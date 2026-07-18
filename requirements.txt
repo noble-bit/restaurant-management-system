@@ -1,0 +1,35 @@
+# ---- Core ----
+Django>=5.0,<5.2                     # LTS, supported through Apr 2028
+djangorestframework>=3.15,<3.16
+
+# ---- Auth ----
+djoser>=2.2,<2.3                      # registration/login endpoints, wraps simplejwt
+djangorestframework-simplejwt>=5.3,<5.4
+
+# ---- Database ----
+psycopg[binary]>=3.1,<3.2             # PostgreSQL adapter (psycopg3)
+
+# ---- Async tasks / scheduling ----
+celery>=5.4,<5.5
+redis>=5.0,<5.1
+django-celery-beat>=2.7,<2.8          # periodic task scheduling (low-stock alerts), DB-backed
+
+# ---- Filtering / API polish ----
+django-filter>=24.2,<25.0
+drf-spectacular>=0.27,<0.28           # OpenAPI schema + Swagger UI, useful for a "real" deployable API
+
+# ---- Config / environment ----
+django-environ>=0.11,<0.12            # .env-based settings, keeps secrets out of code
+
+# ---- Static files / deployment ----
+gunicorn>=22.0,<23.0                  # WSGI server for Docker/production
+whitenoise>=6.7,<6.8                  # serves static files without needing Nginx for that part
+
+# ---- Testing ----
+pytest>=8.2,<8.3
+pytest-django>=4.8,<4.9
+factory-boy>=3.3,<3.4                 # test fixtures for models (Staff, Ingredient, Order, etc.)
+
+# ---- Dev tooling (optional but recommended) ----
+black>=24.4,<25.0
+flake8>=7.0,<8.0

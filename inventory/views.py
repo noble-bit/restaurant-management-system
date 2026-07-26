@@ -1,4 +1,7 @@
 from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework import status
+from .exceptions import IngredientNotFound, InsufficientStockError
 
 from .models import Ingredient, StockMovement
 from .serializers import IngredientSerializer, StockMovementSerializer, RestockSerializer
@@ -9,8 +12,15 @@ from .services import restock
 class IngredientViewSet(viewsets.ModelViewSet):
     queryset = Ingredient.objects.filter(is_active=True)
     serializer_class = IngredientSerializer
-    permission_classes = [IsOwnerOrManager | IsChef]
 
+    def get_permissions(self):
+          if self.action in ['list', 'retirive', 'low_stock']:
+                permission_classes = [IsChef | IsOwnerOrManager]
+          else:
+                permission_classes = [IsOwnerOrManager]
+          return [p() for p in permission_classes]
+
+    
     def perform_destroy(self, instance):
         instance.is_active = False
         instance.save()
@@ -29,15 +39,17 @@ class IngredientViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            updated_ingredients = restock(
+            updated_ingredient = restock(
                 ingredient_id=ingredient.id,
                 quantity=serializer.validated_data["quantity"],
                 staff = request.user
             )
-        except ValueError as e:
-                        return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except IngredientNotFound:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+        except InsufficientStockError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_409_CONFLICT)
 
-        return Response(IngredientSerializer(updated_ingredients).data, status=status.HTTP_200_OK)
+        return Response(IngredientSerializer(updated_ingredient).data, status=status.HTTP_200_OK)
 
 
 class StockMovementViewSet(viewsets.ReadOnlyModelViewSet):

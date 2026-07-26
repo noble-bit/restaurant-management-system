@@ -18,4 +18,3 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RestockSerializer(serializers.Serializer):
     quantity = serializers.DecimalField(max_digits=10, decimal_places=2, min_value=Decimal('0.01'))
-    

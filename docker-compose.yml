@@ -9,6 +9,7 @@ services:
     env_file: .env
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:16
@@ -19,5 +20,33 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data/
 
+  redis:
+    image: redis:7-alpine
+    volumes:
+      - redis_data:/data
+
+  celery-worker:
+    build: .
+    command: celery -A config worker --loglevel=info
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
+  celery-beat:
+    build: .
+    command: celery -A config beat --loglevel=info
+    volumes:
+      - .:/app
+    env_file: .env
+    depends_on:
+      - db
+      - redis
+
 volumes:
   postgres_data:
+  redis_data:
+
+  

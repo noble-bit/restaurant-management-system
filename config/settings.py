@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 
+from rest_framework import settings
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,6 +46,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     "accounts",
     "inventory",
+    "django_celery_results",
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -174,3 +178,24 @@ DJOSER = {
 
     },
 }
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Celery
+CELERY_BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE  # reuse whatever you've already set for Django
+
+CELERY_BEAT_SCHEDULE = {
+    "check-low-stock-every-30-minutes": {
+        "task": "inventory.tasks.check_low_stock",
+        "schedule": 1800.0,  # seconds
+    },
+}
+
+# Email (used by check_low_stock)
+DEFAULT_FROM_EMAIL = "noreply@yourrestaurant.com"
+STOCK_ALERT_RECIPIENTS = ["manager@yourrestaurant.com"]

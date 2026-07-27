@@ -14,8 +14,11 @@ class Staff(AbstractUser):
     hire_date = models.DateField(null=True, blank=True)
     must_change_password = models.BooleanField(default=True)
 
+    email = models.EmailField(unique=True)
 
-    
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username'] 
 
 
 

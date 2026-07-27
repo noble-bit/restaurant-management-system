@@ -11,7 +11,7 @@ class Ingredient(models.Model):
         PIECES = "pcs", "Pieces"
     
     name = models.CharField(max_length=100, unique=True)
-    quantity_on_hand = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity_on_hand = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     unit_of_measure = models.CharField(max_length=3, choices=UnitOfMeasure.choices, default=UnitOfMeasure.GRAMS)
     reorder_threshold = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     cost_per_unit = models.DecimalField(max_digits=10, decimal_places=2, default=0)

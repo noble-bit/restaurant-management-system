@@ -11,6 +11,18 @@ services:
       - db
       - redis
 
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_TARGET=http://web:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - web
+
   db:
     image: postgres:16
     environment:
@@ -48,5 +60,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-
-  

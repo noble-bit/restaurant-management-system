@@ -8,7 +8,7 @@ from accounts.permissions import IsOwnerOrManager, IsChef
 
 
 class MenuCategoryViewSet(viewsets.ModelViewSet):
-    queryset = MenuCategory.objects.filter(is_active=True)
+    queryset = MenuCategory.objects.all().order_by("display_order")
     serializer_class = MenuCategorySerializer
 
     def get_permissions(self):
@@ -21,7 +21,7 @@ class MenuCategoryViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         instance.is_active = False
         instance.save()
-
+        
 
 class MenuItemViewSet(viewsets.ModelViewSet):
     serializer_class = MenuItemSerializer

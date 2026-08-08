@@ -86,3 +86,88 @@ export interface StockMovement {
   staff_name?: string;
   created_at: string;
 }
+
+// Menu App Types
+export interface MenuCategory {
+  id: number;
+  name: string;
+  display_order: number;
+  is_active: boolean;
+}
+
+export interface CreateMenuCategoryPayload {
+  name: string;
+  display_order: number;
+  is_active?: boolean;
+}
+
+export interface UpdateMenuCategoryPayload {
+  name?: string;
+  display_order?: number;
+  is_active?: boolean;
+}
+
+export interface MenuItemIngredientPayload {
+  ingredient_id: number;
+  quantity_required: number;
+}
+
+export interface MenuItemIngredient {
+  id?: number;
+  ingredient: Ingredient;
+  ingredient_id?: number;
+  quantity_required: string | number;
+}
+
+export interface MenuItem {
+  id: number;
+  name: string;
+  description?: string;
+  price: string | number;
+  category: MenuCategory;
+  category_id?: number;
+  is_available: boolean;
+  is_active?: boolean;
+  ingredients: MenuItemIngredient[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface CreateMenuItemPayload {
+  name: string;
+  description?: string;
+  price: number;
+  category_id: number;
+  ingredients: MenuItemIngredientPayload[];
+}
+
+export interface UpdateMenuItemPayload {
+  name?: string;
+  description?: string;
+  price?: number;
+  category_id?: number;
+  ingredients?: MenuItemIngredientPayload[];
+}
+
+// Helper to extract field-specific validation errors from DRF response JSON
+export const parseApiFieldErrors = (err: unknown): Record<string, string> => {
+  const errors: Record<string, string> = {};
+  if (err && typeof err === 'object' && 'response' in err) {
+    const respData = (err as { response?: { data?: unknown } }).response?.data;
+    if (respData && typeof respData === 'object' && !Array.isArray(respData)) {
+      for (const [key, val] of Object.entries(respData as Record<string, unknown>)) {
+        if (Array.isArray(val)) {
+          errors[key] = val.map(String).join(' ');
+        } else if (typeof val === 'string') {
+          errors[key] = val;
+        } else if (val !== null && val !== undefined) {
+          errors[key] = JSON.stringify(val);
+        }
+      }
+    } else if (typeof respData === 'string') {
+      errors['non_field_errors'] = respData.startsWith('<') ? 'Server error' : respData;
+    }
+  }
+  return errors;
+};
+

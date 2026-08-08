@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/common/Modal';
-import type { CreateIngredientPayload, Ingredient, UnitOfMeasure } from '../../types';
+import type { CreateIngredientPayload, Ingredient } from '../../types';
 import { createIngredientApi, updateIngredientApi } from '../../api/inventory';
 import { useToast } from '../../context/ToastContext';
 import { PackagePlus, Tag, Scale, DollarSign, AlertCircle } from 'lucide-react';

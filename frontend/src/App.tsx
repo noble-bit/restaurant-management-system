@@ -8,6 +8,8 @@ import { DashboardPage } from './features/dashboard/DashboardPage';
 import { IngredientListPage } from './features/inventory/IngredientListPage';
 import { StockMovementsPage } from './features/inventory/StockMovementsPage';
 import { StaffListPage } from './features/staff/StaffListPage';
+import { MenuItemListPage } from './features/menu/MenuItemListPage';
+import { CategoryListPage } from './features/menu/CategoryListPage';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
 const AppContent: React.FC = () => {
@@ -56,6 +58,8 @@ const AppContent: React.FC = () => {
       onChangePasswordClick={() => setIsChangingPassword(true)}
     >
       {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
+      {currentTab === 'menu-items' && <MenuItemListPage />}
+      {currentTab === 'menu-categories' && <CategoryListPage />}
       {currentTab === 'inventory' && <IngredientListPage />}
       {currentTab === 'movements' && <StockMovementsPage />}
       {currentTab === 'staff' && isOwnerOrManager && <StaffListPage />}

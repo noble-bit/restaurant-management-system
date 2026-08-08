@@ -8,6 +8,7 @@ import {
   ChefHat,
   Receipt,
   UserCheck,
+  FolderTree,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import type { UserRole } from '../../types';
@@ -29,6 +30,18 @@ const navItems: NavItem[] = [
     id: 'dashboard',
     label: 'Dashboard',
     icon: LayoutDashboard,
+    roles: ['owner', 'manager', 'chef', 'waiter', 'cashier'],
+  },
+  {
+    id: 'menu-items',
+    label: 'Menu Items',
+    icon: UtensilsCrossed,
+    roles: ['owner', 'manager', 'chef', 'waiter', 'cashier'],
+  },
+  {
+    id: 'menu-categories',
+    label: 'Menu Categories',
+    icon: FolderTree,
     roles: ['owner', 'manager', 'chef', 'waiter', 'cashier'],
   },
   {

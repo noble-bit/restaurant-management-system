@@ -50,8 +50,23 @@ def restock(ingredient_id, quantity, staff):
 
 @transaction.atomic
 def deduct_stock_bulk(ingredient_quantities, staff, reason=StockMovement.ReasonChoices.ORDER_DEDUCTION):
-    ...
+    ingredients_id = sorted(ingredient_quantities.keys())
+    ingredients = Ingredient.objects.select_for_update().filter(id__in=ingredients_id)
+    ingredients_by_id = {ing.id: ing for ing in ingredients}
 
+    #validation: ensure all ingredients exist and have sufficient stock
+    for ingredient_id, needed_quantity in ingredient_quantities.items():
+        ingredient = ingredients_by_id[ingredient_id]
+
+        if ingredient.quantity_on_hand < needed_quantity:
+            raise InsufficientStockError(ingredient, needed_quantity)
+
+    updated = []
+    for ingredient_id, needed_quantity in ingredient_quantities.items():
+            ingredient = ingredients_by_id[ingredient_id]
+            updated.append(_apply_adjustment(ingredient, -needed_quantity, reason, staff))
+
+    return updated
 
 def reverse_order_deduction(ingredient_quantities, staff):
     ...

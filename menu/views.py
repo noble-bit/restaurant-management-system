@@ -4,7 +4,7 @@ from rest_framework.decorators import action
 
 from .models import MenuCategory, MenuItem, MenuItemIngredient
 from .serializers import MenuCategorySerializer, MenuItemSerializer, MenuItemIngredientSerializer
-from accounts.permissions import IsOwnerOrManager, IsChef
+from accounts.permissions import IsOwnerOrManager, IsChef, IsWaiter
 
 
 class MenuCategoryViewSet(viewsets.ModelViewSet):
@@ -13,7 +13,7 @@ class MenuCategoryViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["list", "retrieve"]:
-            permission_classes = [IsOwnerOrManager | IsChef]
+            permission_classes = [IsOwnerOrManager | IsChef | IsWaiter]
         else:
             permission_classes = [IsOwnerOrManager]
         return [p() for p in permission_classes]
@@ -36,7 +36,7 @@ class MenuItemViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ["list", "retrieve", "available"]:
-            permission_classes = [IsOwnerOrManager | IsChef]
+            permission_classes = [IsOwnerOrManager | IsChef | IsWaiter]
         else:
             permission_classes = [IsOwnerOrManager]
         return [p() for p in permission_classes]

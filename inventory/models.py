@@ -30,6 +30,7 @@ class StockMovement(models.Model):
     class ReasonChoices(models.TextChoices):
         RESTOCK = "restock", "Restock"
         ORDER_DEDUCTION = "order_deduction", "Order Deduction"
+        ORDER_REVERSAL = "order_reversal", "Order Reversal"
         WASTE = "waste", "Waste"
         CORRECTION = "correction", "Correction"
     

@@ -3,10 +3,15 @@ from decimal import Decimal
 from django.db import transaction
 
 from inventory.exceptions import InsufficientStockError
-from inventory.services import deduct_stock_bulk
+from inventory.services import deduct_stock_bulk, reverse_order_deduction
 from menu.models import MenuItem
 
-from .exceptions import MenuItemNotActive, MenuItemOutOfStock
+from .exceptions import (
+    InvalidStatusTransition,
+    MenuItemNotActive,
+    MenuItemOutOfStock,
+    OrderPermissionDenied,
+)
 from .models import Order, OrderItem
 
 
@@ -76,4 +81,72 @@ def place_order(staff, validated_data):
 
     OrderItem.objects.bulk_create(order_items)
 
+    return order
+
+
+def _rebuild_order_ingredient_needs(order):
+    """
+    Rebuilds aggregate ingredient requirements for an existing Order instance.
+    Walks all OrderItems and their corresponding MenuItem ingredients to produce
+    {ingredient_id: total_quantity}, matching the payload structure passed to deduct_stock_bulk.
+    """
+    ingredient_quantities = defaultdict(Decimal)
+    for item in order.items.all():
+        ordered_qty = Decimal(item.quantity)
+        for recipe_item in item.menu_item.ingredients.all():
+            ingredient_quantities[recipe_item.ingredient_id] += recipe_item.quantity_required * ordered_qty
+    return dict(ingredient_quantities)
+
+
+# The state machine transition rules are separated into two distinct dictionaries:
+# 1. ALLOWED_TRANSITIONS defines structural workflow validity (which state progression is logically allowed).
+# 2. TRANSITION_ROLES defines role-based authorization matrix (which staff roles are allowed to trigger a valid transition).
+# Keeping structural validity separate from role authorization avoids overloading a single structure and allows
+# role permission overrides (e.g. manager/owner overrides) without corrupting the state graph logic.
+
+ALLOWED_TRANSITIONS = {
+    Order.StatusChoices.PENDING:   [Order.StatusChoices.PREPARING, Order.StatusChoices.CANCELLED],
+    Order.StatusChoices.PREPARING: [Order.StatusChoices.READY, Order.StatusChoices.CANCELLED],
+    Order.StatusChoices.READY:     [Order.StatusChoices.SERVED],
+    Order.StatusChoices.SERVED:    [Order.StatusChoices.PAID],
+    Order.StatusChoices.PAID:      [],
+    Order.StatusChoices.CANCELLED: [],
+}
+
+TRANSITION_ROLES = {
+    (Order.StatusChoices.PENDING, Order.StatusChoices.PREPARING): {"chef"},
+    (Order.StatusChoices.PREPARING, Order.StatusChoices.READY): {"chef"},
+    (Order.StatusChoices.READY, Order.StatusChoices.SERVED): {"waiter"},
+    (Order.StatusChoices.SERVED, Order.StatusChoices.PAID): {"cashier"},
+    (Order.StatusChoices.PENDING, Order.StatusChoices.CANCELLED): {"waiter", "manager", "owner"},
+    (Order.StatusChoices.PREPARING, Order.StatusChoices.CANCELLED): {"manager", "owner"},
+}
+
+
+@transaction.atomic
+def update_order_status(order, new_status, staff):
+    """
+    Updates the status of an existing order following ALLOWED_TRANSITIONS workflow and
+    TRANSITION_ROLES authorization checks. If the order is cancelled, ingredient stock is reversed.
+    """
+    current = order.status
+
+    if new_status not in ALLOWED_TRANSITIONS.get(current, []):
+        raise InvalidStatusTransition(
+            f"Cannot move order from {current} to {new_status}."
+        )
+
+    allowed_roles = TRANSITION_ROLES.get((current, new_status), set())
+    if staff.role not in allowed_roles and staff.role not in ("owner", "manager"):
+        raise OrderPermissionDenied(
+            f"Role '{staff.role}' cannot perform this transition."
+        )
+
+    if new_status == Order.StatusChoices.CANCELLED:
+        ingredient_quantities = _rebuild_order_ingredient_needs(order)
+        if ingredient_quantities:
+            reverse_order_deduction(ingredient_quantities, staff=staff)
+
+    order.status = new_status
+    order.save(update_fields=["status", "updated_at"])
     return order

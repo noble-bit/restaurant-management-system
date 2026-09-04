@@ -171,3 +171,42 @@ export const parseApiFieldErrors = (err: unknown): Record<string, string> => {
   return errors;
 };
 
+// Orders App Types
+export type OrderType = 'dine_in' | 'takeout' | 'delivery';
+export type OrderStatus = 'pending' | 'preparing' | 'ready' | 'served' | 'paid' | 'cancelled';
+
+export interface OrderItemPayload {
+  menu_item_id: number;
+  quantity: number;
+  note?: string;
+}
+
+export interface CreateOrderPayload {
+  items: OrderItemPayload[];
+  order_type: OrderType;
+  table_number?: string;
+}
+
+export interface CreatedOrderItemResponse {
+  id: number;
+  menu_item: number;
+  menu_item_name: string;
+  quantity: number;
+  price_at_order: string | number;
+  note?: string;
+}
+
+export interface CreatedOrderResponse {
+  id: number;
+  staff: number;
+  staff_name?: string;
+  status: OrderStatus | string;
+  order_type: OrderType;
+  table_number: string;
+  total_price: string | number;
+  items: CreatedOrderItemResponse[];
+  created_at: string;
+  updated_at: string;
+}
+
+

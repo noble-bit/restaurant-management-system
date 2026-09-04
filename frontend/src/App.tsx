@@ -10,6 +10,10 @@ import { StockMovementsPage } from './features/inventory/StockMovementsPage';
 import { StaffListPage } from './features/staff/StaffListPage';
 import { MenuItemListPage } from './features/menu/MenuItemListPage';
 import { CategoryListPage } from './features/menu/CategoryListPage';
+import { NewOrderPage } from './features/orders/NewOrderPage';
+import { KitchenQueuePage } from './features/orders/KitchenQueuePage';
+import { ReadyToServePage } from './features/orders/ReadyToServePage';
+import { PaymentsQueuePage } from './features/orders/PaymentsQueuePage';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
 const AppContent: React.FC = () => {
@@ -45,11 +49,17 @@ const AppContent: React.FC = () => {
   }
 
   const isOwnerOrManager = user.role === 'owner' || user.role === 'manager';
+  const canPlaceOrder = ['owner', 'manager', 'waiter'].includes(user.role);
+  const canAccessKitchen = ['chef', 'manager', 'owner'].includes(user.role);
+  const canAccessReady = ['waiter', 'manager', 'owner'].includes(user.role);
+  const canAccessPayments = ['cashier', 'manager', 'owner'].includes(user.role);
 
-  // Safeguard: redirect if non-authorized role attempts staff tab
-  if (currentTab === 'staff' && !isOwnerOrManager) {
-    setCurrentTab('dashboard');
-  }
+  // Safeguards for role-restricted tabs
+  if (currentTab === 'staff' && !isOwnerOrManager) setCurrentTab('dashboard');
+  if (currentTab === 'new-order' && !canPlaceOrder) setCurrentTab('dashboard');
+  if (currentTab === 'orders-kitchen' && !canAccessKitchen) setCurrentTab('dashboard');
+  if (currentTab === 'orders-ready' && !canAccessReady) setCurrentTab('dashboard');
+  if (currentTab === 'orders-payments' && !canAccessPayments) setCurrentTab('dashboard');
 
   return (
     <MainLayout
@@ -58,6 +68,10 @@ const AppContent: React.FC = () => {
       onChangePasswordClick={() => setIsChangingPassword(true)}
     >
       {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
+      {currentTab === 'new-order' && canPlaceOrder && <NewOrderPage />}
+      {currentTab === 'orders-kitchen' && canAccessKitchen && <KitchenQueuePage />}
+      {currentTab === 'orders-ready' && canAccessReady && <ReadyToServePage />}
+      {currentTab === 'orders-payments' && canAccessPayments && <PaymentsQueuePage />}
       {currentTab === 'menu-items' && <MenuItemListPage />}
       {currentTab === 'menu-categories' && <CategoryListPage />}
       {currentTab === 'inventory' && <IngredientListPage />}

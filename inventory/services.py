@@ -68,5 +68,21 @@ def deduct_stock_bulk(ingredient_quantities, staff, reason=StockMovement.ReasonC
 
     return updated
 
-def reverse_order_deduction(ingredient_quantities, staff):
-    ...
+@transaction.atomic
+def reverse_order_deduction(ingredient_quantities, staff, reason=StockMovement.ReasonChoices.ORDER_REVERSAL):
+    """
+    Mirrors deduct_stock_bulk structurally: locks ingredients in sorted-by-id order
+    (deadlock avoidance), then calls _apply_adjustment with positive quantity_delta.
+    ingredient_quantities: {ingredient_id: quantity, ...}
+    """
+    ingredient_ids = sorted(ingredient_quantities.keys())
+    ingredients = Ingredient.objects.select_for_update().filter(id__in=ingredient_ids)
+    ingredients_by_id = {ing.id: ing for ing in ingredients}
+
+    updated = []
+    for ingredient_id in ingredient_ids:
+        ingredient = ingredients_by_id[ingredient_id]
+        quantity = ingredient_quantities[ingredient_id]
+        updated.append(_apply_adjustment(ingredient, quantity, reason, staff))
+
+    return updated

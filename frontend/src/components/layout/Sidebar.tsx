@@ -1,12 +1,14 @@
 import React from 'react';
 import {
   LayoutDashboard,
+  ShoppingCart,
+  ChefHat,
+  BellRing,
+  Receipt,
   Users,
   Package,
   History,
   UtensilsCrossed,
-  ChefHat,
-  Receipt,
   UserCheck,
   FolderTree,
 } from 'lucide-react';
@@ -31,6 +33,30 @@ const navItems: NavItem[] = [
     label: 'Dashboard',
     icon: LayoutDashboard,
     roles: ['owner', 'manager', 'chef', 'waiter', 'cashier'],
+  },
+  {
+    id: 'new-order',
+    label: 'New Order',
+    icon: ShoppingCart,
+    roles: ['owner', 'manager', 'waiter'],
+  },
+  {
+    id: 'orders-kitchen',
+    label: 'Kitchen Queue',
+    icon: ChefHat,
+    roles: ['chef', 'manager', 'owner'],
+  },
+  {
+    id: 'orders-ready',
+    label: 'Ready to Serve',
+    icon: BellRing,
+    roles: ['waiter', 'manager', 'owner'],
+  },
+  {
+    id: 'orders-payments',
+    label: 'Payments Queue',
+    icon: Receipt,
+    roles: ['cashier', 'manager', 'owner'],
   },
   {
     id: 'menu-items',

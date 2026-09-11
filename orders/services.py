@@ -149,4 +149,6 @@ def update_order_status(order, new_status, staff):
 
     order.status = new_status
     order.save(update_fields=["status", "updated_at"])
+
     return order
+

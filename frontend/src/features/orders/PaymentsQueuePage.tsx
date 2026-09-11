@@ -39,8 +39,15 @@ export const PaymentsQueuePage: React.FC = () => {
   }, [fetchPaymentOrders]);
 
   // Remove order from list when status changes to paid
-  const handleStatusUpdated = (orderId: number, newStatus: OrderStatus) => {
-    showToast(`Order #${orderId} marked as "${newStatus.replace('_', ' ')}".`, 'success');
+  const handleStatusUpdated = (orderId: number, newStatus: OrderStatus, recordedAmount?: number | string) => {
+    if (recordedAmount !== undefined) {
+      showToast(
+        `Payment of $${Number(recordedAmount).toFixed(2)} recorded for Order #${orderId}.`,
+        'success'
+      );
+    } else {
+      showToast(`Order #${orderId} marked as "${newStatus.replace('_', ' ')}".`, 'success');
+    }
     setOrders((prev) => prev.filter((o) => o.id !== orderId));
   };
 

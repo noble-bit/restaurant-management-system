@@ -209,4 +209,16 @@ export interface CreatedOrderResponse {
   updated_at: string;
 }
 
+// Payment App Types
+export type PaymentMethod = 'cash' | 'card' | 'mobile';
+
+export interface PaymentResponse {
+  id: number;
+  order_id: number;
+  amount: string | number;
+  method: PaymentMethod;
+  status: string;
+  processed_by_name: string;
+  created_at: string;
+}
 

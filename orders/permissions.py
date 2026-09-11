@@ -8,3 +8,5 @@ class CanPlaceOrder(BasePermission):
             and request.user.is_authenticated
             and request.user.role in ("waiter", "manager", "owner")
         )
+
+

@@ -1,5 +1,5 @@
 import api from './axios';
-import type { CreateOrderPayload, CreatedOrderResponse, OrderStatus } from '../types';
+import type { CreateOrderPayload, CreatedOrderResponse, OrderStatus, PaymentMethod, PaymentResponse } from '../types';
 
 export const createOrderApi = async (
   payload: CreateOrderPayload
@@ -32,3 +32,12 @@ export const updateOrderStatusApi = async (
   const response = await api.patch<CreatedOrderResponse>(`/orders/${id}/status/`, { status });
   return response.data;
 };
+
+export const processPaymentApi = async (
+  orderId: number,
+  method: PaymentMethod
+): Promise<PaymentResponse> => {
+  const response = await api.post<PaymentResponse>(`/orders/${orderId}/pay/`, { method });
+  return response.data;
+};
+

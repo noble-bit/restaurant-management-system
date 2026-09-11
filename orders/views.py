@@ -17,14 +17,20 @@ from .serializers import OrderSerializer, PlaceOrderSerializer
 from .services import place_order, update_order_status
 
 
-class PlaceOrderView(APIView):
+class PlaceOrderView(generics.ListCreateAPIView):
     """
+    GET /orders/ - List all orders filtered by status and order_type.
     POST /orders/ - Endpoint to place a new order.
-    
-    Validates request payload, invokes place_order service, and returns
-    the created Order serialized via OrderSerializer.
     """
-    permission_classes = [CanPlaceOrder]
+    queryset = Order.objects.all().order_by("-created_at")
+    serializer_class = OrderSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = OrderFilter
+
+    def get_permissions(self):
+        if self.request.method == "POST":
+            return [CanPlaceOrder()]
+        return [permissions.IsAuthenticated()]
 
     def post(self, request, *args, **kwargs):
         serializer = PlaceOrderSerializer(data=request.data)
@@ -41,15 +47,8 @@ class PlaceOrderView(APIView):
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
 
 
-class OrderListView(generics.ListAPIView):
-    """
-    GET /orders/ - List all orders filtered by status and order_type.
-    """
-    queryset = Order.objects.all().order_by("-created_at")
-    serializer_class = OrderSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_class = OrderFilter
-    permission_classes = [permissions.IsAuthenticated]
+OrderListView = PlaceOrderView
+
 
 
 class OrderDetailView(generics.RetrieveAPIView):

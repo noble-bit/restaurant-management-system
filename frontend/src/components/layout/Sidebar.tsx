@@ -59,6 +59,12 @@ const navItems: NavItem[] = [
     roles: ['cashier', 'manager', 'owner'],
   },
   {
+    id: 'order-history',
+    label: 'Order History',
+    icon: History,
+    roles: ['owner', 'manager'],
+  },
+  {
     id: 'menu-items',
     label: 'Menu Items',
     icon: UtensilsCrossed,

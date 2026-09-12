@@ -15,3 +15,10 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ["id", "order_id", "amount", "method", "status", "processed_by_name", "created_at"]
         read_only_fields = fields
+
+class PaymentInfoSerializer(serializers.ModelSerializer):
+    processed_by = serializers.CharField(source="processed_by.username", read_only=True)
+
+    class Meta:
+        model = Payment
+        fields = ["method", "processed_by"]

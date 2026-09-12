@@ -14,6 +14,7 @@ import { NewOrderPage } from './features/orders/NewOrderPage';
 import { KitchenQueuePage } from './features/orders/KitchenQueuePage';
 import { ReadyToServePage } from './features/orders/ReadyToServePage';
 import { PaymentsQueuePage } from './features/orders/PaymentsQueuePage';
+import { OrderHistoryPage } from './features/orders/OrderHistoryPage';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
 const AppContent: React.FC = () => {
@@ -56,6 +57,7 @@ const AppContent: React.FC = () => {
 
   // Safeguards for role-restricted tabs
   if (currentTab === 'staff' && !isOwnerOrManager) setCurrentTab('dashboard');
+  if (currentTab === 'order-history' && !isOwnerOrManager) setCurrentTab('dashboard');
   if (currentTab === 'new-order' && !canPlaceOrder) setCurrentTab('dashboard');
   if (currentTab === 'orders-kitchen' && !canAccessKitchen) setCurrentTab('dashboard');
   if (currentTab === 'orders-ready' && !canAccessReady) setCurrentTab('dashboard');
@@ -72,6 +74,7 @@ const AppContent: React.FC = () => {
       {currentTab === 'orders-kitchen' && canAccessKitchen && <KitchenQueuePage />}
       {currentTab === 'orders-ready' && canAccessReady && <ReadyToServePage />}
       {currentTab === 'orders-payments' && canAccessPayments && <PaymentsQueuePage />}
+      {currentTab === 'order-history' && isOwnerOrManager && <OrderHistoryPage />}
       {currentTab === 'menu-items' && <MenuItemListPage />}
       {currentTab === 'menu-categories' && <CategoryListPage />}
       {currentTab === 'inventory' && <IngredientListPage />}

@@ -32,3 +32,4 @@ class ProcessPaymentView(APIView):
             return Response({"detail": str(exc)}, status=status.HTTP_403_FORBIDDEN)
 
         return Response(PaymentSerializer(payment).data, status=status.HTTP_201_CREATED)
+

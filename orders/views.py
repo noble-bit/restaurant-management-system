@@ -15,6 +15,8 @@ from .models import Order
 from .permissions import CanPlaceOrder
 from .serializers import OrderSerializer, PlaceOrderSerializer
 from .services import place_order, update_order_status
+from payments.models import Payment
+from payments.serializers import PaymentInfoSerializer
 
 
 class PlaceOrderView(generics.ListCreateAPIView):
@@ -60,6 +62,17 @@ class OrderDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
 
+class OrderPaymentInfoView(generics.RetrieveAPIView):
+    """
+    GET /orders/{id}/payment/ - Retrieve payment detail of a single order.
+    """
+    queryset = Payment.objects.all()
+    serializer_class = PaymentInfoSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    lookup_field = "order_id"
+    lookup_url_kwarg = "pk"
+    
 class UpdateOrderStatusView(APIView):
     """
     PATCH /orders/{id}/status/ - Update order status.

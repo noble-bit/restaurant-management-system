@@ -222,3 +222,9 @@ export interface PaymentResponse {
   created_at: string;
 }
 
+export interface OrderPaymentDetailsResponse {
+  method: PaymentMethod;
+  processed_by: string;
+}
+
+

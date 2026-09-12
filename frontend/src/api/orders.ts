@@ -1,5 +1,12 @@
 import api from './axios';
-import type { CreateOrderPayload, CreatedOrderResponse, OrderStatus, PaymentMethod, PaymentResponse } from '../types';
+import type {
+  CreateOrderPayload,
+  CreatedOrderResponse,
+  OrderPaymentDetailsResponse,
+  OrderStatus,
+  PaymentMethod,
+  PaymentResponse,
+} from '../types';
 
 export const createOrderApi = async (
   payload: CreateOrderPayload
@@ -41,3 +48,9 @@ export const processPaymentApi = async (
   return response.data;
 };
 
+export const getOrderPaymentDetailsApi = async (
+  orderId: number
+): Promise<OrderPaymentDetailsResponse> => {
+  const response = await api.get<OrderPaymentDetailsResponse>(`/orders/${orderId}/payment/`);
+  return response.data;
+};

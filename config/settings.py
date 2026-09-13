@@ -32,7 +32,7 @@ environ.Env.read_env(BASE_DIR / '.env')
 
 DEBUG = env.bool('DEBUG', default=False)
 
-env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 # Application definition
 
@@ -149,16 +149,7 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'restaurant_db',
-        'USER': 'restaurant_user',
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': 'db',      
-        'PORT': '5432',
-    }
-}
+DATABASES =  { 'default': env.db('DATABASE_URL') }
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [

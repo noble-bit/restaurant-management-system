@@ -19,8 +19,10 @@ export const setOnUnauthenticated = (callback: () => void) => {
   onUnauthenticatedCallback = callback;
 };
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api/v1';
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -90,7 +92,8 @@ api.interceptors.response.use(
       }
 
       try {
-        const { data } = await axios.post<{ access: string }>('/api/v1/auth/jwt/refresh/', {
+        const refreshUrl = `${API_BASE_URL.replace(/\/+$/, '')}/auth/jwt/refresh/`;
+        const { data } = await axios.post<{ access: string }>(refreshUrl, {
           refresh: inMemoryRefreshToken,
         });
 

@@ -12,7 +12,6 @@ import {
   XCircle,
   AlertTriangle,
   FileText,
-  DollarSign,
   Loader2,
   User,
 } from 'lucide-react';

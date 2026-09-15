@@ -15,7 +15,6 @@ import {
   ShieldAlert,
   Search,
   Filter,
-  DollarSign,
   Utensils,
   Sparkles,
   RefreshCw,

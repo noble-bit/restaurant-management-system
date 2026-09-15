@@ -1,6 +1,7 @@
 # ---- Core ----
 Django>=5.0,<5.2                     # LTS, supported through Apr 2028
 djangorestframework>=3.15,<3.16
+django-cors-headers>=4.4,<5.0
 
 # ---- Auth ----
 djoser>=2.2,<2.3                      # registration/login endpoints, wraps simplejwt

@@ -1,19 +1,58 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-// In-memory token storage (never stored in localStorage or sessionStorage)
-let inMemoryAccessToken: string | null = null;
-let inMemoryRefreshToken: string | null = null;
-let onUnauthenticatedCallback: (() => void) | null = null;
+// localStorage key names
+const ACCESS_TOKEN_KEY = 'restaurant_access_token';
+const REFRESH_TOKEN_KEY = 'restaurant_refresh_token';
 
-export const setTokens = (access: string | null, refresh: string | null) => {
-  inMemoryAccessToken = access;
-  if (refresh !== undefined) {
-    inMemoryRefreshToken = refresh;
+// Safe localStorage helpers (handles restricted environments like private browsing)
+const getStoredToken = (key: string): string | null => {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
   }
 };
 
-export const getAccessToken = () => inMemoryAccessToken;
-export const getRefreshToken = () => inMemoryRefreshToken;
+const setStoredToken = (key: string, value: string | null) => {
+  try {
+    if (value === null) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore storage errors gracefully
+  }
+};
+
+// In-memory token storage (synced with localStorage)
+let inMemoryAccessToken: string | null = getStoredToken(ACCESS_TOKEN_KEY);
+let inMemoryRefreshToken: string | null = getStoredToken(REFRESH_TOKEN_KEY);
+let onUnauthenticatedCallback: (() => void) | null = null;
+
+export const setTokens = (access: string | null, refresh?: string | null) => {
+  inMemoryAccessToken = access;
+  setStoredToken(ACCESS_TOKEN_KEY, access);
+
+  if (refresh !== undefined) {
+    inMemoryRefreshToken = refresh;
+    setStoredToken(REFRESH_TOKEN_KEY, refresh);
+  }
+};
+
+export const getAccessToken = (): string | null => {
+  if (!inMemoryAccessToken) {
+    inMemoryAccessToken = getStoredToken(ACCESS_TOKEN_KEY);
+  }
+  return inMemoryAccessToken;
+};
+
+export const getRefreshToken = (): string | null => {
+  if (!inMemoryRefreshToken) {
+    inMemoryRefreshToken = getStoredToken(REFRESH_TOKEN_KEY);
+  }
+  return inMemoryRefreshToken;
+};
 
 export const setOnUnauthenticated = (callback: () => void) => {
   onUnauthenticatedCallback = callback;
@@ -31,8 +70,9 @@ const api = axios.create({
 // Request Interceptor: Attach Access Token if available
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    if (inMemoryAccessToken && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${inMemoryAccessToken}`;
+    const token = getAccessToken();
+    if (token && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -85,8 +125,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      if (!inMemoryRefreshToken) {
+      const currentRefreshToken = getRefreshToken();
+      if (!currentRefreshToken) {
         isRefreshing = false;
+        setTokens(null, null);
         if (onUnauthenticatedCallback) onUnauthenticatedCallback();
         return Promise.reject(error);
       }
@@ -94,11 +136,11 @@ api.interceptors.response.use(
       try {
         const refreshUrl = `${API_BASE_URL.replace(/\/+$/, '')}/auth/jwt/refresh/`;
         const { data } = await axios.post<{ access: string }>(refreshUrl, {
-          refresh: inMemoryRefreshToken,
+          refresh: currentRefreshToken,
         });
 
         const newAccessToken = data.access;
-        setTokens(newAccessToken, inMemoryRefreshToken);
+        setTokens(newAccessToken, currentRefreshToken);
 
         if (originalRequest.headers) {
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

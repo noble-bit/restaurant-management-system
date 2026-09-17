@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { User, JwtTokenResponse } from '../types';
-import { loginApi, getMeApi, setPasswordApi, refreshTokenApi } from '../api/auth';
-import { setTokens, setOnUnauthenticated } from '../api/axios';
+import { loginApi, getMeApi, setPasswordApi } from '../api/auth';
+import { setTokens, setOnUnauthenticated, getAccessToken, getRefreshToken } from '../api/axios';
 
 interface AuthContextType {
   user: User | null;
@@ -18,8 +18,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessTokenState] = useState<string | null>(null);
-  const [refreshToken, setRefreshTokenState] = useState<string | null>(null);
+  const [accessToken, setAccessTokenState] = useState<string | null>(() => getAccessToken());
+  const [refreshToken, setRefreshTokenState] = useState<string | null>(() => getRefreshToken());
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const updateTokens = useCallback((access: string | null, refresh: string | null = null) => {
@@ -54,14 +54,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   }, [logout]);
 
-  // Page Refresh Resilience: Attempt silent token refresh on app initialization
+  // Page Refresh Resilience: Attempt session restoration on app initialization
   useEffect(() => {
     const initAuth = async () => {
-      // If we have an in-memory refresh token (or session state active)
-      if (refreshToken) {
+      const storedAccess = getAccessToken();
+      const storedRefresh = getRefreshToken();
+      if (storedAccess || storedRefresh) {
         try {
-          const res = await refreshTokenApi(refreshToken);
-          updateTokens(res.access, res.refresh || refreshToken);
           await fetchProfile();
         } catch {
           logout();
@@ -71,7 +70,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initAuth();
-  }, [refreshToken, updateTokens, fetchProfile, logout]);
+  }, [fetchProfile, logout]);
 
   const login = async (email: string, pass: string) => {
     setIsLoading(true);

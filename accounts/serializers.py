@@ -11,7 +11,8 @@ class StaffCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Staff
-        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "must_change_password", "temp_password"]
+        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "must_change_password", "temp_password", "is_active"]
+        read_only_fields = ["is_active"]
 
     def create(self, validated_data):
         temp_password = secrets.token_urlsafe(12)
@@ -46,4 +47,9 @@ class SetPasswordSerializer(DjoserSetPasswordSerializer):
         user.must_change_password = False
         user.save(update_fields=["must_change_password"])
         return user
-    
+
+class UserDeleteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Staff
+        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date"]
+        read_only_fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date"]

@@ -10,3 +10,8 @@ export const createStaffApi = async (payload: CreateStaffPayload): Promise<Staff
   const response = await api.post<StaffMember>('/staff/', payload);
   return response.data;
 };
+
+export const deleteStaffApi = async (id: number): Promise<void> => {
+  await api.delete(`/staff/${id}/`);
+};
+

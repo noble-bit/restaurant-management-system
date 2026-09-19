@@ -62,6 +62,7 @@ export interface StaffMember {
   hire_date: string | null;
   must_change_password: boolean;
   temp_password?: string;
+  is_active?: boolean;
 }
 
 export interface CreateStaffPayload {

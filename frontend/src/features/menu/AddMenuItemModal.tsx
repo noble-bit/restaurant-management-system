@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type {
   CreateMenuItemPayload,
@@ -39,6 +40,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
   onSuccess,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
@@ -128,7 +130,6 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     e.preventDefault();
     setFieldErrors({});
 
-    // Client-side quick check
     if (!categoryId) {
       setFieldErrors({ category_id: 'Please select a valid menu category.' });
       return;
@@ -165,7 +166,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Add New Menu Item" maxWidth="xl">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('menu.addMenuItem')} maxWidth="xl">
       <form onSubmit={handleSubmit} className="space-y-6">
         {(fieldErrors.detail || fieldErrors.non_field_errors) && (
           <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
@@ -177,12 +178,12 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
         {/* Section 1: Item Basic Details */}
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">
-            Item Attributes
+            {t('menu.menuItemCol')}
           </h4>
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Item Name *
+              {t('common.name')} *
             </label>
             <div className="relative">
               <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -212,7 +213,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                Category *
+                {t('menu.categoryCol')} *
               </label>
               <div className="relative">
                 <FolderTree className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -250,7 +251,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                Price ($) *
+                {t('menu.priceCol')} ($) *
               </label>
               <div className="relative">
                 <DollarSign className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -281,7 +282,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Description
+              {t('common.description')}
             </label>
             <div className="relative">
               <FileText className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
@@ -290,19 +291,18 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Brief description of ingredients or flavor profile..."
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
               />
             </div>
           </div>
         </div>
 
-        {/* Section 2: Recipe Ingredients (Required Array Submitted Together) */}
+        {/* Section 2: Recipe Ingredients */}
         <div className="space-y-3 pt-2">
           <div className="flex items-center justify-between border-b border-gray-800 pb-2">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
               <Scale className="w-4 h-4 text-indigo-400" />
-              <span>Recipe Ingredients * (Required)</span>
+              <span>{t('menu.recipeCol')} *</span>
             </h4>
 
             <button
@@ -312,7 +312,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
               className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Add Another Ingredient</span>
+              <span>{t('menu.addIngredientToRecipe')}</span>
             </button>
           </div>
 
@@ -335,7 +335,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                 >
                   <div className="flex-1">
                     <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      Ingredient #{idx + 1}
+                      {t('inventory.ingredientCol')} #{idx + 1}
                     </label>
                     <select
                       value={row.ingredient_id}
@@ -358,7 +358,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
 
                   <div className="w-36">
                     <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      Qty ({unit || 'unit'})
+                      {t('common.quantity')} ({unit || 'unit'})
                     </label>
                     <input
                       type="number"
@@ -378,7 +378,6 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                     onClick={() => handleRemoveIngredientRow(idx)}
                     disabled={ingredientRows.length <= 1}
                     className="p-2 text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors mt-4 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
-                    title="Remove ingredient row"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -394,7 +393,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -402,7 +401,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
           >
             <UtensilsCrossed className="w-4 h-4" />
-            <span>{isSubmitting ? 'Creating...' : 'Create Menu Item'}</span>
+            <span>{isSubmitting ? t('common.saving') : t('menu.addMenuItem')}</span>
           </button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type { Ingredient } from '../../types';
 import { restockIngredientApi } from '../../api/inventory';
@@ -19,6 +20,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
   onSuccess,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [quantity, setQuantity] = useState<number>(10);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [conflictError, setConflictError] = useState<string | null>(null);
@@ -30,7 +32,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
     setConflictError(null);
 
     if (quantity <= 0) {
-      setConflictError('Quantity must be greater than 0');
+      setConflictError(t('common.error'));
       return;
     }
 
@@ -39,7 +41,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
     try {
       await restockIngredientApi(ingredient.id, quantity);
       showToast(
-        `Successfully restocked +${quantity} ${ingredient.unit_of_measure} for ${ingredient.name}!`,
+        t('inventory.restockSuccess'),
         'success'
       );
       onSuccess();
@@ -51,17 +53,17 @@ export const RestockModal: React.FC<RestockModalProps> = ({
         if (resp?.status === 409) {
           const detailMsg = resp.data?.detail || 'Conflict encountered while processing restock.';
           setConflictError(detailMsg);
-          showToast(`Restock Conflict (409): ${detailMsg}`, 'error');
+          showToast(detailMsg, 'error');
         } else if (resp?.data?.detail) {
           setConflictError(resp.data.detail);
           showToast(resp.data.detail, 'error');
         } else {
-          setConflictError('Failed to restock ingredient.');
-          showToast('Failed to restock ingredient.', 'error');
+          setConflictError(t('common.error'));
+          showToast(t('common.error'), 'error');
         }
       } else {
-        setConflictError('Network connection error.');
-        showToast('Network error during restock.', 'error');
+        setConflictError(t('auth.networkError'));
+        showToast(t('auth.networkError'), 'error');
       }
     } finally {
       setIsSubmitting(false);
@@ -72,20 +74,20 @@ export const RestockModal: React.FC<RestockModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Restock Ingredient: ${ingredient.name}`}
+      title={`${t('inventory.restock')}: ${ingredient.name}`}
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4 py-2">
         <div className="p-4 rounded-xl glass-card border border-gray-800 flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">Current Stock</p>
+            <p className="text-xs text-gray-400">{t('inventory.currentStock')}</p>
             <p className="text-lg font-bold text-white">
               {ingredient.quantity_on_hand} <span className="text-xs font-medium text-gray-400">{ingredient.unit_of_measure}</span>
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-xs text-gray-400">Reorder Threshold</p>
+            <p className="text-xs text-gray-400">{t('inventory.reorderThresholdCol')}</p>
             <p className="text-sm font-semibold text-amber-400">
               {ingredient.reorder_threshold} {ingredient.unit_of_measure}
             </p>
@@ -96,7 +98,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
           <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-3">
             <AlertOctagon className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
             <div>
-              <p className="font-bold text-rose-200">Restock Error / Conflict</p>
+              <p className="font-bold text-rose-200">{t('common.error')}</p>
               <p className="mt-0.5">{conflictError}</p>
             </div>
           </div>
@@ -104,7 +106,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
 
         <div>
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            Restock Quantity ({ingredient.unit_of_measure}) *
+            {t('inventory.quantityAdded')} ({ingredient.unit_of_measure}) *
           </label>
           <div className="relative">
             <PlusCircle className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -127,7 +129,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -135,7 +137,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-            <span>{isSubmitting ? 'Processing Restock...' : 'Confirm Restock'}</span>
+            <span>{isSubmitting ? t('common.loading') : t('common.confirm')}</span>
           </button>
         </div>
       </form>

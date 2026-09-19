@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderStatus } from '../../types';
 import { getOrdersApi } from '../../api/orders';
 import { OrderCard } from './OrderCard';
@@ -8,26 +9,25 @@ import { Flame, RefreshCw, ChefHat } from 'lucide-react';
 
 export const KitchenQueuePage: React.FC = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<CreatedOrderResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchKitchenOrders = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     try {
-      // Backend supports comma-separated status query: ?status=pending,preparing
       const data = await getOrdersApi('pending,preparing');
       setOrders(data);
     } catch (err: unknown) {
       console.error('Failed to fetch kitchen orders:', err);
       if (!isSilent) {
-        showToast('Failed to load kitchen queue orders.', 'error');
+        showToast(t('common.error'), 'error');
       }
     } finally {
       if (!isSilent) setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
-  // Initial load + 9-second polling interval with cleanup on unmount
   useEffect(() => {
     fetchKitchenOrders(false);
 
@@ -38,9 +38,8 @@ export const KitchenQueuePage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchKitchenOrders]);
 
-  // Remove order from list when status changes (no longer pending/preparing)
-  const handleStatusUpdated = (orderId: number, newStatus: OrderStatus) => {
-    showToast(`Order #${orderId} updated to "${newStatus.replace('_', ' ')}".`, 'success');
+  const handleStatusUpdated = (orderId: number, _newStatus: OrderStatus) => {
+    showToast(t('orders.orderSuccess', { id: orderId }), 'success');
     setOrders((prev) => prev.filter((o) => o.id !== orderId));
   };
 
@@ -53,9 +52,9 @@ export const KitchenQueuePage: React.FC = () => {
             <ChefHat className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Kitchen Working Queue</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('orders.kitchenWorkingQueue')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Live preparation queue for kitchen staff. Updates automatically every 9 seconds.
+              {t('orders.kitchenQueueDesc')}
             </p>
           </div>
         </div>
@@ -65,19 +64,19 @@ export const KitchenQueuePage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Refresh Queue</span>
+          <span>{t('orders.refreshQueue')}</span>
         </button>
       </div>
 
       {/* Orders Grid */}
       {isLoading ? (
-        <LoadingSpinner text="Fetching kitchen queue orders..." />
+        <LoadingSpinner text={t('orders.fetchingKitchen')} />
       ) : orders.length === 0 ? (
         <div className="glass-card p-12 rounded-3xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <Flame className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No active kitchen orders</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('orders.noActiveKitchen')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            All pending and preparing orders have been completed or served!
+            {t('orders.allKitchenCompleted')}
           </p>
         </div>
       ) : (

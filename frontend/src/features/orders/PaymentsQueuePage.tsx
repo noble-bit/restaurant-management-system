@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderStatus } from '../../types';
 import { getOrdersApi } from '../../api/orders';
 import { OrderCard } from './OrderCard';
@@ -8,26 +9,25 @@ import { CreditCard, RefreshCw, Receipt } from 'lucide-react';
 
 export const PaymentsQueuePage: React.FC = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<CreatedOrderResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchPaymentOrders = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     try {
-      // Backend status query: ?status=served
       const data = await getOrdersApi('served');
       setOrders(data);
     } catch (err: unknown) {
       console.error('Failed to fetch payment orders:', err);
       if (!isSilent) {
-        showToast('Failed to load payments queue.', 'error');
+        showToast(t('common.error'), 'error');
       }
     } finally {
       if (!isSilent) setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
-  // Initial load + 9-second polling interval with cleanup on unmount
   useEffect(() => {
     fetchPaymentOrders(false);
 
@@ -38,15 +38,14 @@ export const PaymentsQueuePage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchPaymentOrders]);
 
-  // Remove order from list when status changes to paid
-  const handleStatusUpdated = (orderId: number, newStatus: OrderStatus, recordedAmount?: number | string) => {
+  const handleStatusUpdated = (orderId: number, _newStatus: OrderStatus, recordedAmount?: number | string) => {
     if (recordedAmount !== undefined) {
       showToast(
-        `Payment of $${Number(recordedAmount).toFixed(2)} recorded for Order #${orderId}.`,
+        t('orders.orderSuccess', { id: orderId }),
         'success'
       );
     } else {
-      showToast(`Order #${orderId} marked as "${newStatus.replace('_', ' ')}".`, 'success');
+      showToast(t('orders.orderSuccess', { id: orderId }), 'success');
     }
     setOrders((prev) => prev.filter((o) => o.id !== orderId));
   };
@@ -60,9 +59,9 @@ export const PaymentsQueuePage: React.FC = () => {
             <Receipt className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Payments Queue</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('nav.paymentsQueue')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Served orders awaiting cashier settlement and billing. Auto-refreshes every 9 seconds.
+              {t('orders.paymentsQueueDesc')}
             </p>
           </div>
         </div>
@@ -72,19 +71,19 @@ export const PaymentsQueuePage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Refresh Queue</span>
+          <span>{t('orders.refreshQueue')}</span>
         </button>
       </div>
 
       {/* Orders Grid */}
       {isLoading ? (
-        <LoadingSpinner text="Fetching payment queue orders..." />
+        <LoadingSpinner text={t('orders.fetchingPayments')} />
       ) : orders.length === 0 ? (
         <div className="glass-card p-12 rounded-3xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <CreditCard className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No pending payments</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('orders.noPendingPayments')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            All served orders have been settled and marked as paid!
+            {t('orders.allServedSettled')}
           </p>
         </div>
       ) : (

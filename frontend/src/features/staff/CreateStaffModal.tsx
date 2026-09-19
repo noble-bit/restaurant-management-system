@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type { CreateStaffPayload, StaffMember, UserRole } from '../../types';
 import { createStaffApi } from '../../api/staff';
@@ -17,6 +18,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
   onSuccess,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [formData, setFormData] = useState<CreateStaffPayload>({
     username: '',
     email: '',
@@ -42,7 +44,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
     try {
       const created = await createStaffApi(formData);
-      showToast(`Staff member "${created.username}" created successfully!`, 'success');
+      showToast(t('staff.createdToast', { name: created.username }), 'success');
       onSuccess(created);
       onClose();
       setFormData({
@@ -62,10 +64,10 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
           const firstErrVal = resp.data[firstErrKey];
           setError(`${firstErrKey}: ${Array.isArray(firstErrVal) ? firstErrVal.join(' ') : firstErrVal}`);
         } else {
-          setError('Failed to create staff member.');
+          setError(t('common.error'));
         }
       } else {
-        setError('Network error. Please try again.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setIsSubmitting(false);
@@ -73,7 +75,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Register New Staff Member" maxWidth="lg">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('staff.registerTitle')} maxWidth="lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
@@ -102,7 +104,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Email *
+              {t('staff.email')} *
             </label>
             <div className="relative">
               <Mail className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -122,7 +124,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              First Name
+              {t('staff.firstName')}
             </label>
             <input
               type="text"
@@ -136,7 +138,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Last Name
+              {t('staff.lastName')}
             </label>
             <input
               type="text"
@@ -152,7 +154,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Role *
+              {t('staff.role')} *
             </label>
             <div className="relative">
               <Shield className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -164,7 +166,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
               >
                 {(['owner', 'manager', 'chef', 'waiter', 'cashier'] as UserRole[]).map((r) => (
                   <option key={r} value={r} className="bg-gray-900 text-white">
-                    {r}
+                    {t(`roles.${r}`, { defaultValue: r })}
                   </option>
                 ))}
               </select>
@@ -173,7 +175,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Phone Number
+              {t('staff.phone')}
             </label>
             <div className="relative">
               <Phone className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -191,7 +193,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Hire Date
+              {t('staff.hireDate')}
             </label>
             <div className="relative">
               <Calendar className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -212,7 +214,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -220,7 +222,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
           >
             <UserPlus className="w-4 h-4" />
-            <span>{isSubmitting ? 'Creating Staff...' : 'Create Staff Member'}</span>
+            <span>{isSubmitting ? t('common.saving') : t('staff.addStaff')}</span>
           </button>
         </div>
       </form>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MenuItem, MenuCategory, OrderType, CreatedOrderResponse } from '../../types';
 import { getMenuItemsApi, getMenuCategoriesApi } from '../../api/menu';
 import { createOrderApi } from '../../api/orders';
@@ -37,6 +38,7 @@ interface ApiErrorState {
 
 export const NewOrderPage: React.FC = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   // Menu Catalog State
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -61,7 +63,6 @@ export const NewOrderPage: React.FC = () => {
   // Post-201 Order Confirmation State
   const [confirmedOrder, setConfirmedOrder] = useState<CreatedOrderResponse | null>(null);
 
-  // Fetch Menu Items & Categories
   const fetchMenu = useCallback(async () => {
     setIsLoadingMenu(true);
     try {
@@ -73,20 +74,19 @@ export const NewOrderPage: React.FC = () => {
       setCategories(catsData);
     } catch (err: unknown) {
       console.error('Failed to fetch menu items:', err);
-      showToast('Failed to load menu items.', 'error');
+      showToast(t('common.error'), 'error');
     } finally {
       setIsLoadingMenu(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     fetchMenu();
   }, [fetchMenu]);
 
-  // Add Item to Cart
   const handleAddToCart = (item: MenuItem) => {
     if (!item.is_available) {
-      showToast(`"${item.name}" is currently unavailable due to insufficient stock.`, 'warning');
+      showToast(t('orders.outOfStock'), 'warning');
       return;
     }
 
@@ -101,7 +101,6 @@ export const NewOrderPage: React.FC = () => {
     });
   };
 
-  // Quantity Stepper Controls
   const handleUpdateQuantity = (itemId: number, delta: number) => {
     setCart((prevCart) =>
       prevCart
@@ -133,17 +132,14 @@ export const NewOrderPage: React.FC = () => {
     setCart((prevCart) => prevCart.filter((ci) => ci.menu_item.id !== itemId));
   };
 
-  // Calculate Client-side Total
   const cartSubtotal = cart.reduce(
     (sum, item) => sum + Number(item.menu_item.price) * item.quantity,
     0
   );
 
-  // Form Validation Check
   const isTableNumberMissing = orderType === 'dine_in' && !tableNumber.trim();
   const isSubmitDisabled = cart.length === 0 || isTableNumberMissing || isSubmitting;
 
-  // Submit Order
   const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -151,8 +147,8 @@ export const NewOrderPage: React.FC = () => {
     if (cart.length === 0) {
       setApiError({
         code: 400,
-        title: 'Empty Order Cart',
-        message: 'Please add at least one menu item to the order before submitting.',
+        title: t('orders.emptyCart'),
+        message: t('orders.cartEmptyMsg'),
       });
       return;
     }
@@ -160,8 +156,8 @@ export const NewOrderPage: React.FC = () => {
     if (orderType === 'dine_in' && !tableNumber.trim()) {
       setApiError({
         code: 400,
-        title: 'Missing Table Number',
-        message: 'Table number is strictly required for Dine-In orders.',
+        title: t('orders.tableNumLabel'),
+        message: t('orders.tableEnterPrompt'),
       });
       return;
     }
@@ -181,7 +177,7 @@ export const NewOrderPage: React.FC = () => {
 
       const response = await createOrderApi(payload);
       setConfirmedOrder(response);
-      showToast(`Order #${response.id} placed successfully!`, 'success');
+      showToast(t('orders.orderSuccess', { id: response.id }), 'success');
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const resp = (
@@ -205,32 +201,26 @@ export const NewOrderPage: React.FC = () => {
           setApiError({
             code: 409,
             title: 'Stock Conflict (409)',
-            message: `This order cannot be fulfilled right now due to inventory stock limitations: ${detailMsg}`,
+            message: detailMsg,
           });
         } else if (statusCode === 403) {
           setApiError({
             code: 403,
             title: 'Access Restricted (403)',
-            message: 'Your user role is not authorized to place orders. Only Waiters, Managers, and Owners can place orders.',
-          });
-        } else if (statusCode === 400) {
-          setApiError({
-            code: 400,
-            title: 'Validation Error (400)',
             message: detailMsg,
           });
         } else {
           setApiError({
-            code: statusCode as 500,
-            title: `Error (${statusCode || 'Network'})`,
+            code: statusCode as 400,
+            title: `${t('common.error')} (${statusCode})`,
             message: detailMsg,
           });
         }
       } else {
         setApiError({
           code: 0,
-          title: 'Network Error',
-          message: 'Unable to connect to the backend server. Please check your internet connection.',
+          title: t('auth.networkError'),
+          message: t('auth.networkError'),
         });
       }
     } finally {
@@ -238,7 +228,6 @@ export const NewOrderPage: React.FC = () => {
     }
   };
 
-  // Reset Form for New Order
   const handleStartAnotherOrder = () => {
     setConfirmedOrder(null);
     setCart([]);
@@ -248,7 +237,6 @@ export const NewOrderPage: React.FC = () => {
     fetchMenu();
   };
 
-  // Filtered Menu Items
   const filteredMenuItems = menuItems.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -274,24 +262,24 @@ export const NewOrderPage: React.FC = () => {
             <ShoppingCart className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">New Order Placement</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('orders.placementTitle')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Select order type, add menu items, customize line notes, and place new orders.
+              {t('orders.placementDesc')}
             </p>
           </div>
         </div>
 
         <button
           onClick={fetchMenu}
-          title="Refresh Menu Catalog"
+          title={t('orders.refreshMenu')}
           className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Refresh Menu</span>
+          <span>{t('orders.refreshMenu')}</span>
         </button>
       </div>
 
-      {/* CONFIRMED ORDER VIEW (POST-201 SUCCESS) */}
+      {/* CONFIRMED ORDER VIEW */}
       {confirmedOrder ? (
         <div className="glass-panel p-8 rounded-3xl border border-emerald-500/40 bg-gradient-to-br from-emerald-950/30 via-gray-900 to-gray-950 shadow-2xl space-y-6 animate-in fade-in duration-300">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 border-b border-gray-800">
@@ -301,7 +289,7 @@ export const NewOrderPage: React.FC = () => {
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-2xl font-extrabold text-white">Order Placed Successfully</h2>
+                  <h2 className="text-2xl font-extrabold text-white">{t('orders.orderPlacedTitle')}</h2>
                   <span className="px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 uppercase">
                     #{confirmedOrder.id}
                   </span>
@@ -316,13 +304,13 @@ export const NewOrderPage: React.FC = () => {
                   </span>
                   <span>•</span>
                   <span className="capitalize font-semibold text-indigo-400">
-                    {confirmedOrder.order_type.replace('_', ' ')}
+                    {t(`orders.${confirmedOrder.order_type === 'dine_in' ? 'dineIn' : confirmedOrder.order_type}`, { defaultValue: confirmedOrder.order_type.replace('_', ' ') })}
                   </span>
                   {confirmedOrder.table_number && (
                     <>
                       <span>•</span>
                       <span className="text-amber-400 font-bold">
-                        Table {confirmedOrder.table_number}
+                        {t('dashboard.table')} {confirmedOrder.table_number}
                       </span>
                     </>
                   )}
@@ -335,24 +323,23 @@ export const NewOrderPage: React.FC = () => {
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Start Another Order</span>
+              <span>{t('orders.startAnotherOrder')}</span>
             </button>
           </div>
 
-          {/* Snapshotted Order Items Table */}
           <div>
             <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
-              Order Items & Price Snapshots
+              {t('orders.snapshotsTitle')}
             </h3>
             <div className="glass-card rounded-2xl border border-gray-800 overflow-hidden">
               <table className="w-full text-left text-xs">
                 <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800">
                   <tr>
-                    <th className="py-3 px-5">Item Name</th>
-                    <th className="py-3 px-5">Price (At Order)</th>
-                    <th className="py-3 px-5">Qty</th>
-                    <th className="py-3 px-5">Line Subtotal</th>
-                    <th className="py-3 px-5">Special Notes</th>
+                    <th className="py-3 px-5">{t('menu.menuItemCol')}</th>
+                    <th className="py-3 px-5">{t('orders.priceAtOrder')}</th>
+                    <th className="py-3 px-5">{t('common.quantity')}</th>
+                    <th className="py-3 px-5">{t('orders.lineSubtotal')}</th>
+                    <th className="py-3 px-5">{t('orders.specialNotes')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -381,7 +368,7 @@ export const NewOrderPage: React.FC = () => {
                 <tfoot className="bg-gray-900/90 border-t border-gray-800 font-bold">
                   <tr>
                     <td colSpan={3} className="py-4 px-5 text-right text-gray-400 uppercase">
-                      Confirmed Total Price:
+                      {t('orders.confirmedTotal')}
                     </td>
                     <td className="py-4 px-5 text-emerald-400 text-base font-mono">
                       ${Number(confirmedOrder.total_price).toFixed(2)}
@@ -394,11 +381,10 @@ export const NewOrderPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        /* MAIN ORDER FORM (CATALOG + CART SIDEBAR) */
+        /* MAIN ORDER FORM */
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* LEFT 7 COLS: MENU CATALOG */}
+          {/* MENU CATALOG */}
           <div className="lg:col-span-7 space-y-6">
-            {/* Search & Category Toolbar */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="relative w-full sm:w-64">
                 <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -406,7 +392,7 @@ export const NewOrderPage: React.FC = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search dishes..."
+                  placeholder={t('common.search')}
                   className="w-full pl-10 pr-4 py-2 rounded-xl glass-input text-xs"
                 />
               </div>
@@ -419,7 +405,7 @@ export const NewOrderPage: React.FC = () => {
                   className="w-full pl-8 pr-4 py-2 rounded-xl glass-input text-xs bg-gray-900"
                 >
                   <option value="all" className="bg-gray-900">
-                    All Categories
+                    {t('menu.allCategories')}
                   </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id} className="bg-gray-900">
@@ -430,14 +416,13 @@ export const NewOrderPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Menu Grid */}
             {isLoadingMenu ? (
-              <LoadingSpinner text="Fetching menu items..." />
+              <LoadingSpinner text={t('menu.loadingCatalog')} />
             ) : filteredMenuItems.length === 0 ? (
               <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
                 <Utensils className="w-12 h-12 text-gray-600 mb-3" />
-                <h3 className="text-base font-bold text-gray-300">No dishes match filter</h3>
-                <p className="text-xs text-gray-500 mt-1">Try adjusting your search query or category filter.</p>
+                <h3 className="text-base font-bold text-gray-300">{t('orders.dishesNoMatch')}</h3>
+                <p className="text-xs text-gray-500 mt-1">{t('orders.adjustSearch')}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -445,7 +430,7 @@ export const NewOrderPage: React.FC = () => {
                   const categoryName =
                     typeof item.category === 'object' && item.category !== null
                       ? item.category.name
-                      : 'General';
+                      : t('menu.generalMenu');
 
                   const isAvailable = item.is_available;
 
@@ -477,16 +462,15 @@ export const NewOrderPage: React.FC = () => {
                             {categoryName}
                           </span>
 
-                          {/* REUSED AVAILABILITY BADGE */}
                           {isAvailable ? (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                               <CheckCircle2 className="w-3 h-3 text-emerald-400" />
-                              Available
+                              {t('menu.available')}
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
                               <AlertTriangle className="w-3 h-3 text-rose-400" />
-                              Unavailable
+                              {t('menu.unavailable')}
                             </span>
                           )}
                         </div>
@@ -502,7 +486,7 @@ export const NewOrderPage: React.FC = () => {
                         }`}
                       >
                         <Plus className="w-4 h-4" />
-                        <span>{isAvailable ? 'Add to Order' : 'Out of Stock'}</span>
+                        <span>{isAvailable ? t('orders.addToOrder') : t('orders.outOfStock')}</span>
                       </button>
                     </div>
                   );
@@ -511,20 +495,19 @@ export const NewOrderPage: React.FC = () => {
             )}
           </div>
 
-          {/* RIGHT 5 COLS: RUNNING CART & ORDER CONFIG */}
+          {/* RUNNING CART */}
           <div className="lg:col-span-5 space-y-6">
             <div className="glass-panel p-6 rounded-3xl border border-gray-800 shadow-xl sticky top-20">
               <div className="flex items-center justify-between pb-4 border-b border-gray-800 mb-5">
                 <div className="flex items-center gap-2">
                   <ShoppingCart className="w-5 h-5 text-indigo-400" />
-                  <h3 className="font-bold text-white text-base">Current Cart</h3>
+                  <h3 className="font-bold text-white text-base">{t('orders.currentCart')}</h3>
                 </div>
                 <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-indigo-500/20 text-indigo-300">
-                  {cart.reduce((s, i) => s + i.quantity, 0)} Items
+                  {cart.reduce((s, i) => s + i.quantity, 0)} {t('dashboard.items')}
                 </span>
               </div>
 
-              {/* API ERROR ALERTS (DISTINCT STATUS CODES) */}
               {apiError && (
                 <div
                   className={`mb-5 p-4 rounded-xl border text-xs leading-relaxed space-y-1 ${
@@ -553,7 +536,7 @@ export const NewOrderPage: React.FC = () => {
                 {/* 1. ORDER TYPE SELECTOR */}
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                    Order Type
+                    {t('orders.orderTypeLabel')}
                   </label>
                   <div className="grid grid-cols-3 gap-2">
                     {(['dine_in', 'takeout', 'delivery'] as OrderType[]).map((type) => (
@@ -570,20 +553,20 @@ export const NewOrderPage: React.FC = () => {
                             : 'glass-card border-gray-800 text-gray-400 hover:text-white hover:bg-gray-800'
                         }`}
                       >
-                        {type.replace('_', ' ')}
+                        {t(`orders.${type === 'dine_in' ? 'dineIn' : type}`, { defaultValue: type.replace('_', ' ') })}
                       </button>
                     ))}
                   </div>
                 </div>
 
-                {/* 2. TABLE NUMBER INPUT (REQUIRED FOR DINE_IN) */}
+                {/* 2. TABLE NUMBER INPUT */}
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                      Table Number {orderType === 'dine_in' ? '*' : '(Optional)'}
+                      {t('orders.tableNumLabel')} {orderType === 'dine_in' ? '*' : ''}
                     </label>
                     {orderType === 'dine_in' && (
-                      <span className="text-[10px] text-amber-400 font-medium">Required for Dine-In</span>
+                      <span className="text-[10px] text-amber-400 font-medium">{t('orders.tableRequiredMsg')}</span>
                     )}
                   </div>
                   <div className="relative">
@@ -595,7 +578,7 @@ export const NewOrderPage: React.FC = () => {
                         setTableNumber(e.target.value);
                         setApiError(null);
                       }}
-                      placeholder={orderType === 'dine_in' ? 'e.g. T-12' : 'Optional table ref'}
+                      placeholder={orderType === 'dine_in' ? 'e.g. T-12' : ''}
                       className={`w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs ${
                         isTableNumberMissing ? 'border-amber-500/60 focus:border-amber-400' : ''
                       }`}
@@ -604,7 +587,7 @@ export const NewOrderPage: React.FC = () => {
                   {isTableNumberMissing && (
                     <p className="text-[11px] text-amber-400 mt-1 flex items-center gap-1">
                       <AlertTriangle className="w-3 h-3" />
-                      <span>Please enter a table number for dine-in orders.</span>
+                      <span>{t('orders.tableEnterPrompt')}</span>
                     </p>
                   )}
                 </div>
@@ -612,13 +595,13 @@ export const NewOrderPage: React.FC = () => {
                 {/* 3. RUNNING CART ITEMS LIST */}
                 <div className="space-y-3 pt-3 border-t border-gray-800">
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                    Selected Items ({cart.length})
+                    {t('orders.selectedItems')} ({cart.length})
                   </label>
 
                   {cart.length === 0 ? (
                     <div className="p-6 rounded-2xl border border-dashed border-gray-800 text-center">
                       <p className="text-xs text-gray-500">
-                        Your cart is empty. Click "+ Add to Order" on any available menu item.
+                        {t('orders.cartEmptyMsg')}
                       </p>
                     </div>
                   ) : (
@@ -637,7 +620,7 @@ export const NewOrderPage: React.FC = () => {
                                   {item.menu_item.name}
                                 </p>
                                 <p className="text-[11px] text-gray-400">
-                                  ${Number(item.menu_item.price).toFixed(2)} each
+                                  ${Number(item.menu_item.price).toFixed(2)}
                                 </p>
                               </div>
 
@@ -650,7 +633,6 @@ export const NewOrderPage: React.FC = () => {
                               </button>
                             </div>
 
-                            {/* Line Note Input */}
                             <div className="relative">
                               <FileText className="w-3 h-3 text-gray-500 absolute left-2.5 top-1/2 -translate-y-1/2" />
                               <input
@@ -659,12 +641,11 @@ export const NewOrderPage: React.FC = () => {
                                 onChange={(e) =>
                                   handleUpdateNote(item.menu_item.id, e.target.value)
                                 }
-                                placeholder="Add line note (e.g. extra crispy)..."
+                                placeholder={t('orders.lineNotePlaceholder')}
                                 className="w-full pl-7 pr-2 py-1 text-[11px] glass-input rounded-lg"
                               />
                             </div>
 
-                            {/* Stepper + Subtotal */}
                             <div className="flex items-center justify-between pt-1">
                               <div className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg p-1">
                                 <button
@@ -708,7 +689,7 @@ export const NewOrderPage: React.FC = () => {
 
                 {/* 4. TOTAL SUMMARY */}
                 <div className="pt-4 border-t border-gray-800 flex items-center justify-between">
-                  <span className="text-xs font-bold text-gray-400 uppercase">Estimated Total</span>
+                  <span className="text-xs font-bold text-gray-400 uppercase">{t('orders.estimatedTotal')}</span>
                   <span className="text-xl font-extrabold font-mono text-emerald-400">
                     ${cartSubtotal.toFixed(2)}
                   </span>
@@ -721,11 +702,11 @@ export const NewOrderPage: React.FC = () => {
                   className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
-                    <span>Submitting Order...</span>
+                    <span>{t('orders.submittingOrder')}</span>
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4" />
-                      <span>Place Order (${cartSubtotal.toFixed(2)})</span>
+                      <span>{t('orders.placeOrder')} (${cartSubtotal.toFixed(2)})</span>
                     </>
                   )}
                 </button>

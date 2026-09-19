@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MenuCategory, MenuItem } from '../../types';
 import { getMenuItemsApi, getMenuCategoriesApi, deleteMenuItemApi } from '../../api/menu';
 import { AddMenuItemModal } from './AddMenuItemModal';
@@ -24,6 +25,7 @@ import {
 export const MenuItemListPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'manager';
 
@@ -51,26 +53,26 @@ export const MenuItemListPage: React.FC = () => {
       setCategories(catsData);
     } catch (err: unknown) {
       console.error('Failed to fetch menu items:', err);
-      showToast('Failed to load menu items list.', 'error');
+      showToast(t('menu.loadFailedToast'), 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     fetchMenuItemsAndCategories();
   }, [fetchMenuItemsAndCategories]);
 
   const handleDelete = async (item: MenuItem) => {
-    if (!window.confirm(`Are you sure you want to delete menu item "${item.name}"?`)) return;
+    if (!window.confirm(t('menu.deleteItemConfirm', { name: item.name }))) return;
 
     try {
       await deleteMenuItemApi(item.id);
-      showToast(`Menu item "${item.name}" deleted.`, 'info');
+      showToast(t('menu.itemDeletedToast', { name: item.name }), 'info');
       fetchMenuItemsAndCategories();
     } catch (err: unknown) {
       console.error('Failed to delete menu item:', err);
-      showToast('Failed to delete menu item.', 'error');
+      showToast(t('menu.deleteFailedToast'), 'error');
     }
   };
 
@@ -104,9 +106,9 @@ export const MenuItemListPage: React.FC = () => {
             <UtensilsCrossed className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Menu Items Catalog</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('menu.catalogTitle')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Browse dishes, pricing, category classification, and ingredient recipe requirements.
+              {t('menu.catalogSubtitle')}
             </p>
           </div>
         </div>
@@ -117,7 +119,7 @@ export const MenuItemListPage: React.FC = () => {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
           >
             <Plus className="w-5 h-5" />
-            <span>Add New Menu Item</span>
+            <span>{t('menu.addNewMenuItem')}</span>
           </button>
         )}
       </div>
@@ -130,7 +132,7 @@ export const MenuItemListPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search menu items..."
+            placeholder={t('common.search')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
           />
         </div>
@@ -145,7 +147,7 @@ export const MenuItemListPage: React.FC = () => {
               className="pl-8 pr-3 py-2 rounded-xl glass-input text-xs bg-gray-900"
             >
               <option value="all" className="bg-gray-900">
-                All Categories
+                {t('menu.allCategories')}
               </option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id} className="bg-gray-900">
@@ -162,19 +164,19 @@ export const MenuItemListPage: React.FC = () => {
             className="px-3 py-2 rounded-xl glass-input text-xs bg-gray-900"
           >
             <option value="all" className="bg-gray-900">
-              All Availability Statuses
+              {t('menu.allStatuses')}
             </option>
             <option value="available" className="bg-gray-900">
-              Available Only
+              {t('menu.availableOnly')}
             </option>
             <option value="unavailable" className="bg-gray-900">
-              Unavailable Only
+              {t('menu.unavailableOnly')}
             </option>
           </select>
 
           <button
             onClick={fetchMenuItemsAndCategories}
-            title="Refresh list"
+            title={t('inventory.refresh')}
             className="p-2.5 glass-panel border border-gray-700 text-gray-300 hover:text-white rounded-xl hover:bg-gray-800 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -184,15 +186,15 @@ export const MenuItemListPage: React.FC = () => {
 
       {/* Menu Items Table */}
       {isLoading ? (
-        <LoadingSpinner text="Loading menu catalog..." />
+        <LoadingSpinner text={t('menu.loadingCatalog')} />
       ) : filteredItems.length === 0 ? (
         <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <UtensilsCrossed className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No menu items found</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('menu.noItemsTitle')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
             {searchQuery || selectedCategoryFilter !== 'all' || availabilityFilter !== 'all'
-              ? 'No items match your selected filters.'
-              : 'Add your first menu item to populate the restaurant menu.'}
+              ? t('menu.noItemsMatching')
+              : t('menu.addFirstItem')}
           </p>
         </div>
       ) : (
@@ -201,12 +203,12 @@ export const MenuItemListPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Menu Item</th>
-                  <th className="py-4 px-6">Category</th>
-                  <th className="py-4 px-6">Price</th>
-                  <th className="py-4 px-6">Ingredients Recipe</th>
-                  <th className="py-4 px-6">Stock Availability</th>
-                  <th className="py-4 px-6 text-right">Actions</th>
+                  <th className="py-4 px-6">{t('menu.menuItemCol')}</th>
+                  <th className="py-4 px-6">{t('menu.categoryCol')}</th>
+                  <th className="py-4 px-6">{t('menu.priceCol')}</th>
+                  <th className="py-4 px-6">{t('menu.recipeCol')}</th>
+                  <th className="py-4 px-6">{t('menu.stockAvailabilityCol')}</th>
+                  <th className="py-4 px-6 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -214,7 +216,7 @@ export const MenuItemListPage: React.FC = () => {
                   const categoryName =
                     typeof item.category === 'object' && item.category !== null
                       ? item.category.name
-                      : 'General Menu';
+                      : t('menu.generalMenu');
 
                   return (
                     <tr key={item.id} className="hover:bg-gray-800/40 transition-colors">
@@ -249,7 +251,7 @@ export const MenuItemListPage: React.FC = () => {
                               >
                                 <Scale className="w-2.5 h-2.5 text-gray-500" />
                                 <span>
-                                  {ri.ingredient?.name || `Ing #${ri.ingredient_id}`}:{' '}
+                                  {ri.ingredient?.name || `${t('inventory.ingredientCol')} #${ri.ingredient_id}`}:{' '}
                                   <strong className="text-white">{ri.quantity_required}</strong>
                                   {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
                                 </span>
@@ -257,19 +259,19 @@ export const MenuItemListPage: React.FC = () => {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-gray-500 italic text-[11px]">No recipe listed</span>
+                          <span className="text-gray-500 italic text-[11px]">{t('menu.noRecipe')}</span>
                         )}
                       </td>
                       <td className="py-4 px-6">
                         {item.is_available ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                            Available
+                            {t('menu.available')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
                             <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                            Unavailable
+                            {t('menu.unavailable')}
                           </span>
                         )}
                       </td>
@@ -278,17 +280,16 @@ export const MenuItemListPage: React.FC = () => {
                           <button
                             onClick={() => setEditingItem(item)}
                             className="px-3 py-1.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-all border border-gray-700 flex items-center gap-1.5"
-                            title={isOwnerOrManager ? 'Edit Item Details' : 'View Item Details'}
                           >
                             {isOwnerOrManager ? (
                               <>
                                 <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
-                                <span>Edit</span>
+                                <span>{t('common.edit')}</span>
                               </>
                             ) : (
                               <>
                                 <Eye className="w-3.5 h-3.5 text-gray-400" />
-                                <span>View</span>
+                                <span>{t('common.viewDetails')}</span>
                               </>
                             )}
                           </button>
@@ -297,7 +298,6 @@ export const MenuItemListPage: React.FC = () => {
                             <button
                               onClick={() => handleDelete(item)}
                               className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20"
-                              title="Delete Menu Item"
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>

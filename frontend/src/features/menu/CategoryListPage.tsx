@@ -1,15 +1,17 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { MenuCategory } from '../../types';
 import { getMenuCategoriesApi, deleteMenuCategoryApi } from '../../api/menu';
 import { AddEditCategoryModal } from './AddEditCategoryModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
-import { FolderTree, Plus, Search, Edit2, Trash2, RefreshCw, Hash, CheckCircle2, XCircle } from 'lucide-react';
+import { FolderTree, Plus, Search, Edit2, Trash2, RefreshCw, CheckCircle2, XCircle } from 'lucide-react';
 
 export const CategoryListPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'manager';
 
@@ -28,26 +30,26 @@ export const CategoryListPage: React.FC = () => {
       setCategories(data);
     } catch (err: unknown) {
       console.error('Failed to fetch menu categories:', err);
-      showToast('Failed to load menu categories.', 'error');
+      showToast(t('common.error'), 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
 
   const handleDelete = async (category: MenuCategory) => {
-    if (!window.confirm(`Are you sure you want to delete category "${category.name}"?`)) return;
+    if (!window.confirm(t('menu.deleteCategoryConfirm', { name: category.name }))) return;
 
     try {
       await deleteMenuCategoryApi(category.id);
-      showToast(`Category "${category.name}" deleted.`, 'info');
+      showToast(t('menu.categoryDeletedToast', { name: category.name }), 'info');
       fetchCategories();
     } catch (err: unknown) {
       console.error('Failed to delete category:', err);
-      showToast('Failed to delete category.', 'error');
+      showToast(t('common.error'), 'error');
     }
   };
 
@@ -64,9 +66,9 @@ export const CategoryListPage: React.FC = () => {
             <FolderTree className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Menu Categories</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('menu.categoriesTitle')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Organize food and drink offerings by category and set display priority.
+              {t('menu.catalogSubtitle')}
             </p>
           </div>
         </div>
@@ -80,7 +82,7 @@ export const CategoryListPage: React.FC = () => {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
           >
             <Plus className="w-5 h-5" />
-            <span>Add New Category</span>
+            <span>{t('menu.addCategory')}</span>
           </button>
         )}
       </div>
@@ -93,14 +95,14 @@ export const CategoryListPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search categories..."
+            placeholder={t('common.search')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
           />
         </div>
 
         <button
           onClick={fetchCategories}
-          title="Refresh list"
+          title={t('inventory.refresh')}
           className="p-2.5 glass-panel border border-gray-700 text-gray-300 hover:text-white rounded-xl hover:bg-gray-800 transition-colors"
         >
           <RefreshCw className="w-4 h-4" />
@@ -109,15 +111,15 @@ export const CategoryListPage: React.FC = () => {
 
       {/* Categories Table */}
       {isLoading ? (
-        <LoadingSpinner text="Loading menu categories..." />
+        <LoadingSpinner text={t('common.loading')} />
       ) : filteredCategories.length === 0 ? (
         <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <FolderTree className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No menu categories found</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('menu.noCategories')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
             {searchQuery
-              ? 'No categories match your search filter.'
-              : 'Start by adding menu categories to group your dishes.'}
+              ? t('menu.noItemsMatching')
+              : t('menu.categoriesTitle')}
           </p>
         </div>
       ) : (
@@ -127,10 +129,9 @@ export const CategoryListPage: React.FC = () => {
               <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">ID</th>
-                  <th className="py-4 px-6">Category Name</th>
-                  <th className="py-4 px-6">Display Order</th>
-                  <th className="py-4 px-6">Status</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">Actions</th>}
+                  <th className="py-4 px-6">{t('menu.categoryName')}</th>
+                  <th className="py-4 px-6">{t('common.status')}</th>
+                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -138,20 +139,14 @@ export const CategoryListPage: React.FC = () => {
                   <tr key={cat.id} className="hover:bg-gray-800/40 transition-colors">
                     <td className="py-4 px-6 font-mono text-gray-500 text-xs">#{cat.id}</td>
                     <td className="py-4 px-6 font-semibold text-white text-sm">{cat.name}</td>
-                    <td className="py-4 px-6 font-mono text-sm">
-                      <div className="flex items-center gap-1.5 text-gray-300">
-                        <Hash className="w-3.5 h-3.5 text-indigo-400" />
-                        <span>{cat.display_order ?? 0}</span>
-                      </div>
-                    </td>
                     <td className="py-4 px-6">
                       {cat.is_active ? (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle2 className="w-3.5 h-3.5" /> Active
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {t('staff.statusActive')}
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-md bg-gray-800 text-gray-400 border border-gray-700">
-                          <XCircle className="w-3.5 h-3.5" /> Inactive
+                          <XCircle className="w-3.5 h-3.5" /> {t('staff.statusInactive')}
                         </span>
                       )}
                     </td>
@@ -164,14 +159,14 @@ export const CategoryListPage: React.FC = () => {
                               setIsModalOpen(true);
                             }}
                             className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors border border-transparent hover:border-gray-700"
-                            title="Edit Category"
+                            title={t('menu.editCategory')}
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(cat)}
                             className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20"
-                            title="Delete Category"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

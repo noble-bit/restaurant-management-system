@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type { CreateMenuCategoryPayload, MenuCategory } from '../../types';
 import { parseApiFieldErrors } from '../../types';
 import { createMenuCategoryApi, updateMenuCategoryApi } from '../../api/menu';
 import { useToast } from '../../context/ToastContext';
-import { FolderPlus, Tag, Hash, AlertCircle } from 'lucide-react';
+import { FolderPlus, Tag, AlertCircle } from 'lucide-react';
 
 interface AddEditCategoryModalProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
   onSuccess,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const isEditing = Boolean(categoryToEdit);
 
   const [formData, setFormData] = useState<CreateMenuCategoryPayload>({
@@ -96,7 +98,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? `Edit Category: ${categoryToEdit?.name}` : 'Add New Menu Category'}
+      title={isEditing ? `${t('menu.editCategory')}: ${categoryToEdit?.name}` : t('menu.addCategory')}
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -109,7 +111,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
 
         <div>
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-            Category Name *
+            {t('menu.categoryName')} *
           </label>
           <div className="relative">
             <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -133,36 +135,6 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
           )}
         </div>
 
-        <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-            Display Order
-          </label>
-          <div className="relative">
-            <Hash className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="number"
-              name="display_order"
-              min="0"
-              required
-              value={formData.display_order}
-              onChange={handleChange}
-              placeholder="0"
-              className={`w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs ${
-                fieldErrors.display_order ? 'border-rose-500/60 focus:border-rose-500' : ''
-              }`}
-            />
-          </div>
-          {fieldErrors.display_order && (
-            <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 shrink-0" />
-              <span>{fieldErrors.display_order}</span>
-            </p>
-          )}
-          <p className="text-[11px] text-gray-500 mt-1">
-            Lower numbers will be displayed first in menu listings.
-          </p>
-        </div>
-
         <div className="flex items-center gap-3 py-1">
           <input
             type="checkbox"
@@ -173,7 +145,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
             className="w-4 h-4 rounded border-gray-700 bg-gray-900 text-indigo-600 focus:ring-indigo-500"
           />
           <label htmlFor="cat_is_active" className="text-xs font-semibold text-gray-300">
-            Is Active
+            {t('staff.statusActive')}
           </label>
         </div>
 
@@ -183,7 +155,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -191,7 +163,7 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
           >
             <FolderPlus className="w-4 h-4" />
-            <span>{isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Category'}</span>
+            <span>{isSubmitting ? t('common.saving') : t('common.save')}</span>
           </button>
         </div>
       </form>

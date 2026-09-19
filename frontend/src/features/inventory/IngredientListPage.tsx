@@ -6,6 +6,7 @@ import { RestockModal } from './RestockModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
+import { useTranslation } from 'react-i18next';
 import {
   Package,
   Plus,
@@ -22,6 +23,7 @@ import {
 export const IngredientListPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'manager';
 
@@ -49,26 +51,24 @@ export const IngredientListPage: React.FC = () => {
       }
     } catch (err: unknown) {
       console.error('Failed to fetch ingredients:', err);
-      showToast('Failed to load ingredients list.', 'error');
-    } finally {
-      setIsLoading(false);
+      showToast(t('inventory.loadFailedToast'), 'error');
     }
-  }, [showOnlyLowStock, showToast]);
+  }, [showOnlyLowStock, showToast, t]);
 
   useEffect(() => {
     fetchIngredients();
   }, [fetchIngredients]);
 
   const handleDelete = async (ingredient: Ingredient) => {
-    if (!window.confirm(`Are you sure you want to deactivate "${ingredient.name}"?`)) return;
+    if (!window.confirm(t('inventory.deactivateConfirm', { name: ingredient.name }))) return;
 
     try {
       await deleteIngredientApi(ingredient.id);
-      showToast(`Ingredient "${ingredient.name}" deactivated.`, 'info');
+      showToast(t('inventory.deactivatedToast', { name: ingredient.name }), 'info');
       fetchIngredients();
     } catch (err: unknown) {
       console.error('Failed to delete ingredient:', err);
-      showToast('Failed to deactivate ingredient.', 'error');
+      showToast(t('inventory.deactivateFailedToast'), 'error');
     }
   };
 
@@ -87,9 +87,9 @@ export const IngredientListPage: React.FC = () => {
             <Package className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Ingredient Inventory</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('inventory.ingredientsTitle')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Track stock levels, reorder thresholds, unit costs, and perform stock replenishments.
+              {t('inventory.subtitle')}
             </p>
           </div>
         </div>
@@ -103,7 +103,7 @@ export const IngredientListPage: React.FC = () => {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
           >
             <Plus className="w-5 h-5" />
-            <span>Add New Ingredient</span>
+            <span>{t('inventory.addIngredient')}</span>
           </button>
         )}
       </div>
@@ -116,7 +116,7 @@ export const IngredientListPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search ingredients..."
+            placeholder={t('common.search')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
           />
         </div>
@@ -132,7 +132,7 @@ export const IngredientListPage: React.FC = () => {
             }`}
           >
             <AlertTriangle className={`w-4 h-4 ${showOnlyLowStock ? 'text-rose-400' : 'text-amber-400'}`} />
-            <span>Low Stock Alert Filter</span>
+            <span>{t('inventory.lowStockFilter')}</span>
             {lowStockCount > 0 && (
               <span className="ml-1 px-2 py-0.5 text-[10px] font-bold rounded-full bg-rose-500 text-white">
                 {lowStockCount}
@@ -142,7 +142,7 @@ export const IngredientListPage: React.FC = () => {
 
           <button
             onClick={fetchIngredients}
-            title="Refresh list"
+            title={t('inventory.refresh')}
             className="p-2.5 glass-panel border border-gray-700 text-gray-300 hover:text-white rounded-xl hover:bg-gray-800 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
@@ -152,15 +152,15 @@ export const IngredientListPage: React.FC = () => {
 
       {/* Ingredients Table */}
       {isLoading ? (
-        <LoadingSpinner text="Loading inventory records..." />
+        <LoadingSpinner text={t('inventory.loading')} />
       ) : filteredIngredients.length === 0 ? (
         <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <Package className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No ingredients found</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('inventory.noIngredientsTitle')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
             {showOnlyLowStock
-              ? 'Great news! There are currently no low-stock ingredients requiring reorder.'
-              : 'No ingredients exist in inventory.'}
+              ? t('inventory.noLowStockMsg')
+              : t('inventory.noIngredientsMsg')}
           </p>
         </div>
       ) : (
@@ -169,12 +169,12 @@ export const IngredientListPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Ingredient</th>
-                  <th className="py-4 px-6">Quantity On Hand</th>
-                  <th className="py-4 px-6">Reorder Threshold</th>
-                  <th className="py-4 px-6">Cost / Unit</th>
-                  <th className="py-4 px-6">Status Badge</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">Actions</th>}
+                  <th className="py-4 px-6">{t('inventory.ingredientCol')}</th>
+                  <th className="py-4 px-6">{t('inventory.quantityOnHandCol')}</th>
+                  <th className="py-4 px-6">{t('inventory.reorderThresholdCol')}</th>
+                  <th className="py-4 px-6">{t('inventory.costPerUnitCol')}</th>
+                  <th className="py-4 px-6">{t('inventory.statusBadgeCol')}</th>
+                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -219,12 +219,12 @@ export const IngredientListPage: React.FC = () => {
                         {isLow ? (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse">
                             <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-                            LOW STOCK ALERT
+                            {t('inventory.lowStockAlert')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                             <CheckCircle2 className="w-3.5 h-3.5" />
-                            Optimal Level
+                            {t('inventory.optimalLevel')}
                           </span>
                         )}
                       </td>
@@ -240,7 +240,7 @@ export const IngredientListPage: React.FC = () => {
                               className="px-3 py-1.5 bg-emerald-600/90 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold shadow-md transition-all flex items-center gap-1"
                             >
                               <RefreshCw className="w-3.5 h-3.5" />
-                              <span>Restock</span>
+                              <span>{t('inventory.restock')}</span>
                             </button>
 
                             {/* Edit Button */}

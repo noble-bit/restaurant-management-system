@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { UtensilsCrossed, Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 export const LoginPage: React.FC = () => {
   const { login } = useAuth();
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -24,10 +26,10 @@ export const LoginPage: React.FC = () => {
         } else if (resp?.data?.non_field_errors?.[0]) {
           setError(resp.data.non_field_errors[0]);
         } else {
-          setError('Invalid credentials. Please check your email and password.');
+          setError(t('auth.invalidCredentials'));
         }
       } else {
-        setError('Network or server error. Please try again.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setIsSubmitting(false);
@@ -46,7 +48,7 @@ export const LoginPage: React.FC = () => {
             <UtensilsCrossed className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide">GourmetControl</h1>
-          <p className="text-sm text-gray-400 mt-1">Restaurant Management Portal</p>
+          <p className="text-sm text-gray-400 mt-1">{t('auth.portal')}</p>
         </div>
 
         {error && (
@@ -59,7 +61,7 @@ export const LoginPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Email Address
+              {t('auth.emailLabel')}
             </label>
             <div className="relative">
               <Mail className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -68,7 +70,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="staff@restaurant.com"
+                placeholder={t('auth.emailPlaceholder')}
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm transition-all"
               />
             </div>
@@ -76,7 +78,7 @@ export const LoginPage: React.FC = () => {
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-              Password
+              {t('auth.passwordLabel')}
             </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -85,7 +87,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••••••"
+                placeholder={t('auth.passwordPlaceholder')}
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm transition-all"
               />
             </div>
@@ -97,10 +99,10 @@ export const LoginPage: React.FC = () => {
             className="w-full py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all flex items-center justify-center gap-2 group disabled:opacity-50"
           >
             {isSubmitting ? (
-              <span>Authenticating...</span>
+              <span>{t('auth.authenticating')}</span>
             ) : (
               <>
-                <span>Sign In to Dashboard</span>
+                <span>{t('auth.signIn')}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
@@ -108,7 +110,7 @@ export const LoginPage: React.FC = () => {
         </form>
 
         <p className="text-xs text-center text-gray-500 mt-8">
-          Authorized staff access only. Contact your Manager for access assistance.
+          {t('auth.authorizedNotice')}
         </p>
       </div>
     </div>

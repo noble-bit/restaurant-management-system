@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { KeyRound, Lock, AlertTriangle, CheckCircle, LogOut } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 
@@ -14,6 +15,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
 }) => {
   const { updatePassword, logout, user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -26,12 +28,12 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
     setError(null);
 
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match');
+      setError(t('auth.passwordsDoNotMatch'));
       return;
     }
 
     if (newPassword.length < 8) {
-      setError('New password must be at least 8 characters long');
+      setError(t('auth.passwordTooShort'));
       return;
     }
 
@@ -39,25 +41,27 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
 
     try {
       await updatePassword(currentPassword, newPassword);
-      showToast('Password updated successfully!', 'success');
+      showToast(t('auth.passwordUpdateSuccess'), 'success');
       if (onSuccess) onSuccess();
     } catch (err: unknown) {
       if (err && typeof err === 'object' && 'response' in err) {
         const resp = (err as { response?: { data?: Record<string, string[]> } }).response;
         if (resp?.data?.current_password) {
-          setError(`Current password: ${resp.data.current_password.join(' ')}`);
+          setError(`${t('auth.currentPasswordLabel')}: ${resp.data.current_password.join(' ')}`);
         } else if (resp?.data?.new_password) {
-          setError(`New password: ${resp.data.new_password.join(' ')}`);
+          setError(`${t('auth.newPasswordLabel')}: ${resp.data.new_password.join(' ')}`);
         } else {
-          setError('Failed to update password. Please verify current password.');
+          setError(t('auth.passwordUpdateFailed'));
         }
       } else {
-        setError('An unexpected error occurred. Please try again.');
+        setError(t('common.error'));
       }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const displayName = user?.first_name || user?.username || '';
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-[#0b0f19] relative overflow-hidden">
@@ -67,12 +71,12 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
             <KeyRound className="w-8 h-8" />
           </div>
           <h1 className="text-2xl font-bold text-white tracking-wide">
-            {isForced ? 'Password Update Required' : 'Change Your Password'}
+            {isForced ? t('auth.passwordRequiredTitle') : t('auth.changePasswordTitle')}
           </h1>
           <p className="text-sm text-gray-400 mt-2">
             {isForced
-              ? `Hello ${user?.first_name || user?.username}, your account requires a new password before proceeding.`
-              : 'Please enter your current password and set a new secure password.'}
+              ? t('auth.forcedNotice', { name: displayName })
+              : t('auth.voluntaryNotice')}
           </p>
         </div>
 
@@ -80,7 +84,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
           <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-amber-300 text-xs">
             <AlertTriangle className="w-5 h-5 shrink-0" />
             <span>
-              For safety compliance, temporary passwords must be changed immediately upon first login.
+              {t('auth.firstLoginSafety')}
             </span>
           </div>
         )}
@@ -94,7 +98,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Current Password
+              {t('auth.currentPasswordLabel')}
             </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -103,7 +107,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
                 required
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
-                placeholder="Current / Temporary Password"
+                placeholder={t('auth.currentPasswordPlaceholder')}
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
               />
             </div>
@@ -111,7 +115,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              New Password
+              {t('auth.newPasswordLabel')}
             </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -120,7 +124,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="At least 8 characters"
+                placeholder={t('auth.newPasswordPlaceholder')}
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
               />
             </div>
@@ -128,7 +132,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Confirm New Password
+              {t('auth.confirmPasswordLabel')}
             </label>
             <div className="relative">
               <Lock className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -137,7 +141,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Re-enter new password"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
                 className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm"
               />
             </div>
@@ -149,7 +153,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
             className="w-full py-3.5 px-4 bg-gradient-to-r from-amber-600 to-indigo-600 hover:from-amber-500 hover:to-indigo-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-2 mt-4"
           >
             <CheckCircle className="w-5 h-5" />
-            <span>{isSubmitting ? 'Updating...' : 'Update Password & Access App'}</span>
+            <span>{isSubmitting ? t('auth.updatingPassword') : t('auth.updatePasswordBtn')}</span>
           </button>
         </form>
 
@@ -159,7 +163,7 @@ export const ForceChangePasswordPage: React.FC<ForceChangePasswordPageProps> = (
             className="flex items-center gap-2 text-xs font-semibold text-gray-400 hover:text-rose-400 transition-colors"
           >
             <LogOut className="w-4 h-4" />
-            <span>Sign out instead</span>
+            <span>{t('auth.signOutInstead')}</span>
           </button>
         </div>
       </div>

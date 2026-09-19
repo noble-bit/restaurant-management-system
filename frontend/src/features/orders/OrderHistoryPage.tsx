@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderPaymentDetailsResponse, PaymentMethod } from '../../types';
 import { getOrdersApi, getOrderPaymentDetailsApi } from '../../api/orders';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
@@ -30,6 +31,7 @@ type DateFilterOption = 'all' | 'today' | '7days' | '30days';
 
 export const OrderHistoryPage: React.FC = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [orders, setOrders] = useState<CreatedOrderResponse[]>([]);
   const [paymentsMap, setPaymentsMap] = useState<Record<number, OrderPaymentDetailsResponse | null>>({});
@@ -46,17 +48,14 @@ export const OrderHistoryPage: React.FC = () => {
   const fetchPaidOrders = useCallback(async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch paid orders: GET /api/v1/orders/?status=paid
       const data = await getOrdersApi('paid');
       setOrders(data);
 
-      // 2. Fetch per-row payment details using GET /api/v1/orders/{id}/payment/
       const paymentPromises = data.map(async (order) => {
         try {
           const paymentData = await getOrderPaymentDetailsApi(order.id);
           return { orderId: order.id, payment: paymentData };
         } catch {
-          // Graceful fallback for missing/unrecorded payment details
           return { orderId: order.id, payment: null };
         }
       });
@@ -72,11 +71,11 @@ export const OrderHistoryPage: React.FC = () => {
       setPaymentsMap(map);
     } catch (err: unknown) {
       console.error('Failed to fetch paid orders history:', err);
-      showToast('Failed to load order history.', 'error');
+      showToast(t('common.error'), 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     fetchPaidOrders();
@@ -86,25 +85,23 @@ export const OrderHistoryPage: React.FC = () => {
     setExpandedOrders((prev) => ({ ...prev, [orderId]: !prev[orderId] }));
   };
 
-  // Helper to render Payment Method badge
   const getPaymentMethodBadge = (method: PaymentMethod) => {
-    const map: Record<PaymentMethod, { style: string; label: string; icon: React.ComponentType<{ className?: string }> }> = {
-      cash: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', label: 'Cash', icon: Banknote },
-      card: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', label: 'Card', icon: CreditCard },
-      mobile: { style: 'bg-purple-500/20 text-purple-300 border-purple-500/30', label: 'Mobile', icon: Smartphone },
+    const map: Record<PaymentMethod, { style: string; labelKey: string; icon: React.ComponentType<{ className?: string }> }> = {
+      cash: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', labelKey: 'orders.cash', icon: Banknote },
+      card: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', labelKey: 'orders.card', icon: CreditCard },
+      mobile: { style: 'bg-purple-500/20 text-purple-300 border-purple-500/30', labelKey: 'orders.digital', icon: Smartphone },
     };
-    const info = map[method] || { style: 'bg-gray-800 text-gray-300 border-gray-700', label: method, icon: DollarSign };
+    const info = map[method] || { style: 'bg-gray-800 text-gray-300 border-gray-700', labelKey: method, icon: DollarSign };
     const Icon = info.icon;
 
     return (
       <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-semibold rounded-full border ${info.style}`}>
         <Icon className="w-3 h-3" />
-        <span className="capitalize">{info.label}</span>
+        <span>{t(info.labelKey, { defaultValue: method })}</span>
       </span>
     );
   };
 
-  // Filter Logic
   const filteredOrders = useMemo(() => {
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -112,7 +109,6 @@ export const OrderHistoryPage: React.FC = () => {
     const thirtyDaysAgo = now.getTime() - 30 * 24 * 60 * 60 * 1000;
 
     return orders.filter((order) => {
-      // Search Filter
       const orderIdStr = `#${order.id}`;
       const tableStr = order.table_number ? `table ${order.table_number}` : '';
       const staffStr = order.staff_name || `staff ${order.staff}`;
@@ -131,11 +127,9 @@ export const OrderHistoryPage: React.FC = () => {
         methodStr.toLowerCase().includes(searchQuery.toLowerCase()) ||
         processedByStr.toLowerCase().includes(searchQuery.toLowerCase());
 
-      // Order Type Filter
       const matchesType =
         orderTypeFilter === 'all' || order.order_type === orderTypeFilter;
 
-      // Date Filter
       const orderTime = new Date(order.created_at).getTime();
       let matchesDate = true;
 
@@ -151,7 +145,6 @@ export const OrderHistoryPage: React.FC = () => {
     });
   }, [orders, paymentsMap, searchQuery, dateFilter, orderTypeFilter]);
 
-  // Statistics Calculations
   const totalRevenue = useMemo(() => {
     return filteredOrders.reduce((sum, order) => sum + Number(order.total_price), 0);
   }, [filteredOrders]);
@@ -168,9 +161,9 @@ export const OrderHistoryPage: React.FC = () => {
             <History className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Order History</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('nav.orderHistory')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Read-only historical ledger of all completed and paid customer orders.
+              {t('orders.historyDesc')}
             </p>
           </div>
         </div>
@@ -180,32 +173,32 @@ export const OrderHistoryPage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Refresh History</span>
+          <span>{t('orders.refreshHistory')}</span>
         </button>
       </div>
 
       {/* Summary Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <StatCard
-          title="Total Settled Revenue"
+          title={t('orders.totalSettledRevenue')}
           value={`$${totalRevenue.toFixed(2)}`}
-          subtitle="Sum of paid transactions"
+          subtitle={t('orders.sumPaidTx')}
           icon={DollarSign}
           iconColor="text-emerald-400"
         />
 
         <StatCard
-          title="Paid Transactions"
+          title={t('orders.paidTransactions')}
           value={isLoading ? '...' : totalCount}
-          subtitle="Completed order records"
+          subtitle={t('orders.completedRecords')}
           icon={Receipt}
           iconColor="text-purple-400"
         />
 
         <StatCard
-          title="Average Order Value"
+          title={t('orders.avgOrderValue')}
           value={`$${avgOrderValue.toFixed(2)}`}
-          subtitle="Revenue per paid order"
+          subtitle={t('orders.revPerPaidOrder')}
           icon={TrendingUp}
           iconColor="text-indigo-400"
         />
@@ -220,7 +213,7 @@ export const OrderHistoryPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search Order #, table, staff, dish, or payment method..."
+            placeholder={t('common.search')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
           />
         </div>
@@ -235,10 +228,10 @@ export const OrderHistoryPage: React.FC = () => {
               onChange={(e) => setDateFilter(e.target.value as DateFilterOption)}
               className="pl-8 pr-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900"
             >
-              <option value="all" className="bg-gray-900">All Time</option>
-              <option value="today" className="bg-gray-900">Today Only</option>
-              <option value="7days" className="bg-gray-900">Last 7 Days</option>
-              <option value="30days" className="bg-gray-900">Last 30 Days</option>
+              <option value="all" className="bg-gray-900">{t('orders.allTime')}</option>
+              <option value="today" className="bg-gray-900">{t('orders.todayOnly')}</option>
+              <option value="7days" className="bg-gray-900">{t('orders.last7Days')}</option>
+              <option value="30days" className="bg-gray-900">{t('orders.last30Days')}</option>
             </select>
           </div>
 
@@ -250,10 +243,10 @@ export const OrderHistoryPage: React.FC = () => {
               onChange={(e) => setOrderTypeFilter(e.target.value)}
               className="pl-8 pr-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900"
             >
-              <option value="all" className="bg-gray-900">All Order Types</option>
-              <option value="dine_in" className="bg-gray-900">Dine In</option>
-              <option value="takeout" className="bg-gray-900">Takeout</option>
-              <option value="delivery" className="bg-gray-900">Delivery</option>
+              <option value="all" className="bg-gray-900">{t('common.all')}</option>
+              <option value="dine_in" className="bg-gray-900">{t('orders.dineIn')}</option>
+              <option value="takeout" className="bg-gray-900">{t('orders.takeout')}</option>
+              <option value="delivery" className="bg-gray-900">{t('orders.delivery')}</option>
             </select>
           </div>
         </div>
@@ -261,15 +254,15 @@ export const OrderHistoryPage: React.FC = () => {
 
       {/* Dense Scannable Table */}
       {isLoading ? (
-        <LoadingSpinner text="Loading paid order records & payment details..." />
+        <LoadingSpinner text={t('orders.loadingHistory')} />
       ) : filteredOrders.length === 0 ? (
         <div className="glass-card p-12 rounded-3xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <History className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No paid orders match filter</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('orders.noPaidOrdersMatch')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
             {orders.length === 0
-              ? 'No orders have been marked as paid yet.'
-              : 'Try adjusting your search query or date range filters.'}
+              ? t('orders.noOrdersMarkedPaid')
+              : t('orders.adjustSearch')}
           </p>
         </div>
       ) : (
@@ -278,13 +271,13 @@ export const OrderHistoryPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-gray-900/90 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Order Ref & Type</th>
-                  <th className="py-4 px-6">Date & Time Placed</th>
-                  <th className="py-4 px-6">Ordered Items Summary</th>
-                  <th className="py-4 px-6">Payment Method</th>
-                  <th className="py-4 px-6">Staff / Cashier</th>
-                  <th className="py-4 px-6">Total Settled</th>
-                  <th className="py-4 px-6">Status</th>
+                  <th className="py-4 px-6">{t('orders.orderRefAndType')}</th>
+                  <th className="py-4 px-6">{t('orders.datePlaced')}</th>
+                  <th className="py-4 px-6">{t('orders.itemsSummary')}</th>
+                  <th className="py-4 px-6">{t('orders.paymentMethod')}</th>
+                  <th className="py-4 px-6">{t('orders.staffCashier')}</th>
+                  <th className="py-4 px-6">{t('orders.totalSettled')}</th>
+                  <th className="py-4 px-6">{t('common.status')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -299,15 +292,15 @@ export const OrderHistoryPage: React.FC = () => {
                         {/* Order ID & Type */}
                         <td className="py-4 px-6 font-semibold text-white">
                           <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-extrabold">Order #{order.id}</span>
+                            <span className="font-mono text-sm font-extrabold">{t('orders.orderId')}{order.id}</span>
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold capitalize bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                              {order.order_type.replace('_', ' ')}
+                              {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, { defaultValue: order.order_type.replace('_', ' ') })}
                             </span>
                           </div>
                           {order.table_number && (
                             <p className="text-xs text-amber-400 font-bold flex items-center gap-1 mt-1">
                               <MapPin className="w-3 h-3" />
-                              Table {order.table_number}
+                              {t('dashboard.table')} {order.table_number}
                             </p>
                           )}
                         </td>
@@ -351,12 +344,11 @@ export const OrderHistoryPage: React.FC = () => {
                               )}
                             </div>
 
-                            {/* Show notes if present */}
                             {order.items.some((i) => i.note) && (
                               <div className="flex items-center gap-1 text-[11px] text-amber-300 italic mt-1">
                                 <FileText className="w-3 h-3 text-amber-400 shrink-0" />
                                 <span className="truncate">
-                                  Notes:{' '}
+                                  {t('common.notes')}:{' '}
                                   {order.items
                                     .filter((i) => i.note)
                                     .map((i) => `"${i.note}"`)
@@ -388,7 +380,7 @@ export const OrderHistoryPage: React.FC = () => {
                         <td className="py-4 px-6 text-gray-400">
                           <div className="flex items-center gap-1.5">
                             <User className="w-3.5 h-3.5 text-gray-500" />
-                            <span>{order.staff_name || `Staff #${order.staff}`}</span>
+                            <span>{order.staff_name || `#${order.staff}`}</span>
                           </div>
                         </td>
 
@@ -401,7 +393,7 @@ export const OrderHistoryPage: React.FC = () => {
                         <td className="py-4 px-6">
                           <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40">
                             <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
-                            Paid
+                            {t('orders.paid')}
                           </span>
                         </td>
                       </tr>
@@ -413,11 +405,11 @@ export const OrderHistoryPage: React.FC = () => {
                             <div className="p-3 rounded-xl glass-card border border-gray-800 space-y-2">
                               <div className="flex items-center justify-between">
                                 <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-                                  Full Order Item Breakdown:
+                                  {t('orders.itemsSummary')}
                                 </p>
                                 {payment?.processed_by && (
                                   <p className="text-[11px] text-indigo-300 font-medium">
-                                    Payment Processed By: <strong className="text-white">{payment.processed_by}</strong> ({payment.method})
+                                    Processed By: <strong className="text-white">{payment.processed_by}</strong> ({payment.method})
                                   </p>
                                 )}
                               </div>

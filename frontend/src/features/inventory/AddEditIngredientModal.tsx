@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type { CreateIngredientPayload, Ingredient } from '../../types';
 import { createIngredientApi, updateIngredientApi } from '../../api/inventory';
@@ -19,6 +20,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
   onSuccess,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const isEditing = Boolean(ingredientToEdit);
 
   const [formData, setFormData] = useState<CreateIngredientPayload>({
@@ -65,10 +67,10 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
     try {
       if (isEditing && ingredientToEdit) {
         await updateIngredientApi(ingredientToEdit.id, formData);
-        showToast(`Ingredient "${formData.name}" updated successfully.`, 'success');
+        showToast(t('inventory.ingredientUpdatedToast', { name: formData.name }), 'success');
       } else {
         await createIngredientApi(formData);
-        showToast(`Ingredient "${formData.name}" created successfully.`, 'success');
+        showToast(t('inventory.ingredientCreatedToast', { name: formData.name }), 'success');
       }
       onSuccess();
       onClose();
@@ -80,10 +82,10 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
           const firstErrVal = resp.data[firstErrKey];
           setError(`${firstErrKey}: ${Array.isArray(firstErrVal) ? firstErrVal.join(' ') : firstErrVal}`);
         } else {
-          setError('Failed to save ingredient.');
+          setError(t('common.error'));
         }
       } else {
-        setError('Network error. Please check backend.');
+        setError(t('auth.networkError'));
       }
     } finally {
       setIsSubmitting(false);
@@ -94,7 +96,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={isEditing ? `Edit Ingredient: ${ingredientToEdit?.name}` : 'Add New Ingredient'}
+      title={isEditing ? t('inventory.editTitle', { name: ingredientToEdit?.name }) : t('inventory.addTitle')}
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -107,7 +109,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
 
         <div>
           <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-            Ingredient Name *
+            {t('inventory.ingredientNameLabel')}
           </label>
           <div className="relative">
             <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -117,7 +119,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
               required
               value={formData.name}
               onChange={handleChange}
-              placeholder="e.g. Extra Virgin Olive Oil"
+              placeholder={t('inventory.ingredientNamePlaceholder')}
               className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
             />
           </div>
@@ -126,7 +128,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
         <div className="grid grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Unit of Measure *
+              {t('inventory.unitOfMeasureLabel')}
             </label>
             <div className="relative">
               <Scale className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -147,7 +149,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Reorder Threshold *
+              {t('inventory.reorderThresholdLabel')}
             </label>
             <input
               type="number"
@@ -163,7 +165,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Cost Per Unit ($) *
+              {t('inventory.costPerUnitLabel')}
             </label>
             <div className="relative">
               <DollarSign className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -182,7 +184,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
         </div>
 
         <p className="text-[11px] text-gray-500 italic bg-gray-900/50 p-3 rounded-xl border border-gray-800">
-          Note: Quantity on hand is omitted from creation/edit forms for audit compliance. Use the Restock action to update stock quantities.
+          {t('inventory.auditNote')}
         </p>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
@@ -191,7 +193,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             type="submit"
@@ -199,7 +201,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
             className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
           >
             <PackagePlus className="w-4 h-4" />
-            <span>{isSubmitting ? 'Saving...' : isEditing ? 'Save Changes' : 'Create Ingredient'}</span>
+            <span>{isSubmitting ? t('common.saving') : isEditing ? t('inventory.saveChanges') : t('inventory.createIngredient')}</span>
           </button>
         </div>
       </form>

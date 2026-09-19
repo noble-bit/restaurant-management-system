@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderStatus } from '../../types';
 import { getOrdersApi } from '../../api/orders';
 import { OrderCard } from './OrderCard';
@@ -8,26 +9,25 @@ import { Utensils, RefreshCw, BellRing } from 'lucide-react';
 
 export const ReadyToServePage: React.FC = () => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const [orders, setOrders] = useState<CreatedOrderResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchReadyOrders = useCallback(async (isSilent = false) => {
     if (!isSilent) setIsLoading(true);
     try {
-      // Backend status query: ?status=ready
       const data = await getOrdersApi('ready');
       setOrders(data);
     } catch (err: unknown) {
       console.error('Failed to fetch ready orders:', err);
       if (!isSilent) {
-        showToast('Failed to load ready to serve queue.', 'error');
+        showToast(t('common.error'), 'error');
       }
     } finally {
       if (!isSilent) setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
-  // Initial load + 9-second polling interval with cleanup on unmount
   useEffect(() => {
     fetchReadyOrders(false);
 
@@ -38,9 +38,8 @@ export const ReadyToServePage: React.FC = () => {
     return () => clearInterval(intervalId);
   }, [fetchReadyOrders]);
 
-  // Remove order from list when status changes
-  const handleStatusUpdated = (orderId: number, newStatus: OrderStatus) => {
-    showToast(`Order #${orderId} marked as "${newStatus.replace('_', ' ')}".`, 'success');
+  const handleStatusUpdated = (orderId: number, _newStatus: OrderStatus) => {
+    showToast(t('orders.orderSuccess', { id: orderId }), 'success');
     setOrders((prev) => prev.filter((o) => o.id !== orderId));
   };
 
@@ -53,9 +52,9 @@ export const ReadyToServePage: React.FC = () => {
             <BellRing className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Ready to Serve Queue</h1>
+            <h1 className="text-2xl font-bold text-white tracking-tight">{t('nav.readyToServe')}</h1>
             <p className="text-xs text-gray-400 mt-0.5">
-              Dishes completed by kitchen staff awaiting waiter service. Auto-refreshes every 9 seconds.
+              {t('orders.readyQueueDesc')}
             </p>
           </div>
         </div>
@@ -65,19 +64,19 @@ export const ReadyToServePage: React.FC = () => {
           className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
         >
           <RefreshCw className="w-4 h-4" />
-          <span>Refresh Queue</span>
+          <span>{t('orders.refreshQueue')}</span>
         </button>
       </div>
 
       {/* Orders Grid */}
       {isLoading ? (
-        <LoadingSpinner text="Fetching ready to serve orders..." />
+        <LoadingSpinner text={t('orders.fetchingReady')} />
       ) : orders.length === 0 ? (
         <div className="glass-card p-12 rounded-3xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <Utensils className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No orders ready to serve</h3>
+          <h3 className="text-base font-bold text-gray-300">{t('orders.noReadyOrders')}</h3>
           <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            When kitchen staff mark dishes as ready, they will appear here for waitstaff.
+            {t('orders.kitchenWillAppear')}
           </p>
         </div>
       ) : (

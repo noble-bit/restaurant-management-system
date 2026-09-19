@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderStatus, PaymentMethod, UserRole } from '../../types';
 import { processPaymentApi, updateOrderStatusApi } from '../../api/orders';
 import { useAuth } from '../../context/AuthContext';
@@ -23,6 +24,7 @@ interface OrderCardProps {
 
 export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const role: UserRole = user?.role || 'waiter';
   const isOwnerOrManager = role === 'owner' || role === 'manager';
 
@@ -33,18 +35,18 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
 
   // Status Badge Colors & Info
   const getStatusBadge = (st: OrderStatus | string) => {
-    const map: Record<string, { style: string; label: string }> = {
-      pending: { style: 'bg-amber-500/20 text-amber-300 border-amber-500/30', label: 'Pending' },
-      preparing: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', label: 'Preparing' },
-      ready: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', label: 'Ready to Serve' },
-      served: { style: 'bg-blue-500/20 text-blue-300 border-blue-500/30', label: 'Served' },
-      paid: { style: 'bg-purple-500/20 text-purple-300 border-purple-500/30', label: 'Paid' },
-      cancelled: { style: 'bg-rose-500/20 text-rose-300 border-rose-500/30', label: 'Cancelled' },
+    const map: Record<string, { style: string; labelKey: string }> = {
+      pending: { style: 'bg-amber-500/20 text-amber-300 border-amber-500/30', labelKey: 'orders.statusPending' },
+      preparing: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', labelKey: 'orders.statusPreparing' },
+      ready: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', labelKey: 'orders.statusReady' },
+      served: { style: 'bg-blue-500/20 text-blue-300 border-blue-500/30', labelKey: 'orders.statusServed' },
+      paid: { style: 'bg-purple-500/20 text-purple-300 border-purple-500/30', labelKey: 'orders.paid' },
+      cancelled: { style: 'bg-rose-500/20 text-rose-300 border-rose-500/30', labelKey: 'orders.statusCancelled' },
     };
-    const info = map[st] || { style: 'bg-gray-800 text-gray-300 border-gray-700', label: st };
+    const info = map[st] || { style: 'bg-gray-800 text-gray-300 border-gray-700', labelKey: st };
     return (
       <span className={`px-2.5 py-1 text-xs font-bold rounded-full border capitalize ${info.style}`}>
-        {info.label}
+        {t(info.labelKey, { defaultValue: st })}
       </span>
     );
   };
@@ -116,15 +118,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
     }
   };
 
-  // Role Permissions Matrix for Primary Action
   const canStartPreparing = order.status === 'pending' && (role === 'chef' || isOwnerOrManager);
   const canMarkReady = order.status === 'preparing' && (role === 'chef' || isOwnerOrManager);
   const canMarkServed = order.status === 'ready' && (role === 'waiter' || isOwnerOrManager);
   const canMarkPaid = order.status === 'served' && (role === 'cashier' || isOwnerOrManager);
 
-  // Role Permissions Matrix for Cancel Action
-  // pending -> cancelled: waiter, manager, owner
-  // preparing -> cancelled: manager, owner ONLY
   const canCancelPending = order.status === 'pending' && (role === 'waiter' || isOwnerOrManager);
   const canCancelPreparing = order.status === 'preparing' && isOwnerOrManager;
   const canCancel = canCancelPending || canCancelPreparing;
@@ -136,17 +134,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
         <div className="flex items-start justify-between gap-3 pb-4 border-b border-gray-800/80">
           <div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-base font-extrabold text-white">Order #{order.id}</span>
+              <span className="font-mono text-base font-extrabold text-white">{t('orders.orderId')}{order.id}</span>
               {getStatusBadge(order.status)}
             </div>
             <div className="flex items-center gap-3 text-xs text-gray-400 mt-1.5">
               <span className="capitalize font-semibold text-indigo-400">
-                {order.order_type.replace('_', ' ')}
+                {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, { defaultValue: order.order_type.replace('_', ' ') })}
               </span>
               {order.table_number && (
                 <span className="flex items-center gap-1 text-amber-400 font-bold">
                   <MapPin className="w-3 h-3" />
-                  Table {order.table_number}
+                  {t('dashboard.table')} {order.table_number}
                 </span>
               )}
               <span className="flex items-center gap-1 text-gray-500">
@@ -160,7 +158,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           </div>
 
           <div className="text-right">
-            <span className="text-[10px] text-gray-500 block uppercase font-semibold">Total Price</span>
+            <span className="text-[10px] text-gray-500 block uppercase font-semibold">{t('common.total')}</span>
             <span className="font-mono font-extrabold text-emerald-400 text-lg">
               ${Number(order.total_price).toFixed(2)}
             </span>
@@ -178,7 +176,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
         {/* Order Items List */}
         <div className="py-4 space-y-3">
           <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-            Order Items ({order.items.length})
+            {t('dashboard.items')} ({order.items.length})
           </p>
 
           <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
@@ -206,12 +204,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     </span>
                   </div>
 
-                  {/* PROMINENT LINE NOTE CALLOUT */}
                   {item.note && (
                     <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2 font-medium">
                       <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
                       <span>
-                        Note: <strong className="text-amber-100">{item.note}</strong>
+                        {t('common.notes')}: <strong className="text-amber-100">{item.note}</strong>
                       </span>
                     </div>
                   )}
@@ -222,18 +219,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
         </div>
       </div>
 
-      {/* Card Footer: Staff Info & Transition Action Buttons */}
+      {/* Card Footer */}
       <div className="pt-4 border-t border-gray-800/80 space-y-3">
         <div className="flex items-center justify-between text-xs text-gray-400">
           <span className="flex items-center gap-1">
             <User className="w-3.5 h-3.5 text-gray-500" />
-            <span>Staff: {order.staff_name || `ID #${order.staff}`}</span>
+            <span>{t('staff.role')}: {order.staff_name || `#${order.staff}`}</span>
           </span>
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center gap-2">
-          {/* Primary Transition Actions */}
           {canStartPreparing && (
             <button
               onClick={() => handleTransition('preparing')}
@@ -245,7 +241,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               ) : (
                 <>
                   <Flame className="w-4 h-4 text-amber-300" />
-                  <span>Start Preparing</span>
+                  <span>{t('orders.startPreparing')}</span>
                 </>
               )}
             </button>
@@ -262,7 +258,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               ) : (
                 <>
                   <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                  <span>Mark Ready</span>
+                  <span>{t('orders.markReady')}</span>
                 </>
               )}
             </button>
@@ -279,7 +275,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               ) : (
                 <>
                   <Utensils className="w-4 h-4 text-blue-200" />
-                  <span>Mark Served</span>
+                  <span>{t('orders.markServed')}</span>
                 </>
               )}
             </button>
@@ -295,7 +291,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               className="flex-1 py-2.5 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
               <CreditCard className="w-4 h-4 text-purple-200" />
-              <span>Mark Paid (${Number(order.total_price).toFixed(2)})</span>
+              <span>{t('orders.markPaidBtn', { amount: Number(order.total_price).toFixed(2) })}</span>
             </button>
           )}
 
@@ -304,7 +300,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-purple-200 flex items-center gap-1">
                   <CreditCard className="w-3.5 h-3.5 text-purple-400" />
-                  Payment Method:
+                  {t('orders.paymentMethod')}:
                 </span>
                 <button
                   type="button"
@@ -313,13 +309,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     setCardError(null);
                   }}
                   className="text-gray-400 hover:text-white p-0.5 rounded transition-colors"
-                  title="Cancel payment"
                 >
                   <XCircle className="w-4 h-4 text-gray-400 hover:text-rose-400" />
                 </button>
               </div>
 
-              {/* Radio / pill buttons for payment method selection */}
               <div className="grid grid-cols-3 gap-1.5">
                 {(['cash', 'card', 'mobile'] as PaymentMethod[]).map((method) => (
                   <button
@@ -332,12 +326,11 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                         : 'bg-gray-800/80 text-gray-400 border-gray-700/80 hover:text-white hover:border-gray-600'
                     }`}
                   >
-                    {method}
+                    {t(`orders.${method === 'mobile' ? 'digital' : method}`, { defaultValue: method })}
                   </button>
                 ))}
               </div>
 
-              {/* Confirm Payment button */}
               <button
                 type="button"
                 onClick={handleConfirmPayment}
@@ -349,18 +342,17 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                 ) : (
                   <>
                     <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                    <span>Confirm Payment (${Number(order.total_price).toFixed(2)})</span>
+                    <span>{t('orders.confirmPaymentBtn', { amount: Number(order.total_price).toFixed(2) })}</span>
                   </>
                 )}
               </button>
             </div>
           )}
 
-          {/* Cancel Action */}
           {canCancel && (
             <button
               onClick={() => {
-                if (window.confirm(`Are you sure you want to cancel Order #${order.id}?`)) {
+                if (window.confirm(t('orders.cancelConfirm', { id: order.id }))) {
                   handleTransition('cancelled');
                 }
               }}
@@ -368,7 +360,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               className="py-2.5 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
             >
               <XCircle className="w-4 h-4 text-rose-400" />
-              <span>Cancel</span>
+              <span>{t('common.cancel')}</span>
             </button>
           )}
         </div>
@@ -376,4 +368,3 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
     </div>
   );
 };
-

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { StaffMember, UserRole } from '../../types';
 import { getStaffListApi, deleteStaffApi } from '../../api/staff';
 import { CreateStaffModal } from './CreateStaffModal';
@@ -23,6 +24,7 @@ import {
 export const StaffListPage: React.FC = () => {
   const { user } = useAuth();
   const { showToast } = useToast();
+  const { t } = useTranslation();
   const isOwnerOrManager = user?.role === 'owner' || user?.role === 'manager';
 
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
@@ -46,11 +48,11 @@ export const StaffListPage: React.FC = () => {
       setStaffList(data);
     } catch (err: unknown) {
       console.error('Error fetching staff list:', err);
-      showToast('Failed to load staff list. Check permissions or backend connection.', 'error');
+      showToast(t('common.error'), 'error');
     } finally {
       setIsLoading(false);
     }
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     fetchStaff();
@@ -72,14 +74,14 @@ export const StaffListPage: React.FC = () => {
       ? `${staff.first_name} ${staff.last_name}`.trim()
       : staff.username;
 
-    if (!window.confirm(`Deactivate ${staffName}? They will no longer be able to log in.`)) {
+    if (!window.confirm(t('staff.deactivateStaffConfirm', { name: staffName }))) {
       return;
     }
 
     setDeletingId(staff.id);
     try {
       await deleteStaffApi(staff.id);
-      showToast(`Staff member "${staffName}" deactivated.`, 'info');
+      showToast(t('staff.deactivatedToast', { name: staffName }), 'info');
       setStaffList((prev) =>
         prev.map((s) => (s.id === staff.id ? { ...s, is_active: false } : s))
       );
@@ -88,20 +90,16 @@ export const StaffListPage: React.FC = () => {
       if (err && typeof err === 'object' && 'response' in err) {
         const resp = (err as { response?: { status?: number; data?: { detail?: string } } }).response;
         if (resp?.status === 403) {
-          const msg = 'Permission denied. Only managers and owners can deactivate staff.';
-          setDeleteError(msg);
-          showToast(msg, 'error');
-        } else if (resp?.status === 404) {
-          const msg = 'Staff member not found or already deactivated.';
+          const msg = t('common.error');
           setDeleteError(msg);
           showToast(msg, 'error');
         } else {
-          const detail = resp?.data?.detail || 'Failed to deactivate staff member. Please try again.';
+          const detail = resp?.data?.detail || t('staff.deactivateFailedToast');
           setDeleteError(detail);
           showToast(detail, 'error');
         }
       } else {
-        const msg = 'Network error. Failed to deactivate staff member.';
+        const msg = t('auth.networkError');
         setDeleteError(msg);
         showToast(msg, 'error');
       }
@@ -134,7 +132,7 @@ export const StaffListPage: React.FC = () => {
           map[role] || 'bg-gray-800 text-gray-300 border-gray-700'
         }`}
       >
-        {role}
+        {t(`roles.${role}`, { defaultValue: role })}
       </span>
     );
   };
@@ -149,9 +147,9 @@ export const StaffListPage: React.FC = () => {
               <Users className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Staff Management</h1>
+              <h1 className="text-2xl font-bold text-white tracking-tight">{t('staff.title')}</h1>
               <p className="text-xs text-gray-400 mt-0.5">
-                Register new restaurant staff, monitor roles, and manage system accounts.
+                {t('staff.subtitle')}
               </p>
             </div>
           </div>
@@ -163,7 +161,7 @@ export const StaffListPage: React.FC = () => {
             className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
           >
             <UserPlus className="w-5 h-5" />
-            <span>Add New Staff Member</span>
+            <span>{t('staff.addNewStaff')}</span>
           </button>
         )}
       </div>
@@ -192,7 +190,7 @@ export const StaffListPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search staff by name or email..."
+            placeholder={t('common.search')}
             className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
           />
         </div>
@@ -206,22 +204,22 @@ export const StaffListPage: React.FC = () => {
               onChange={(e) => setShowInactive(e.target.checked)}
               className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900 accent-indigo-600 cursor-pointer"
             />
-            <span>Show Inactive Staff</span>
+            <span>{t('staff.showInactive')}</span>
           </label>
 
           <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Role:</span>
+            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('staff.role')}:</span>
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
               className="px-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900 capitalize"
             >
-              <option value="all" className="bg-gray-900">All Roles</option>
-              <option value="owner" className="bg-gray-900">Owner</option>
-              <option value="manager" className="bg-gray-900">Manager</option>
-              <option value="chef" className="bg-gray-900">Chef</option>
-              <option value="waiter" className="bg-gray-900">Waiter</option>
-              <option value="cashier" className="bg-gray-900">Cashier</option>
+              <option value="all" className="bg-gray-900">{t('common.all')}</option>
+              <option value="owner" className="bg-gray-900">{t('roles.owner')}</option>
+              <option value="manager" className="bg-gray-900">{t('roles.manager')}</option>
+              <option value="chef" className="bg-gray-900">{t('roles.chef')}</option>
+              <option value="waiter" className="bg-gray-900">{t('roles.waiter')}</option>
+              <option value="cashier" className="bg-gray-900">{t('roles.cashier')}</option>
             </select>
           </div>
         </div>
@@ -229,16 +227,11 @@ export const StaffListPage: React.FC = () => {
 
       {/* Staff Table */}
       {isLoading ? (
-        <LoadingSpinner text="Loading staff records..." />
+        <LoadingSpinner text={t('common.loading')} />
       ) : filteredStaff.length === 0 ? (
         <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
           <Users className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">No staff members found</h3>
-          <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            {showInactive
-              ? 'No staff members match your search or filter parameters.'
-              : 'No active staff match your search or filter parameters.'}
-          </p>
+          <h3 className="text-base font-bold text-gray-300">{t('staff.noStaff')}</h3>
         </div>
       ) : (
         <div className="glass-panel rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
@@ -246,12 +239,12 @@ export const StaffListPage: React.FC = () => {
             <table className="w-full text-left text-xs">
               <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
                 <tr>
-                  <th className="py-4 px-6">Staff Member</th>
-                  <th className="py-4 px-6">Role</th>
-                  <th className="py-4 px-6">Contact Info</th>
-                  <th className="py-4 px-6">Hire Date</th>
-                  <th className="py-4 px-6">Security Status</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">Actions</th>}
+                  <th className="py-4 px-6">{t('common.name')}</th>
+                  <th className="py-4 px-6">{t('staff.role')}</th>
+                  <th className="py-4 px-6">{t('staff.contactInfo')}</th>
+                  <th className="py-4 px-6">{t('staff.hireDate')}</th>
+                  <th className="py-4 px-6">{t('staff.securityStatus')}</th>
+                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
@@ -313,16 +306,16 @@ export const StaffListPage: React.FC = () => {
                         {isInactive ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-gray-800/80 text-gray-400 border border-gray-700">
                             <XCircle className="w-3.5 h-3.5 text-gray-500" />
-                            Inactive
+                            {t('staff.statusInactive')}
                           </span>
                         ) : staff.must_change_password ? (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
                             <ShieldAlert className="w-3.5 h-3.5" />
-                            Pending Password Change
+                            {t('staff.pendingPasswordChange')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            Active & Verified
+                            {t('staff.activeAndVerified')}
                           </span>
                         )}
                       </td>
@@ -333,7 +326,7 @@ export const StaffListPage: React.FC = () => {
                               onClick={() => handleDeleteStaff(staff)}
                               disabled={deletingId === staff.id}
                               className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20 disabled:opacity-50"
-                              title="Deactivate Staff Member"
+                              title={t('common.delete')}
                             >
                               {deletingId === staff.id ? (
                                 <Loader2 className="w-4 h-4 animate-spin text-rose-400" />
@@ -343,7 +336,7 @@ export const StaffListPage: React.FC = () => {
                             </button>
                           ) : (
                             <span className="text-[11px] text-gray-500 italic pr-2">
-                              Inactive
+                              {t('staff.statusInactive')}
                             </span>
                           )}
                         </td>

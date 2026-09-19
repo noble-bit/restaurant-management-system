@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import { Key, Copy, Check, AlertTriangle } from 'lucide-react';
 
@@ -15,6 +16,7 @@ export const TempPasswordModal: React.FC<TempPasswordModalProps> = ({
   staffName,
   tempPassword,
 }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
@@ -24,19 +26,19 @@ export const TempPasswordModal: React.FC<TempPasswordModalProps> = ({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Temporary Staff Password Generated" maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('staff.tempPasswordTitle')} maxWidth="md">
       <div className="space-y-6 py-2">
         <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
           <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
           <p className="text-xs text-amber-200 leading-relaxed font-medium">
-            Share this temporary password with <strong className="text-white">{staffName}</strong>. For security reasons, this password will <strong className="underline text-amber-300">not be shown again</strong>.
+            {t('staff.shareTempPasswordMsg', { name: staffName })}
           </p>
         </div>
 
         <div className="p-5 glass-card rounded-2xl border border-indigo-500/30 flex flex-col items-center justify-center gap-3 relative">
           <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
             <Key className="w-4 h-4 text-indigo-400" />
-            <span>One-Time Passcode</span>
+            <span>{t('staff.oneTimePasscode')}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -50,12 +52,12 @@ export const TempPasswordModal: React.FC<TempPasswordModalProps> = ({
               {copied ? (
                 <>
                   <Check className="w-4 h-4 text-emerald-300" />
-                  <span>Copied!</span>
+                  <span>{t('staff.copied')}</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-4 h-4" />
-                  <span>Copy</span>
+                  <span>{t('staff.copyPassword')}</span>
                 </>
               )}
             </button>
@@ -67,7 +69,7 @@ export const TempPasswordModal: React.FC<TempPasswordModalProps> = ({
             onClick={onClose}
             className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-600/30"
           >
-            I have secured this password
+            {t('staff.securedPasswordBtn')}
           </button>
         </div>
       </div>

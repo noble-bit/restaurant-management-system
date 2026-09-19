@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type {
   Ingredient,
@@ -46,6 +47,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
   isOwnerOrManager,
 }) => {
   const { showToast } = useToast();
+  const { t } = useTranslation();
 
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [allIngredients, setAllIngredients] = useState<Ingredient[]>([]);
@@ -179,7 +181,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Edit Menu Item: ${menuItem.name}`}
+      title={`${t('menu.editMenuItem')}: ${menuItem.name}`}
       maxWidth="xl"
     >
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -188,21 +190,18 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           <div className="flex items-center gap-3">
             <UtensilsCrossed className="w-5 h-5 text-indigo-400" />
             <div>
-              <p className="text-xs text-gray-400">Stock Availability Status</p>
-              <p className="text-xs font-semibold text-white mt-0.5">
-                Calculated based on required recipe ingredient stock
-              </p>
+              <p className="text-xs text-gray-400">{t('menu.stockAvailabilityCol')}</p>
             </div>
           </div>
           {menuItem.is_available ? (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-              AVAILABLE
+              {t('menu.available')}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
               <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
-              UNAVAILABLE
+              {t('menu.unavailable')}
             </span>
           )}
         </div>
@@ -217,12 +216,12 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
         {/* Section 1: Item Basic Details */}
         <div className="space-y-4">
           <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">
-            Item Attributes
+            {t('menu.menuItemCol')}
           </h4>
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Item Name *
+              {t('common.name')} *
             </label>
             <div className="relative">
               <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -252,7 +251,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                Category *
+                {t('menu.categoryCol')} *
               </label>
               <div className="relative">
                 <FolderTree className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -286,7 +285,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
 
             <div>
               <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                Price ($) *
+                {t('menu.priceCol')} ($) *
               </label>
               <div className="relative">
                 <DollarSign className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -318,7 +317,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
 
           <div>
             <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Description
+              {t('common.description')}
             </label>
             <div className="relative">
               <FileText className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
@@ -339,7 +338,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           <div className="flex items-center justify-between border-b border-gray-800 pb-2">
             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
               <Scale className="w-4 h-4 text-indigo-400" />
-              <span>Recipe Ingredients * (Required)</span>
+              <span>{t('menu.recipeCol')} *</span>
             </h4>
 
             {isOwnerOrManager && (
@@ -350,7 +349,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                 className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
               >
                 <Plus className="w-3.5 h-3.5" />
-                <span>Add Another Ingredient</span>
+                <span>{t('menu.addIngredientToRecipe')}</span>
               </button>
             )}
           </div>
@@ -374,7 +373,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                 >
                   <div className="flex-1">
                     <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      Ingredient #{idx + 1}
+                      {t('inventory.ingredientCol')} #{idx + 1}
                     </label>
                     <select
                       value={row.ingredient_id}
@@ -394,7 +393,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
 
                   <div className="w-36">
                     <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      Qty ({unit || 'unit'})
+                      {t('common.quantity')} ({unit || 'unit'})
                     </label>
                     <input
                       type="number"
@@ -416,7 +415,6 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                       onClick={() => handleRemoveIngredientRow(idx)}
                       disabled={ingredientRows.length <= 1}
                       className="p-2 text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors mt-4 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
-                      title="Remove ingredient row"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -433,7 +431,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
             onClick={onClose}
             className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
           >
-            {isOwnerOrManager ? 'Cancel' : 'Close'}
+            {isOwnerOrManager ? t('common.cancel') : t('common.close')}
           </button>
           {isOwnerOrManager && (
             <button
@@ -442,7 +440,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
               className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
             >
               <UtensilsCrossed className="w-4 h-4" />
-              <span>{isSubmitting ? 'Saving...' : 'Save Changes'}</span>
+              <span>{isSubmitting ? t('common.saving') : t('common.save')}</span>
             </button>
           )}
         </div>

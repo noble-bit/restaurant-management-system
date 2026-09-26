@@ -364,6 +364,7 @@
     "createdToast": "ሠራተኛ \"{{name}}\" በተሳካ ሁኔታ ተፈጥሯል!",
     "securedPasswordBtn": "ይህንን የይለፍ ቃል ደህንነቱ በተጠበቀ ቦታ አስቀምጫለሁ",
     "oneTimePasscode": "የአንድ ጊዜ የይለፍ ቃል",
-    "shareTempPasswordMsg": "ይህንን ጊዜያዊ የይለፍ ቃል ለ{{name}} ይስጡት። ለደህንነት ሲባል ይህ የይለፍ ቃል እንደገና አይታይም።"
+    "shareTempPasswordMsg": "ይህንን ጊዜያዊ የይለፍ ቃል ለ{{name}} ይስጡት። ለደህንነት ሲባል ይህ የይለፍ ቃል እንደገና አይታይም።",
+    "cannotDeleteSelf": "የራስዎን መለያ ማጥፋት አይችሉም።"
   }
 }

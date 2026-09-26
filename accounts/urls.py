@@ -1,6 +1,7 @@
 from django.urls import path, include
 from .views import UserViewSet
 from .views import StaffListCreateView
+from .views import StaffDeleteView
 
 
 app_name = "accounts"
@@ -20,4 +21,5 @@ urlpatterns = [
 
     # --- Login/refresh/verify (safe to include fully — no account creation here) ---
     path("auth/", include("djoser.urls.jwt")),
+    path("staff/<int:pk>/", StaffDeleteView.as_view(), name="staff-delete"),
 ]

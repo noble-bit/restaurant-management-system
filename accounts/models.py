@@ -13,6 +13,7 @@ class Staff(AbstractUser):
     phone_number = models.CharField(max_length=10, blank=True)
     hire_date = models.DateField(null=True, blank=True)
     must_change_password = models.BooleanField(default=True)
+    is_active = models.BooleanField(default=True)
 
     email = models.EmailField(unique=True)
 

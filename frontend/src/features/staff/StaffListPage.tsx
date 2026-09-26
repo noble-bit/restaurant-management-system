@@ -89,14 +89,15 @@ export const StaffListPage: React.FC = () => {
       console.error('Failed to deactivate staff member:', err);
       if (err && typeof err === 'object' && 'response' in err) {
         const resp = (err as { response?: { status?: number; data?: { detail?: string } } }).response;
-        if (resp?.status === 403) {
-          const msg = t('common.error');
+        const detail = resp?.data?.detail;
+        if (resp?.status === 403 || detail) {
+          const msg = detail || t('staff.cannotDeleteSelf', { defaultValue: 'You cannot delete your own account.' });
           setDeleteError(msg);
           showToast(msg, 'error');
         } else {
-          const detail = resp?.data?.detail || t('staff.deactivateFailedToast');
-          setDeleteError(detail);
-          showToast(detail, 'error');
+          const msg = t('staff.deactivateFailedToast');
+          setDeleteError(msg);
+          showToast(msg, 'error');
         }
       } else {
         const msg = t('auth.networkError');
@@ -250,6 +251,7 @@ export const StaffListPage: React.FC = () => {
               <tbody className="divide-y divide-gray-800/60 text-gray-300">
                 {filteredStaff.map((staff) => {
                   const isInactive = staff.is_active === false;
+                  const isSelf = user?.id === staff.id || (user?.email && user.email === staff.email);
                   return (
                     <tr
                       key={staff.id}
@@ -321,7 +323,7 @@ export const StaffListPage: React.FC = () => {
                       </td>
                       {isOwnerOrManager && (
                         <td className="py-4 px-6 text-right">
-                          {!isInactive ? (
+                          {isSelf ? null : !isInactive ? (
                             <button
                               onClick={() => handleDeleteStaff(staff)}
                               disabled={deletingId === staff.id}

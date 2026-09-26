@@ -48,8 +48,8 @@ class SetPasswordSerializer(DjoserSetPasswordSerializer):
         user.save(update_fields=["must_change_password"])
         return user
 
-class UserDeleteSerializer(serializers.ModelSerializer):
+class StaffDeleteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
-        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date"]
-        read_only_fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date"]
+        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "is_active"]
+        read_only_fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "is_active"]

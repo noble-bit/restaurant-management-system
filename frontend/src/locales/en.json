@@ -364,6 +364,7 @@
     "createdToast": "Staff member \"{{name}}\" created successfully!",
     "securedPasswordBtn": "I have secured this password",
     "oneTimePasscode": "One-Time Passcode",
-    "shareTempPasswordMsg": "Share this temporary password with {{name}}. For security reasons, this password will not be shown again."
+    "shareTempPasswordMsg": "Share this temporary password with {{name}}. For security reasons, this password will not be shown again.",
+    "cannotDeleteSelf": "You cannot delete your own account."
   }
 }

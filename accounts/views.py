@@ -1,5 +1,6 @@
 from rest_framework import generics, status
-from .serializers import StaffCreateSerializer
+from rest_framework.exceptions import PermissionDenied
+from .serializers import StaffCreateSerializer, StaffDeleteSerializer
 from .permissions import IsOwnerOrManager
 from .models import Staff
 from djoser.views import UserViewSet as DjoserUserViewSet
@@ -19,4 +20,17 @@ class UserViewSet(DjoserUserViewSet):
             request.user.must_change_password = False
             request.user.save(update_fields=["must_change_password"])
         return response
+
+class StaffDeleteView(generics.DestroyAPIView):
+    queryset = Staff.objects.all()
+    serializer_class = StaffDeleteSerializer
+    permission_classes = [IsOwnerOrManager]  
+
+    def perform_destroy(self, instance):
+        if self.request.user == instance:
+            raise PermissionDenied("You cannot delete your own account.")
+        
+        instance.is_active = False
+        instance.save()
+
 

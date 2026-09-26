@@ -52,6 +52,8 @@ export const IngredientListPage: React.FC = () => {
     } catch (err: unknown) {
       console.error('Failed to fetch ingredients:', err);
       showToast(t('inventory.loadFailedToast'), 'error');
+    } finally {
+      setIsLoading(false);
     }
   }, [showOnlyLowStock, showToast, t]);
 

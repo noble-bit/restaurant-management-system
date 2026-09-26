@@ -20,7 +20,7 @@ class Order(models.Model):
         TAKEOUT = "takeout", "Takeout"
         DELIVERY = "delivery", "Delivery"
 
-    staff = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    staff = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="orders")
     status = models.CharField(max_length=20, choices=StatusChoices.choices, default=StatusChoices.PENDING)
     order_type = models.CharField(max_length=20, choices=OrderType.choices, default=OrderType.DINE_IN)
     table_number = models.CharField(max_length=20, blank=True)

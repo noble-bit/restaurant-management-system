@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
 import type {
@@ -24,6 +24,7 @@ import {
   Scale,
   CheckCircle2,
   AlertTriangle,
+  Upload,
 } from 'lucide-react';
 
 interface EditMenuItemModalProps {
@@ -62,6 +63,9 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
   const [description, setDescription] = useState(menuItem.description || '');
   const [price, setPrice] = useState<number | string>(menuItem.price);
   const [categoryId, setCategoryId] = useState<number>(initialCatId);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(menuItem.avatar || null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const initialRows: IngredientRowState[] = (menuItem.ingredients || []).map((ri) => ({
     ingredient_id: ri.ingredient?.id || ri.ingredient_id || 0,
@@ -96,6 +100,8 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
       setDescription(menuItem.description || '');
       setPrice(menuItem.price);
       setCategoryId(initialCatId);
+      setAvatarFile(null);
+      setAvatarPreview(menuItem.avatar || null);
       const rows: IngredientRowState[] = (menuItem.ingredients || []).map((ri) => ({
         ingredient_id: ri.ingredient?.id || ri.ingredient_id || 0,
         quantity_required: ri.quantity_required,
@@ -104,6 +110,38 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
       setFieldErrors({});
     }
   }, [isOpen, menuItem, initialCatId]);
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        avatar: 'Invalid file type. Please select an image file.',
+      }));
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        avatar: 'Image size exceeds 5MB limit.',
+      }));
+      if (avatarInputRef.current) avatarInputRef.current.value = '';
+      return;
+    }
+
+    setFieldErrors((prev) => {
+      const next = { ...prev };
+      delete next.avatar;
+      return next;
+    });
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
 
   const handleAddIngredientRow = () => {
     const defaultIngId = allIngredients.length > 0 ? allIngredients[0].id : 0;
@@ -160,6 +198,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
       price: Number(price),
       category_id: Number(categoryId),
       ingredients: compiledIngredients,
+      avatar: avatarFile,
     };
 
     setIsSubmitting(true);
@@ -330,6 +369,65 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs disabled:opacity-60"
               />
             </div>
+          </div>
+
+          {/* Menu Item Photo */}
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+              Item Photo (Optional)
+            </label>
+            <div className="flex items-center gap-4 p-3.5 rounded-xl glass-panel border border-gray-800">
+              <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-900 border border-gray-700 flex items-center justify-center text-gray-500 shrink-0">
+                {avatarPreview ? (
+                  <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
+                ) : (
+                  <UtensilsCrossed className="w-6 h-6 text-gray-600" />
+                )}
+              </div>
+
+              <div className="flex-1 space-y-1">
+                {isOwnerOrManager && (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="file"
+                      ref={avatarInputRef}
+                      accept="image/*"
+                      onChange={handleAvatarChange}
+                      className="hidden"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => avatarInputRef.current?.click()}
+                      className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      <span>{avatarFile ? 'Change Photo' : 'Upload New Photo'}</span>
+                    </button>
+
+                    {avatarFile && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAvatarFile(null);
+                          setAvatarPreview(menuItem.avatar || null);
+                          if (avatarInputRef.current) avatarInputRef.current.value = '';
+                        }}
+                        className="px-2.5 py-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+                )}
+                <p className="text-[11px] text-gray-500">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
+              </div>
+            </div>
+            {fieldErrors.avatar && (
+              <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 shrink-0" />
+                <span>{fieldErrors.avatar}</span>
+              </p>
+            )}
           </div>
         </div>
 

@@ -25,6 +25,7 @@ import {
   Banknote,
   Smartphone,
   UserCheck,
+  UtensilsCrossed,
 } from 'lucide-react';
 
 type DateFilterOption = 'all' | 'today' | '7days' | '30days';
@@ -326,8 +327,17 @@ export const OrderHistoryPage: React.FC = () => {
                               {order.items.slice(0, 3).map((item, idx) => (
                                 <span
                                   key={idx}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gray-800 text-gray-200 border border-gray-700 text-[11px]"
+                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-gray-800 text-gray-200 border border-gray-700 text-[11px]"
                                 >
+                                  {item.menu_item_avatar ? (
+                                    <img
+                                      src={item.menu_item_avatar}
+                                      alt={item.menu_item_name || ''}
+                                      className="w-4 h-4 rounded object-cover shrink-0"
+                                    />
+                                  ) : (
+                                    <UtensilsCrossed className="w-3.5 h-3.5 text-gray-500 shrink-0" />
+                                  )}
                                   <strong className="text-indigo-400 font-bold">{item.quantity}×</strong>
                                   <span>{item.menu_item_name || `Dish #${item.menu_item}`}</span>
                                 </span>
@@ -414,21 +424,34 @@ export const OrderHistoryPage: React.FC = () => {
                                 )}
                               </div>
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                                 {order.items.map((item, i) => (
                                   <div
                                     key={i}
                                     className="p-2 rounded-lg bg-gray-900 border border-gray-800 text-xs flex justify-between items-center"
                                   >
-                                    <div>
-                                      <span className="font-bold text-white">
-                                        {item.quantity}× {item.menu_item_name}
-                                      </span>
-                                      {item.note && (
-                                        <p className="text-[11px] text-amber-300 italic mt-0.5">
-                                          "{item.note}"
-                                        </p>
+                                    <div className="flex items-center gap-2">
+                                      {item.menu_item_avatar ? (
+                                        <img
+                                          src={item.menu_item_avatar}
+                                          alt={item.menu_item_name || ''}
+                                          className="w-6 h-6 rounded-md object-cover shrink-0 border border-gray-700/60"
+                                        />
+                                      ) : (
+                                        <div className="w-6 h-6 rounded-md bg-gray-800 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                                          <UtensilsCrossed className="w-3.5 h-3.5" />
+                                        </div>
                                       )}
+                                      <div>
+                                        <span className="font-bold text-white">
+                                          {item.quantity}× {item.menu_item_name}
+                                        </span>
+                                        {item.note && (
+                                          <p className="text-[11px] text-amber-300 italic mt-0.5">
+                                            "{item.note}"
+                                          </p>
+                                        )}
+                                      </div>
                                     </div>
                                     <span className="font-mono text-emerald-400 font-bold ml-2">
                                       ${(Number(item.price_at_order) * item.quantity).toFixed(2)}

@@ -9,6 +9,7 @@ import {
   Flame,
   CheckCircle2,
   Utensils,
+  UtensilsCrossed,
   CreditCard,
   XCircle,
   AlertTriangle,
@@ -190,8 +191,19 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                   className="p-3 rounded-xl glass-panel border border-gray-800/80 space-y-1.5"
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30">
+                    <div className="flex items-center gap-2.5">
+                      {item.menu_item_avatar ? (
+                        <img
+                          src={item.menu_item_avatar}
+                          alt={item.menu_item_name || ''}
+                          className="w-7 h-7 rounded-lg object-cover border border-gray-700/60 shrink-0"
+                        />
+                      ) : (
+                        <div className="w-7 h-7 rounded-lg bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                          <UtensilsCrossed className="w-3.5 h-3.5" />
+                        </div>
+                      )}
+                      <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30 shrink-0">
                         {item.quantity}×
                       </span>
                       <span className="font-semibold text-white text-xs">

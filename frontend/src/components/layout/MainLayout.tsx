@@ -6,6 +6,7 @@ interface MainLayoutProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
   onChangePasswordClick: () => void;
+  onProfileClick: () => void;
   children: React.ReactNode;
 }
 
@@ -13,6 +14,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   currentTab,
   setCurrentTab,
   onChangePasswordClick,
+  onProfileClick,
   children,
 }) => {
   return (
@@ -20,7 +22,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
       <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onChangePasswordClick={onChangePasswordClick} />
+        <Navbar onChangePasswordClick={onChangePasswordClick} onProfileClick={onProfileClick} />
         <main className="flex-1 p-8 overflow-y-auto">{children}</main>
       </div>
     </div>

@@ -14,6 +14,7 @@ class Staff(AbstractUser):
     hire_date = models.DateField(null=True, blank=True)
     must_change_password = models.BooleanField(default=True)
     is_active = models.BooleanField(default=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
     email = models.EmailField(unique=True)
 

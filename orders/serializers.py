@@ -40,6 +40,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
     Read-only ModelSerializer for OrderItem output representation.
     """
     menu_item_name = serializers.CharField(source="menu_item.name", read_only=True)
+    menu_item_avatar = serializers.ImageField(source="menu_item.avatar", read_only=True)
 
     class Meta:
         model = OrderItem
@@ -47,6 +48,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "id",
             "menu_item",
             "menu_item_name",
+            "menu_item_avatar",
             "quantity",
             "price_at_order",
             "note",

@@ -23,3 +23,10 @@ export const setPasswordApi = async (current_password: string, new_password: str
     re_new_password: new_password,
   });
 };
+
+export const updateProfileAvatarApi = async (file: File): Promise<User> => {
+  const formData = new FormData();
+  formData.append('avatar', file);
+  const response = await api.patch<User>('/auth/users/me/', formData);
+  return response.data;
+};

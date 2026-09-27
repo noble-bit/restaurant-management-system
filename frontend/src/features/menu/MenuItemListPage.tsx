@@ -221,13 +221,22 @@ export const MenuItemListPage: React.FC = () => {
                   return (
                     <tr key={item.id} className="hover:bg-gray-800/40 transition-colors">
                       <td className="py-4 px-6">
-                        <div>
-                          <span className="font-semibold text-white text-sm block">{item.name}</span>
-                          {item.description && (
-                            <span className="text-xs text-gray-400 line-clamp-1 mt-0.5">
-                              {item.description}
-                            </span>
-                          )}
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-800 border border-gray-700/80 flex items-center justify-center text-gray-500 shrink-0">
+                            {item.avatar ? (
+                              <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
+                            ) : (
+                              <UtensilsCrossed className="w-5 h-5 text-gray-600" />
+                            )}
+                          </div>
+                          <div>
+                            <span className="font-semibold text-white text-sm block">{item.name}</span>
+                            {item.description && (
+                              <span className="text-xs text-gray-400 line-clamp-1 mt-0.5">
+                                {item.description}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="py-4 px-6">

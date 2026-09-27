@@ -5,9 +5,10 @@ import { useAuth } from '../../context/AuthContext';
 
 interface NavbarProps {
   onChangePasswordClick: () => void;
+  onProfileClick: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onChangePasswordClick }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onChangePasswordClick, onProfileClick }) => {
   const { user, logout } = useAuth();
   const { t, i18n } = useTranslation();
 
@@ -52,9 +53,22 @@ export const Navbar: React.FC<NavbarProps> = ({ onChangePasswordClick }) => {
         </div>
 
         {/* User Info Capsule */}
-        <div className="flex items-center gap-3 bg-gray-800/80 border border-gray-700/80 px-4 py-1.5 rounded-full">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md">
-            <UserIcon className="w-4 h-4" />
+        <button
+          type="button"
+          onClick={onProfileClick}
+          className="flex items-center gap-3 bg-gray-800/80 hover:bg-gray-700/80 border border-gray-700/80 px-4 py-1.5 rounded-full transition-all cursor-pointer group"
+          title="View profile & upload photo"
+        >
+          <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xs shadow-md overflow-hidden shrink-0 group-hover:ring-2 group-hover:ring-indigo-400/50 transition-all">
+            {user?.avatar ? (
+              <img
+                src={user.avatar}
+                alt={user.first_name || user.username}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <UserIcon className="w-4 h-4" />
+            )}
           </div>
           <div className="text-left">
             <p className="text-xs font-semibold text-white leading-tight">
@@ -65,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({ onChangePasswordClick }) => {
               <span>{translatedRole}</span>
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Change Password Button */}
         <button

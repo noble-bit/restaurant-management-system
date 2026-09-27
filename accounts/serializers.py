@@ -29,7 +29,7 @@ class StaffCreateSerializer(serializers.ModelSerializer):
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = Staff
-        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "must_change_password"]
+        fields = ["id", "username", "email", "first_name", "last_name", "role", "phone_number", "hire_date", "must_change_password", "avatar"]
         read_only_fields = ["role", "must_change_password"]
         
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):

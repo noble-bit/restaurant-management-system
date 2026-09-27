@@ -49,16 +49,38 @@ export const getMenuItemApi = async (id: number): Promise<MenuItem> => {
   return response.data;
 };
 
-export const createMenuItemApi = async (payload: CreateMenuItemPayload): Promise<MenuItem> => {
-  const response = await api.post<MenuItem>('/menu/items/', payload);
+export const createMenuItemApi = async (payload: CreateMenuItemPayload | FormData): Promise<MenuItem> => {
+  let body: CreateMenuItemPayload | FormData = payload;
+  if (!(payload instanceof FormData) && payload.avatar instanceof File) {
+    const formData = new FormData();
+    formData.append('name', payload.name);
+    if (payload.description) formData.append('description', payload.description);
+    formData.append('price', String(payload.price));
+    formData.append('category_id', String(payload.category_id));
+    formData.append('ingredients', JSON.stringify(payload.ingredients));
+    formData.append('avatar', payload.avatar);
+    body = formData;
+  }
+  const response = await api.post<MenuItem>('/menu/items/', body);
   return response.data;
 };
 
 export const updateMenuItemApi = async (
   id: number,
-  payload: UpdateMenuItemPayload
+  payload: UpdateMenuItemPayload | FormData
 ): Promise<MenuItem> => {
-  const response = await api.patch<MenuItem>(`/menu/items/${id}/`, payload);
+  let body: UpdateMenuItemPayload | FormData = payload;
+  if (!(payload instanceof FormData) && payload.avatar instanceof File) {
+    const formData = new FormData();
+    if (payload.name) formData.append('name', payload.name);
+    if (payload.description !== undefined) formData.append('description', payload.description);
+    if (payload.price !== undefined) formData.append('price', String(payload.price));
+    if (payload.category_id !== undefined) formData.append('category_id', String(payload.category_id));
+    if (payload.ingredients) formData.append('ingredients', JSON.stringify(payload.ingredients));
+    formData.append('avatar', payload.avatar);
+    body = formData;
+  }
+  const response = await api.patch<MenuItem>(`/menu/items/${id}/`, body);
   return response.data;
 };
 

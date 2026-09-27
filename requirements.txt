@@ -35,3 +35,8 @@ factory-boy>=3.3,<3.4                 # test fixtures for models (Staff, Ingredi
 # ---- Dev tooling (optional but recommended) ----
 black>=24.4,<25.0
 flake8>=7.0,<8.0
+pillow>=10.4,<11.0
+django-cloudinary-storage>=0.3.0,<0.4
+cloudinary>=1.46.2,<2.0.0
+
+

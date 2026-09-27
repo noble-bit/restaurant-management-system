@@ -17,6 +17,7 @@ import {
   Search,
   Filter,
   Utensils,
+  UtensilsCrossed,
   Sparkles,
   RefreshCw,
   Clock,
@@ -349,7 +350,20 @@ export const NewOrderPage: React.FC = () => {
                     return (
                       <tr key={item.id} className="hover:bg-gray-800/40">
                         <td className="py-3.5 px-5 font-semibold text-white">
-                          {item.menu_item_name || `Item #${item.menu_item}`}
+                          <div className="flex items-center gap-2.5">
+                            {item.menu_item_avatar ? (
+                              <img
+                                src={item.menu_item_avatar}
+                                alt={item.menu_item_name || ''}
+                                className="w-8 h-8 rounded-lg object-cover border border-gray-700/60 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-lg bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                                <UtensilsCrossed className="w-4 h-4" />
+                              </div>
+                            )}
+                            <span>{item.menu_item_name || `Item #${item.menu_item}`}</span>
+                          </div>
                         </td>
                         <td className="py-3.5 px-5 font-mono text-gray-300">
                           ${priceSnap.toFixed(2)}
@@ -444,8 +458,21 @@ export const NewOrderPage: React.FC = () => {
                       }`}
                     >
                       <div>
-                        <div className="flex items-start justify-between gap-2 mb-2">
-                          <h4 className="font-bold text-white text-sm leading-tight">{item.name}</h4>
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <div className="flex items-center gap-3">
+                            {item.avatar ? (
+                              <img
+                                src={item.avatar}
+                                alt={item.name}
+                                className="w-10 h-10 rounded-xl object-cover border border-gray-700/60 shrink-0"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 rounded-xl bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                                <UtensilsCrossed className="w-5 h-5" />
+                              </div>
+                            )}
+                            <h4 className="font-bold text-white text-sm leading-tight">{item.name}</h4>
+                          </div>
                           <span className="font-mono font-bold text-emerald-400 text-sm shrink-0">
                             ${Number(item.price).toFixed(2)}
                           </span>
@@ -615,13 +642,26 @@ export const NewOrderPage: React.FC = () => {
                             className="p-3 rounded-xl glass-card border border-gray-800 space-y-2"
                           >
                             <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <p className="font-semibold text-white text-xs">
-                                  {item.menu_item.name}
-                                </p>
-                                <p className="text-[11px] text-gray-400">
-                                  ${Number(item.menu_item.price).toFixed(2)}
-                                </p>
+                              <div className="flex items-center gap-2.5">
+                                {item.menu_item.avatar ? (
+                                  <img
+                                    src={item.menu_item.avatar}
+                                    alt={item.menu_item.name}
+                                    className="w-8 h-8 rounded-lg object-cover border border-gray-700/60 shrink-0"
+                                  />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-lg bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                                    <UtensilsCrossed className="w-4 h-4" />
+                                  </div>
+                                )}
+                                <div>
+                                  <p className="font-semibold text-white text-xs">
+                                    {item.menu_item.name}
+                                  </p>
+                                  <p className="text-[11px] text-gray-400">
+                                    ${Number(item.menu_item.price).toFixed(2)}
+                                  </p>
+                                </div>
                               </div>
 
                               <button

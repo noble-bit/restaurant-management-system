@@ -50,8 +50,22 @@ class MenuItemSerializer(serializers.ModelSerializer):
             "ingredients",
             "created_at",
             "updated_at",
+            "avatar",
         ]
         read_only_fields = ["id", "created_at", "updated_at"]
+
+    def to_internal_value(self, data):
+        if hasattr(data, 'dict'):
+            data = data.dict()
+        elif isinstance(data, dict):
+            data = data.copy()
+        if isinstance(data.get('ingredients'), str):
+            try:
+                import json
+                data['ingredients'] = json.loads(data['ingredients'])
+            except Exception:
+                pass
+        return super().to_internal_value(data)
 
     def validate_ingredients(self, value):
         if not value:

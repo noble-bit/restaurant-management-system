@@ -10,6 +10,7 @@ export interface User {
   phone_number: string;
   hire_date: string | null;
   must_change_password: boolean;
+  avatar?: string | null;
 }
 
 export interface JwtTokenResponse {
@@ -132,6 +133,7 @@ export interface MenuItem {
   ingredients: MenuItemIngredient[];
   created_at?: string;
   updated_at?: string;
+  avatar?: string | null;
 }
 
 export interface CreateMenuItemPayload {
@@ -140,6 +142,7 @@ export interface CreateMenuItemPayload {
   price: number;
   category_id: number;
   ingredients: MenuItemIngredientPayload[];
+  avatar?: File | null;
 }
 
 export interface UpdateMenuItemPayload {
@@ -148,6 +151,7 @@ export interface UpdateMenuItemPayload {
   price?: number;
   category_id?: number;
   ingredients?: MenuItemIngredientPayload[];
+  avatar?: File | null;
 }
 
 // Helper to extract field-specific validation errors from DRF response JSON
@@ -192,6 +196,7 @@ export interface CreatedOrderItemResponse {
   id: number;
   menu_item: number;
   menu_item_name: string;
+  menu_item_avatar?: string | null;
   quantity: number;
   price_at_order: string | number;
   note?: string;

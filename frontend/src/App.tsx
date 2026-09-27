@@ -17,10 +17,13 @@ import { PaymentsQueuePage } from './features/orders/PaymentsQueuePage';
 import { OrderHistoryPage } from './features/orders/OrderHistoryPage';
 import { LoadingSpinner } from './components/common/LoadingSpinner';
 
+import { UserProfileModal } from './features/auth/UserProfileModal';
+
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
   const [currentTab, setCurrentTab] = useState<string>('dashboard');
   const [isChangingPassword, setIsChangingPassword] = useState<boolean>(false);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState<boolean>(false);
 
   if (isLoading) {
     return (
@@ -64,23 +67,31 @@ const AppContent: React.FC = () => {
   if (currentTab === 'orders-payments' && !canAccessPayments) setCurrentTab('dashboard');
 
   return (
-    <MainLayout
-      currentTab={currentTab}
-      setCurrentTab={setCurrentTab}
-      onChangePasswordClick={() => setIsChangingPassword(true)}
-    >
-      {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
-      {currentTab === 'new-order' && canPlaceOrder && <NewOrderPage />}
-      {currentTab === 'orders-kitchen' && canAccessKitchen && <KitchenQueuePage />}
-      {currentTab === 'orders-ready' && canAccessReady && <ReadyToServePage />}
-      {currentTab === 'orders-payments' && canAccessPayments && <PaymentsQueuePage />}
-      {currentTab === 'order-history' && isOwnerOrManager && <OrderHistoryPage />}
-      {currentTab === 'menu-items' && <MenuItemListPage />}
-      {currentTab === 'menu-categories' && <CategoryListPage />}
-      {currentTab === 'inventory' && <IngredientListPage />}
-      {currentTab === 'movements' && <StockMovementsPage />}
-      {currentTab === 'staff' && isOwnerOrManager && <StaffListPage />}
-    </MainLayout>
+    <>
+      <MainLayout
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        onChangePasswordClick={() => setIsChangingPassword(true)}
+        onProfileClick={() => setIsProfileModalOpen(true)}
+      >
+        {currentTab === 'dashboard' && <DashboardPage onNavigate={setCurrentTab} />}
+        {currentTab === 'new-order' && canPlaceOrder && <NewOrderPage />}
+        {currentTab === 'orders-kitchen' && canAccessKitchen && <KitchenQueuePage />}
+        {currentTab === 'orders-ready' && canAccessReady && <ReadyToServePage />}
+        {currentTab === 'orders-payments' && canAccessPayments && <PaymentsQueuePage />}
+        {currentTab === 'order-history' && isOwnerOrManager && <OrderHistoryPage />}
+        {currentTab === 'menu-items' && <MenuItemListPage />}
+        {currentTab === 'menu-categories' && <CategoryListPage />}
+        {currentTab === 'inventory' && <IngredientListPage />}
+        {currentTab === 'movements' && <StockMovementsPage />}
+        {currentTab === 'staff' && isOwnerOrManager && <StaffListPage />}
+      </MainLayout>
+
+      <UserProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+      />
+    </>
   );
 };
 

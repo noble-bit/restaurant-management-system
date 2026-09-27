@@ -38,12 +38,14 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 # Application definition
 
 INSTALLED_APPS = [
+    "cloudinary_storage",
+    "django.contrib.staticfiles", 
+    "cloudinary",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "corsheaders",
     "djoser",
     "rest_framework",
@@ -141,6 +143,9 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 STORAGES = {
+    "default": {
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
@@ -204,3 +209,13 @@ CELERY_BEAT_SCHEDULE = {
 # Email (used by check_low_stock)
 DEFAULT_FROM_EMAIL = "noreply@yourrestaurant.com"
 STOCK_ALERT_RECIPIENTS = ["manager@yourrestaurant.com"]
+
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+CLOUDINARY_STORAGE = {
+    "CLOUD_NAME": env("CLOUDINARY_CLOUD_NAME"),
+    "API_KEY": env("CLOUDINARY_API_KEY"),
+    "API_SECRET": env("CLOUDINARY_API_SECRET"),
+}
+

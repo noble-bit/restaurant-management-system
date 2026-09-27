@@ -219,3 +219,28 @@ CLOUDINARY_STORAGE = {
     "API_SECRET": env("CLOUDINARY_API_SECRET"),
 }
 
+# Synchronize Cloudinary SDK timestamp with real server time to handle local dev clock skew
+import time
+import calendar
+import email.utils
+import urllib.request
+import cloudinary.utils
+
+def _get_cloudinary_clock_offset():
+    try:
+        req = urllib.request.Request("https://www.google.com", headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=3) as resp:
+            server_date = resp.headers.get("Date")
+            if server_date:
+                parsed_tuple = email.utils.parsedate(server_date)
+                if parsed_tuple:
+                    real_utc_ts = calendar.timegm(parsed_tuple)
+                    return real_utc_ts - time.time()
+    except Exception:
+        pass
+    return 0
+
+_CLOUDINARY_CLOCK_OFFSET = _get_cloudinary_clock_offset()
+cloudinary.utils.now = lambda: str(int(time.time() + _CLOUDINARY_CLOCK_OFFSET))
+
+

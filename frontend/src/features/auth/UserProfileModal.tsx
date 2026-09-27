@@ -23,7 +23,7 @@ interface UserProfileModalProps {
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) => {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, updateUser } = useAuth();
   const { showToast } = useToast();
   const { t } = useTranslation();
 
@@ -66,7 +66,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
     setErrorMsg(null);
 
     try {
-      await updateProfileAvatarApi(selectedFile);
+      const updatedUser = await updateProfileAvatarApi(selectedFile);
+      updateUser(updatedUser);
       await refreshUser();
       showToast('Profile photo updated successfully!', 'success');
       setSelectedFile(null);

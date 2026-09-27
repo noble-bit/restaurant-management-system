@@ -63,6 +63,21 @@ export const MenuItemListPage: React.FC = () => {
     fetchMenuItemsAndCategories();
   }, [fetchMenuItemsAndCategories]);
 
+  const handleItemSaved = (savedItem?: MenuItem) => {
+    if (savedItem) {
+      setMenuItems((prev) => {
+        const idx = prev.findIndex((i) => i.id === savedItem.id);
+        if (idx > -1) {
+          const next = [...prev];
+          next[idx] = savedItem;
+          return next;
+        }
+        return [savedItem, ...prev];
+      });
+    }
+    fetchMenuItemsAndCategories();
+  };
+
   const handleDelete = async (item: MenuItem) => {
     if (!window.confirm(t('menu.deleteItemConfirm', { name: item.name }))) return;
 
@@ -327,7 +342,7 @@ export const MenuItemListPage: React.FC = () => {
         <AddMenuItemModal
           isOpen={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
-          onSuccess={() => fetchMenuItemsAndCategories()}
+          onSuccess={handleItemSaved}
         />
       )}
 
@@ -337,7 +352,7 @@ export const MenuItemListPage: React.FC = () => {
           isOpen={Boolean(editingItem)}
           onClose={() => setEditingItem(null)}
           menuItem={editingItem}
-          onSuccess={fetchMenuItemsAndCategories}
+          onSuccess={handleItemSaved}
           isOwnerOrManager={isOwnerOrManager}
         />
       )}

@@ -31,7 +31,7 @@ interface EditMenuItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   menuItem: MenuItem;
-  onSuccess: () => void;
+  onSuccess: (updatedItem?: MenuItem) => void;
   isOwnerOrManager: boolean;
 }
 
@@ -204,9 +204,9 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      await updateMenuItemApi(menuItem.id, payload);
+      const updatedItem = await updateMenuItemApi(menuItem.id, payload);
       showToast(`Menu item "${payload.name}" updated successfully.`, 'success');
-      onSuccess();
+      onSuccess(updatedItem);
       onClose();
     } catch (err: unknown) {
       const parsedErrors = parseApiFieldErrors(err);

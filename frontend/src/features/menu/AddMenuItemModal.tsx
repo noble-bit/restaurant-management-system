@@ -5,6 +5,7 @@ import type {
   CreateMenuItemPayload,
   Ingredient,
   MenuCategory,
+  MenuItem,
   MenuItemIngredientPayload,
 } from '../../types';
 import { parseApiFieldErrors } from '../../types';
@@ -27,7 +28,7 @@ import {
 interface AddMenuItemModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: (newItem?: MenuItem) => void;
 }
 
 interface IngredientRowState {
@@ -192,9 +193,9 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     setIsSubmitting(true);
 
     try {
-      await createMenuItemApi(payload);
+      const createdItem = await createMenuItemApi(payload);
       showToast(`Menu item "${payload.name}" created successfully.`, 'success');
-      onSuccess();
+      onSuccess(createdItem);
       onClose();
     } catch (err: unknown) {
       const parsedErrors = parseApiFieldErrors(err);

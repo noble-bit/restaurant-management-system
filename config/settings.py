@@ -38,8 +38,8 @@ CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[])
 # Application definition
 
 INSTALLED_APPS = [
-    "cloudinary_storage",
     "django.contrib.staticfiles", 
+    "cloudinary_storage",
     "cloudinary",
     "django.contrib.admin",
     "django.contrib.auth",
@@ -141,8 +141,6 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
 STORAGES = {
     "default": {

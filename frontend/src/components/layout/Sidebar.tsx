@@ -11,6 +11,8 @@ import {
   UtensilsCrossed,
   UserCheck,
   FolderTree,
+  X,
+  Sparkles,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
@@ -19,6 +21,8 @@ import type { UserRole } from '../../types';
 interface SidebarProps {
   currentTab: string;
   setCurrentTab: (tab: string) => void;
+  isOpenMobile?: boolean;
+  onCloseMobile?: () => void;
 }
 
 interface NavItem {
@@ -97,7 +101,12 @@ const navItems: NavItem[] = [
   },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) => {
+export const Sidebar: React.FC<SidebarProps> = ({
+  currentTab,
+  setCurrentTab,
+  isOpenMobile = false,
+  onCloseMobile,
+}) => {
   const { user } = useAuth();
   const { t } = useTranslation();
   const role = user?.role || 'waiter';
@@ -115,23 +124,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
   const RoleBadgeIcon = roleIconMap[role] || UtensilsCrossed;
   const translatedRole = user?.role ? t(`roles.${user.role}`, { defaultValue: user.role }) : '';
 
-  return (
-    <aside className="w-64 glass-panel border-r border-gray-800/80 flex flex-col justify-between h-screen sticky top-0 z-40">
+  const sidebarContent = (
+    <div className="flex flex-col justify-between h-full">
       <div>
         {/* Brand Header */}
-        <div className="p-6 flex items-center gap-3 border-b border-gray-800/80">
-          <div className="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 rounded-xl shadow-lg shadow-indigo-500/25">
-            <UtensilsCrossed className="w-6 h-6 text-white" />
+        <div className="p-6 flex items-center justify-between border-b border-slate-100">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-red-500 rounded-2xl text-white shadow-sm shadow-red-500/30 flex items-center justify-center">
+              <UtensilsCrossed className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="font-extrabold text-slate-900 tracking-tight text-lg leading-tight">
+                Gourmet<span className="text-red-500">Control</span>
+              </h1>
+              <p className="text-[11px] text-slate-400 font-medium">{t('nav.subBrand')}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-white tracking-wide text-lg">GourmetControl</h1>
-            <p className="text-xs text-indigo-400 font-medium">{t('nav.subBrand')}</p>
-          </div>
+
+          {onCloseMobile && (
+            <button
+              onClick={onCloseMobile}
+              className="lg:hidden p-1.5 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-slate-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* Dynamic Navigation */}
         <nav className="p-4 space-y-1.5 mt-2">
-          <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+          <div className="px-3 py-2 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
             {t('nav.navigation')}
           </div>
           {visibleNavItems.map((item) => {
@@ -141,14 +163,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
             return (
               <button
                 key={item.id}
-                onClick={() => setCurrentTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+                onClick={() => {
+                  setCurrentTab(item.id);
+                  if (onCloseMobile) onCloseMobile();
+                }}
+                className={`w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 ${
                   isActive
-                    ? 'bg-indigo-600/90 text-white shadow-lg shadow-indigo-600/30 border border-indigo-500/50 font-semibold'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800/60'
+                    ? 'bg-red-50 text-red-600 border border-red-100/80 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                 }`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`} />
+                <div
+                  className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all ${
+                    isActive
+                      ? 'bg-red-500 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-500'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
                 <span>{t(item.translationKey)}</span>
               </button>
             );
@@ -157,17 +190,42 @@ export const Sidebar: React.FC<SidebarProps> = ({ currentTab, setCurrentTab }) =
       </div>
 
       {/* Role Badge Footer */}
-      <div className="p-4 m-4 glass-card rounded-xl border border-gray-800">
+      <div className="p-4 m-4 bg-slate-50 rounded-2xl border border-slate-100">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/20 text-indigo-400 rounded-lg">
-            <RoleBadgeIcon className="w-5 h-5" />
+          <div className="p-2 bg-white text-red-500 rounded-xl shadow-xs border border-slate-100">
+            <RoleBadgeIcon className="w-4 h-4" />
           </div>
-          <div>
-            <p className="text-xs text-gray-400">{t('nav.currentRole')}</p>
-            <p className="text-sm font-bold text-white">{translatedRole}</p>
+          <div className="overflow-hidden">
+            <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+              {t('nav.currentRole')}
+            </p>
+            <p className="text-xs font-bold text-slate-800 truncate">{translatedRole}</p>
           </div>
+          <Sparkles className="w-4 h-4 text-red-400 ml-auto shrink-0 opacity-60" />
         </div>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:block w-64 bg-white border-r border-slate-200/80 h-screen sticky top-0 z-40 shrink-0">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile Drawer Overlay */}
+      {isOpenMobile && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity"
+            onClick={onCloseMobile}
+          />
+          <aside className="relative w-64 max-w-[80vw] bg-white h-full shadow-2xl z-10 flex flex-col">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 };

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
 import type { Ingredient } from '../../types';
 import { restockIngredientApi } from '../../api/inventory';
 import { useToast } from '../../context/ToastContext';
@@ -78,67 +80,58 @@ export const RestockModal: React.FC<RestockModalProps> = ({
       maxWidth="md"
     >
       <form onSubmit={handleSubmit} className="space-y-4 py-2">
-        <div className="p-4 rounded-xl glass-card border border-gray-800 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">{t('inventory.currentStock')}</p>
-            <p className="text-lg font-bold text-white">
-              {ingredient.quantity_on_hand} <span className="text-xs font-medium text-gray-400">{ingredient.unit_of_measure}</span>
+            <p className="text-xs font-semibold text-slate-400">{t('inventory.currentStock')}</p>
+            <p className="text-lg font-extrabold text-slate-800 font-mono">
+              {ingredient.quantity_on_hand} <span className="text-xs font-semibold text-slate-500">{ingredient.unit_of_measure}</span>
             </p>
           </div>
 
           <div className="text-right">
-            <p className="text-xs text-gray-400">{t('inventory.reorderThresholdCol')}</p>
-            <p className="text-sm font-semibold text-amber-400">
+            <p className="text-xs font-semibold text-slate-400">{t('inventory.reorderThresholdCol')}</p>
+            <p className="text-sm font-bold text-amber-600 font-mono">
               {ingredient.reorder_threshold} {ingredient.unit_of_measure}
             </p>
           </div>
         </div>
 
         {conflictError && (
-          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-3">
-            <AlertOctagon className="w-5 h-5 shrink-0 text-rose-400 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-3 font-medium">
+            <AlertOctagon className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
             <div>
-              <p className="font-bold text-rose-200">{t('common.error')}</p>
+              <p className="font-bold text-rose-800">{t('common.error')}</p>
               <p className="mt-0.5">{conflictError}</p>
             </div>
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-            {t('inventory.quantityAdded')} ({ingredient.unit_of_measure}) *
-          </label>
-          <div className="relative">
-            <PlusCircle className="w-5 h-5 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              required
-              value={quantity}
-              onChange={(e) => setQuantity(Number(e.target.value))}
-              placeholder="e.g. 50"
-              className="w-full pl-11 pr-4 py-3 rounded-xl glass-input text-sm font-bold text-emerald-400"
-            />
-          </div>
+          <Input
+            label={`${t('inventory.quantityAdded')} (${ingredient.unit_of_measure}) *`}
+            type="number"
+            step="0.01"
+            min="0.01"
+            required
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
+            placeholder="e.g. 50"
+            leftIcon={<PlusCircle className="w-5 h-5 text-slate-400" />}
+          />
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
-          >
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-600/30 transition-all disabled:opacity-50"
+            variant="success"
+            isLoading={isSubmitting}
+            icon={<RefreshCw className="w-4 h-4" />}
           >
-            <RefreshCw className={`w-4 h-4 ${isSubmitting ? 'animate-spin' : ''}`} />
-            <span>{isSubmitting ? t('common.loading') : t('common.confirm')}</span>
-          </button>
+            {isSubmitting ? t('common.loading') : t('common.confirm')}
+          </Button>
         </div>
       </form>
     </Modal>

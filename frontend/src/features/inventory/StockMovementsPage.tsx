@@ -3,6 +3,11 @@ import { useTranslation } from 'react-i18next';
 import type { StockMovement, MovementReason } from '../../types';
 import { getStockMovementsApi } from '../../api/inventory';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { PageHeader } from '../../components/common/PageHeader';
+import { Button } from '../../components/common/Button';
+import { Badge } from '../../components/common/Badge';
+import { Select } from '../../components/common/Select';
+import { EmptyState } from '../../components/common/EmptyState';
 import { useToast } from '../../context/ToastContext';
 import { History, TrendingUp, TrendingDown, RefreshCw, Filter } from 'lucide-react';
 
@@ -35,66 +40,55 @@ export const StockMovementsPage: React.FC = () => {
   );
 
   const getReasonBadge = (reason: MovementReason) => {
-    const map: Record<MovementReason, { style: string; labelKey: string }> = {
-      restock: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', labelKey: 'inventory.restock' },
-      order_deduction: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', labelKey: 'inventory.orderDeduction' },
-      waste: { style: 'bg-rose-500/20 text-rose-300 border-rose-500/30', labelKey: 'inventory.waste' },
-      correction: { style: 'bg-amber-500/20 text-amber-300 border-amber-500/30', labelKey: 'inventory.correction' },
+    const map: Record<MovementReason, { variant: 'success' | 'info' | 'danger' | 'warning'; labelKey: string }> = {
+      restock: { variant: 'success', labelKey: 'inventory.restock' },
+      order_deduction: { variant: 'info', labelKey: 'inventory.orderDeduction' },
+      waste: { variant: 'danger', labelKey: 'inventory.waste' },
+      correction: { variant: 'warning', labelKey: 'inventory.correction' },
     };
-    const info = map[reason] || { style: 'bg-gray-800 text-gray-300 border-gray-700', labelKey: reason };
+    const info = map[reason] || { variant: 'neutral', labelKey: reason };
     return (
-      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${info.style}`}>
+      <Badge variant={info.variant}>
         {t(info.labelKey, { defaultValue: reason })}
-      </span>
+      </Badge>
     );
   };
 
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl">
-            <History className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{t('inventory.stockMovementsTitle')}</h1>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {t('inventory.subtitle')}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={fetchMovements}
-          className="flex items-center gap-2 px-4 py-2.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-xl border border-gray-700 text-xs font-semibold transition-all shrink-0"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span>{t('inventory.refreshBtn')}</span>
-        </button>
-      </div>
+      <PageHeader
+        title={t('inventory.stockMovementsTitle')}
+        subtitle={t('inventory.subtitle')}
+        icon={<History className="w-6 h-6" />}
+        actions={
+          <Button
+            variant="outline"
+            icon={<RefreshCw className="w-4 h-4" />}
+            onClick={fetchMovements}
+          >
+            {t('inventory.refreshBtn')}
+          </Button>
+        }
+      />
 
       {/* Filter Toolbar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-gray-500" />
-          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            {t('inventory.reasonLabel')}
-          </span>
-          <select
+      <div className="flex items-center justify-between gap-4">
+        <div className="w-64">
+          <Select
             value={selectedReason}
             onChange={(e) => setSelectedReason(e.target.value)}
-            className="px-3 py-2 rounded-xl glass-input text-xs bg-gray-900"
+            leftIcon={<Filter className="w-4 h-4 text-slate-400" />}
           >
-            <option value="all" className="bg-gray-900">{t('inventory.allReasons')}</option>
-            <option value="restock" className="bg-gray-900">{t('inventory.restock')}</option>
-            <option value="order_deduction" className="bg-gray-900">{t('inventory.orderDeduction')}</option>
-            <option value="waste" className="bg-gray-900">{t('inventory.waste')}</option>
-            <option value="correction" className="bg-gray-900">{t('inventory.correction')}</option>
-          </select>
+            <option value="all">{t('inventory.allReasons')}</option>
+            <option value="restock">{t('inventory.restock')}</option>
+            <option value="order_deduction">{t('inventory.orderDeduction')}</option>
+            <option value="waste">{t('inventory.waste')}</option>
+            <option value="correction">{t('inventory.correction')}</option>
+          </Select>
         </div>
 
-        <p className="text-xs text-gray-500">
+        <p className="text-xs text-slate-500 font-semibold">
           {t('inventory.showingCount', { count: filteredMovements.length })}
         </p>
       </div>
@@ -103,18 +97,16 @@ export const StockMovementsPage: React.FC = () => {
       {isLoading ? (
         <LoadingSpinner text={t('inventory.loading')} />
       ) : filteredMovements.length === 0 ? (
-        <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
-          <History className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">{t('inventory.noMovementsTitle')}</h3>
-          <p className="text-xs text-gray-500 mt-1">
-            {t('inventory.noMovementsDesc')}
-          </p>
-        </div>
+        <EmptyState
+          icon={<History className="w-8 h-8 text-slate-400" />}
+          title={t('inventory.noMovementsTitle')}
+          description={t('inventory.noMovementsDesc')}
+        />
       ) : (
-        <div className="glass-panel rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
+              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('inventory.timestampCol')}</th>
                   <th className="py-4 px-6">{t('inventory.ingredientRefCol')}</th>
@@ -123,34 +115,34 @@ export const StockMovementsPage: React.FC = () => {
                   <th className="py-4 px-6">{t('inventory.recordedByCol')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/60 text-gray-300">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredMovements.map((item) => {
                   const numDelta = Number(item.quantity_delta);
                   const isPositive = numDelta > 0;
 
                   return (
-                    <tr key={item.id} className="hover:bg-gray-800/40 transition-colors">
-                      <td className="py-4 px-6 text-gray-400 font-mono text-[11px]">
+                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
                         {new Date(item.created_at).toLocaleString()}
                       </td>
-                      <td className="py-4 px-6 font-medium text-white">
-                        {t('inventory.ingredientId', { id: item.ingredient })}
+                      <td className="py-4 px-6 font-bold text-slate-800">
+                        {item.ingredient_name || t('inventory.ingredientId', { id: item.ingredient })}
                       </td>
                       <td className="py-4 px-6 font-mono text-sm font-bold">
                         <div className="flex items-center gap-1.5">
                           {isPositive ? (
-                            <TrendingUp className="w-4 h-4 text-emerald-400" />
+                            <TrendingUp className="w-4 h-4 text-emerald-500" />
                           ) : (
-                            <TrendingDown className="w-4 h-4 text-rose-400" />
+                            <TrendingDown className="w-4 h-4 text-rose-500" />
                           )}
-                          <span className={isPositive ? 'text-emerald-400' : 'text-rose-400'}>
+                          <span className={isPositive ? 'text-emerald-600' : 'text-rose-600'}>
                             {isPositive ? `+${numDelta}` : numDelta}
                           </span>
                         </div>
                       </td>
                       <td className="py-4 px-6">{getReasonBadge(item.reason)}</td>
-                      <td className="py-4 px-6 text-gray-400">
-                        {item.staff ? t('inventory.staffId', { id: item.staff }) : t('inventory.systemAutomated')}
+                      <td className="py-4 px-6 text-slate-500 font-medium">
+                        {item.staff_name || (item.staff ? t('inventory.staffId', { id: item.staff }) : t('inventory.systemAutomated'))}
                       </td>
                     </tr>
                   );

@@ -5,6 +5,13 @@ import { getMenuItemsApi, getMenuCategoriesApi, deleteMenuItemApi } from '../../
 import { AddMenuItemModal } from './AddMenuItemModal';
 import { EditMenuItemModal } from './EditMenuItemModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { PageHeader } from '../../components/common/PageHeader';
+import { Button } from '../../components/common/Button';
+import { Badge } from '../../components/common/Badge';
+import { Input } from '../../components/common/Input';
+import { Select } from '../../components/common/Select';
+import { EmptyState } from '../../components/common/EmptyState';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import {
@@ -14,8 +21,6 @@ import {
   Edit2,
   Trash2,
   RefreshCw,
-  CheckCircle2,
-  AlertTriangle,
   DollarSign,
   Filter,
   Eye,
@@ -38,9 +43,11 @@ export const MenuItemListPage: React.FC = () => {
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>('all');
   const [availabilityFilter, setAvailabilityFilter] = useState<string>('all');
 
-  // Modals state
+  // Modals & Confirmation state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchMenuItemsAndCategories = useCallback(async () => {
     setIsLoading(true);
@@ -78,16 +85,20 @@ export const MenuItemListPage: React.FC = () => {
     fetchMenuItemsAndCategories();
   };
 
-  const handleDelete = async (item: MenuItem) => {
-    if (!window.confirm(t('menu.deleteItemConfirm', { name: item.name }))) return;
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    setIsDeleting(true);
 
     try {
-      await deleteMenuItemApi(item.id);
-      showToast(t('menu.itemDeletedToast', { name: item.name }), 'info');
+      await deleteMenuItemApi(deletingItem.id);
+      showToast(t('menu.itemDeletedToast', { name: deletingItem.name }), 'info');
+      setDeletingItem(null);
       fetchMenuItemsAndCategories();
     } catch (err: unknown) {
       console.error('Failed to delete menu item:', err);
       showToast(t('menu.deleteFailedToast'), 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -114,88 +125,70 @@ export const MenuItemListPage: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-gray-800">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl">
-            <UtensilsCrossed className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">{t('menu.catalogTitle')}</h1>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {t('menu.catalogSubtitle')}
-            </p>
-          </div>
-        </div>
-
-        {isOwnerOrManager && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
-          >
-            <Plus className="w-5 h-5" />
-            <span>{t('menu.addNewMenuItem')}</span>
-          </button>
-        )}
-      </div>
+      {/* Page Header */}
+      <PageHeader
+        title={t('menu.catalogTitle')}
+        subtitle={t('menu.catalogSubtitle')}
+        icon={<UtensilsCrossed className="w-6 h-6" />}
+        actions={
+          isOwnerOrManager && (
+            <Button
+              variant="primary"
+              icon={<Plus className="w-5 h-5" />}
+              onClick={() => setIsAddModalOpen(true)}
+            >
+              {t('menu.addNewMenuItem')}
+            </Button>
+          )
+        }
+      />
 
       {/* Filter and Search Controls */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
+        <div className="w-full sm:w-80">
+          <Input
+            placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('common.search')}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
+            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           {/* Category Filter Dropdown */}
-          <div className="relative">
-            <Filter className="w-3.5 h-3.5 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-            <select
+          <div className="w-full sm:w-48">
+            <Select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="pl-8 pr-3 py-2 rounded-xl glass-input text-xs bg-gray-900"
+              leftIcon={<Filter className="w-4 h-4 text-slate-400" />}
             >
-              <option value="all" className="bg-gray-900">
-                {t('menu.allCategories')}
-              </option>
+              <option value="all">{t('menu.allCategories')}</option>
               {categories.map((c) => (
-                <option key={c.id} value={c.id} className="bg-gray-900">
+                <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           {/* Availability Filter Toggle */}
-          <select
-            value={availabilityFilter}
-            onChange={(e) => setAvailabilityFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl glass-input text-xs bg-gray-900"
-          >
-            <option value="all" className="bg-gray-900">
-              {t('menu.allStatuses')}
-            </option>
-            <option value="available" className="bg-gray-900">
-              {t('menu.availableOnly')}
-            </option>
-            <option value="unavailable" className="bg-gray-900">
-              {t('menu.unavailableOnly')}
-            </option>
-          </select>
+          <div className="w-full sm:w-48">
+            <Select
+              value={availabilityFilter}
+              onChange={(e) => setAvailabilityFilter(e.target.value)}
+            >
+              <option value="all">{t('menu.allStatuses')}</option>
+              <option value="available">{t('menu.availableOnly')}</option>
+              <option value="unavailable">{t('menu.unavailableOnly')}</option>
+            </Select>
+          </div>
 
-          <button
+          <Button
+            variant="outline"
+            icon={<RefreshCw className="w-4 h-4" />}
             onClick={fetchMenuItemsAndCategories}
             title={t('inventory.refresh')}
-            className="p-2.5 glass-panel border border-gray-700 text-gray-300 hover:text-white rounded-xl hover:bg-gray-800 transition-colors"
-          >
-            <RefreshCw className="w-4 h-4" />
-          </button>
+          />
         </div>
       </div>
 
@@ -203,20 +196,22 @@ export const MenuItemListPage: React.FC = () => {
       {isLoading ? (
         <LoadingSpinner text={t('menu.loadingCatalog')} />
       ) : filteredItems.length === 0 ? (
-        <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
-          <UtensilsCrossed className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">{t('menu.noItemsTitle')}</h3>
-          <p className="text-xs text-gray-500 mt-1 max-w-sm">
-            {searchQuery || selectedCategoryFilter !== 'all' || availabilityFilter !== 'all'
+        <EmptyState
+          icon={<UtensilsCrossed className="w-8 h-8 text-slate-400" />}
+          title={t('menu.noItemsTitle')}
+          description={
+            searchQuery || selectedCategoryFilter !== 'all' || availabilityFilter !== 'all'
               ? t('menu.noItemsMatching')
-              : t('menu.addFirstItem')}
-          </p>
-        </div>
+              : t('menu.addFirstItem')
+          }
+          actionText={isOwnerOrManager ? t('menu.addNewMenuItem') : undefined}
+          onAction={isOwnerOrManager ? () => setIsAddModalOpen(true) : undefined}
+        />
       ) : (
-        <div className="glass-panel rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
+              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('menu.menuItemCol')}</th>
                   <th className="py-4 px-6">{t('menu.categoryCol')}</th>
@@ -226,7 +221,7 @@ export const MenuItemListPage: React.FC = () => {
                   <th className="py-4 px-6 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/60 text-gray-300">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredItems.map((item) => {
                   const categoryName =
                     typeof item.category === 'object' && item.category !== null
@@ -234,20 +229,20 @@ export const MenuItemListPage: React.FC = () => {
                       : t('menu.generalMenu');
 
                   return (
-                    <tr key={item.id} className="hover:bg-gray-800/40 transition-colors">
+                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-gray-800 border border-gray-700/80 flex items-center justify-center text-gray-500 shrink-0">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200/60 flex items-center justify-center text-slate-400 shrink-0">
                             {item.avatar ? (
                               <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
                             ) : (
-                              <UtensilsCrossed className="w-5 h-5 text-gray-600" />
+                              <UtensilsCrossed className="w-5 h-5 text-slate-400" />
                             )}
                           </div>
                           <div>
-                            <span className="font-semibold text-white text-sm block">{item.name}</span>
+                            <span className="font-bold text-slate-800 text-sm block">{item.name}</span>
                             {item.description && (
-                              <span className="text-xs text-gray-400 line-clamp-1 mt-0.5">
+                              <span className="text-xs text-slate-400 line-clamp-1 mt-0.5">
                                 {item.description}
                               </span>
                             )}
@@ -255,13 +250,11 @@ export const MenuItemListPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-4 px-6">
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
-                          {categoryName}
-                        </span>
+                        <Badge variant="primary">{categoryName}</Badge>
                       </td>
-                      <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-400">
+                      <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-600">
                         <div className="flex items-center gap-0.5">
-                          <DollarSign className="w-3.5 h-3.5 text-gray-500" />
+                          <DollarSign className="w-3.5 h-3.5 text-slate-400" />
                           <span>{Number(item.price).toFixed(2)}</span>
                         </div>
                       </td>
@@ -271,57 +264,48 @@ export const MenuItemListPage: React.FC = () => {
                             {item.ingredients.map((ri, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] rounded bg-gray-800/80 text-gray-300 border border-gray-700"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600 border border-slate-200/60"
                               >
-                                <Scale className="w-2.5 h-2.5 text-gray-500" />
+                                <Scale className="w-2.5 h-2.5 text-slate-400" />
                                 <span>
                                   {ri.ingredient?.name || `${t('inventory.ingredientCol')} #${ri.ingredient_id}`}:{' '}
-                                  <strong className="text-white">{ri.quantity_required}</strong>
+                                  <strong className="text-slate-800">{ri.quantity_required}</strong>
                                   {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
                                 </span>
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-gray-500 italic text-[11px]">{t('menu.noRecipe')}</span>
+                          <span className="text-slate-400 italic text-[11px]">{t('menu.noRecipe')}</span>
                         )}
                       </td>
                       <td className="py-4 px-6">
                         {item.is_available ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                          <Badge variant="success" dot={true}>
                             {t('menu.available')}
-                          </span>
+                          </Badge>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">
-                            <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+                          <Badge variant="danger" dot={true}>
                             {t('menu.unavailable')}
-                          </span>
+                          </Badge>
                         )}
                       </td>
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
                             onClick={() => setEditingItem(item)}
-                            className="px-3 py-1.5 glass-panel hover:bg-gray-800 text-gray-300 hover:text-white rounded-lg text-xs font-semibold transition-all border border-gray-700 flex items-center gap-1.5"
                           >
-                            {isOwnerOrManager ? (
-                              <>
-                                <Edit2 className="w-3.5 h-3.5 text-indigo-400" />
-                                <span>{t('common.edit')}</span>
-                              </>
-                            ) : (
-                              <>
-                                <Eye className="w-3.5 h-3.5 text-gray-400" />
-                                <span>{t('common.viewDetails')}</span>
-                              </>
-                            )}
-                          </button>
+                            {isOwnerOrManager ? t('common.edit') : t('common.viewDetails')}
+                          </Button>
 
                           {isOwnerOrManager && (
                             <button
-                              onClick={() => handleDelete(item)}
-                              className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20"
+                              onClick={() => setDeletingItem(item)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                              title={t('common.delete')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -354,6 +338,20 @@ export const MenuItemListPage: React.FC = () => {
           menuItem={editingItem}
           onSuccess={handleItemSaved}
           isOwnerOrManager={isOwnerOrManager}
+        />
+      )}
+
+      {/* Confirm Delete Dialog */}
+      {deletingItem && (
+        <ConfirmDialog
+          isOpen={Boolean(deletingItem)}
+          onClose={() => setDeletingItem(null)}
+          onConfirm={handleConfirmDelete}
+          title={t('common.delete')}
+          message={t('menu.deleteItemConfirm', { name: deletingItem.name })}
+          confirmText={t('common.delete')}
+          variant="danger"
+          isLoading={isDeleting}
         />
       )}
     </div>

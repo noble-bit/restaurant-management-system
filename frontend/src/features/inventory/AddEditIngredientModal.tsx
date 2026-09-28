@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+import { Select } from '../../components/common/Select';
 import type { CreateIngredientPayload, Ingredient } from '../../types';
 import { createIngredientApi, updateIngredientApi } from '../../api/inventory';
 import { useToast } from '../../context/ToastContext';
@@ -101,57 +104,44 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{error}</span>
           </div>
         )}
 
         <div>
-          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-            {t('inventory.ingredientNameLabel')}
-          </label>
-          <div className="relative">
-            <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              name="name"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              placeholder={t('inventory.ingredientNamePlaceholder')}
-              className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
-            />
-          </div>
+          <Input
+            label={`${t('inventory.ingredientNameLabel')} *`}
+            name="name"
+            required
+            value={formData.name}
+            onChange={handleChange}
+            placeholder={t('inventory.ingredientNamePlaceholder')}
+            leftIcon={<Tag className="w-4 h-4" />}
+          />
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('inventory.unitOfMeasureLabel')}
-            </label>
-            <div className="relative">
-              <Scale className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                name="unit_of_measure"
-                value={formData.unit_of_measure}
-                onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900"
-              >
-                <option value="g" className="bg-gray-900">Grams (g)</option>
-                <option value="kg" className="bg-gray-900">Kilograms (kg)</option>
-                <option value="l" className="bg-gray-900">Liters (l)</option>
-                <option value="ml" className="bg-gray-900">Milliliters (ml)</option>
-                <option value="pcs" className="bg-gray-900">Pieces (pcs)</option>
-              </select>
-            </div>
+            <Select
+              label={`${t('inventory.unitOfMeasureLabel')} *`}
+              name="unit_of_measure"
+              value={formData.unit_of_measure}
+              onChange={handleChange}
+              leftIcon={<Scale className="w-4 h-4 text-slate-400" />}
+            >
+              <option value="g">Grams (g)</option>
+              <option value="kg">Kilograms (kg)</option>
+              <option value="l">Liters (l)</option>
+              <option value="ml">Milliliters (ml)</option>
+              <option value="pcs">Pieces (pcs)</option>
+            </Select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('inventory.reorderThresholdLabel')}
-            </label>
-            <input
+            <Input
+              label={`${t('inventory.reorderThresholdLabel')} *`}
               type="number"
               name="reorder_threshold"
               step="0.01"
@@ -159,50 +149,40 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
               required
               value={formData.reorder_threshold}
               onChange={handleChange}
-              className="w-full px-3 py-2.5 rounded-xl glass-input text-xs"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('inventory.costPerUnitLabel')}
-            </label>
-            <div className="relative">
-              <DollarSign className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="number"
-                name="cost_per_unit"
-                step="0.01"
-                min="0"
-                required
-                value={formData.cost_per_unit}
-                onChange={handleChange}
-                className="w-full pl-8 pr-3 py-2.5 rounded-xl glass-input text-xs"
-              />
-            </div>
+            <Input
+              label={`${t('inventory.costPerUnitLabel')} *`}
+              type="number"
+              name="cost_per_unit"
+              step="0.01"
+              min="0"
+              required
+              value={formData.cost_per_unit}
+              onChange={handleChange}
+              leftIcon={<DollarSign className="w-4 h-4" />}
+            />
           </div>
         </div>
 
-        <p className="text-[11px] text-gray-500 italic bg-gray-900/50 p-3 rounded-xl border border-gray-800">
+        <p className="text-[11px] text-slate-500 italic bg-slate-50 p-3 rounded-2xl border border-slate-100">
           {t('inventory.auditNote')}
         </p>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
-          >
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
+            variant="primary"
+            isLoading={isSubmitting}
+            icon={<PackagePlus className="w-4 h-4" />}
           >
-            <PackagePlus className="w-4 h-4" />
-            <span>{isSubmitting ? t('common.saving') : isEditing ? t('inventory.saveChanges') : t('inventory.createIngredient')}</span>
-          </button>
+            {isSubmitting ? t('common.saving') : isEditing ? t('inventory.saveChanges') : t('inventory.createIngredient')}
+          </Button>
         </div>
       </form>
     </Modal>

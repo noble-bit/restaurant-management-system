@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+import { Select } from '../../components/common/Select';
 import type { CreateStaffPayload, StaffMember, UserRole } from '../../types';
 import { createStaffApi } from '../../api/staff';
 import { useToast } from '../../context/ToastContext';
-import { UserPlus, Mail, User as UserIcon, Phone, Calendar, Shield } from 'lucide-react';
+import { UserPlus, Mail, User as UserIcon, Phone, Calendar, Shield, AlertCircle } from 'lucide-react';
 
 interface CreateStaffModalProps {
   isOpen: boolean;
@@ -78,152 +81,118 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={t('staff.registerTitle')} maxWidth="lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium">
-            {error}
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+            <span>{error}</span>
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              Username *
-            </label>
-            <div className="relative">
-              <UserIcon className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                name="username"
-                required
-                value={formData.username}
-                onChange={handleChange}
-                placeholder="johndoe"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
-              />
-            </div>
+            <Input
+              label="Username *"
+              type="text"
+              name="username"
+              required
+              value={formData.username}
+              onChange={handleChange}
+              placeholder="johndoe"
+              leftIcon={<UserIcon className="w-4 h-4" />}
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.email')} *
-            </label>
-            <div className="relative">
-              <Mail className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="email"
-                name="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="john@restaurant.com"
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
-              />
-            </div>
+            <Input
+              label={`${t('staff.email')} *`}
+              type="email"
+              name="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="john@restaurant.com"
+              leftIcon={<Mail className="w-4 h-4" />}
+            />
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.firstName')}
-            </label>
-            <input
+            <Input
+              label={t('staff.firstName')}
               type="text"
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
               placeholder="John"
-              className="w-full px-3 py-2.5 rounded-xl glass-input text-xs"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.lastName')}
-            </label>
-            <input
+            <Input
+              label={t('staff.lastName')}
               type="text"
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
               placeholder="Doe"
-              className="w-full px-3 py-2.5 rounded-xl glass-input text-xs"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.role')} *
-            </label>
-            <div className="relative">
-              <Shield className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs capitalize bg-gray-900"
-              >
-                {(['owner', 'manager', 'chef', 'waiter', 'cashier'] as UserRole[]).map((r) => (
-                  <option key={r} value={r} className="bg-gray-900 text-white">
-                    {t(`roles.${r}`, { defaultValue: r })}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Select
+              label={`${t('staff.role')} *`}
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              leftIcon={<Shield className="w-4 h-4 text-slate-400" />}
+            >
+              {(['owner', 'manager', 'chef', 'waiter', 'cashier'] as UserRole[]).map((r) => (
+                <option key={r} value={r}>
+                  {t(`roles.${r}`, { defaultValue: r })}
+                </option>
+              ))}
+            </Select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.phone')}
-            </label>
-            <div className="relative">
-              <Phone className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                name="phone_number"
-                value={formData.phone_number}
-                onChange={handleChange}
-                placeholder="5551234567"
-                maxLength={10}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
-              />
-            </div>
+            <Input
+              label={t('staff.phone')}
+              type="text"
+              name="phone_number"
+              value={formData.phone_number}
+              onChange={handleChange}
+              placeholder="5551234567"
+              maxLength={10}
+              leftIcon={<Phone className="w-4 h-4" />}
+            />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('staff.hireDate')}
-            </label>
-            <div className="relative">
-              <Calendar className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="date"
-                name="hire_date"
-                value={formData.hire_date || ''}
-                onChange={handleChange}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
-              />
-            </div>
+            <Input
+              label={t('staff.hireDate')}
+              type="date"
+              name="hire_date"
+              value={formData.hire_date || ''}
+              onChange={handleChange}
+              leftIcon={<Calendar className="w-4 h-4" />}
+            />
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
-          >
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
+            variant="primary"
+            isLoading={isSubmitting}
+            icon={<UserPlus className="w-4 h-4" />}
           >
-            <UserPlus className="w-4 h-4" />
-            <span>{isSubmitting ? t('common.saving') : t('staff.addStaff')}</span>
-          </button>
+            {isSubmitting ? t('common.saving') : t('staff.addStaff')}
+          </Button>
         </div>
       </form>
     </Modal>

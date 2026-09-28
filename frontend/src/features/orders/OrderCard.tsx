@@ -3,6 +3,9 @@ import { useTranslation } from 'react-i18next';
 import type { CreatedOrderResponse, OrderStatus, PaymentMethod, UserRole } from '../../types';
 import { processPaymentApi, updateOrderStatusApi } from '../../api/orders';
 import { useAuth } from '../../context/AuthContext';
+import { Button } from '../../components/common/Button';
+import { Badge } from '../../components/common/Badge';
+import { Card } from '../../components/common/Card';
 import {
   Clock,
   MapPin,
@@ -14,7 +17,6 @@ import {
   XCircle,
   AlertTriangle,
   FileText,
-  Loader2,
   User,
 } from 'lucide-react';
 
@@ -36,19 +38,19 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
 
   // Status Badge Colors & Info
   const getStatusBadge = (st: OrderStatus | string) => {
-    const map: Record<string, { style: string; labelKey: string }> = {
-      pending: { style: 'bg-amber-500/20 text-amber-300 border-amber-500/30', labelKey: 'orders.statusPending' },
-      preparing: { style: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30', labelKey: 'orders.statusPreparing' },
-      ready: { style: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', labelKey: 'orders.statusReady' },
-      served: { style: 'bg-blue-500/20 text-blue-300 border-blue-500/30', labelKey: 'orders.statusServed' },
-      paid: { style: 'bg-purple-500/20 text-purple-300 border-purple-500/30', labelKey: 'orders.paid' },
-      cancelled: { style: 'bg-rose-500/20 text-rose-300 border-rose-500/30', labelKey: 'orders.statusCancelled' },
+    const map: Record<string, { variant: 'warning' | 'info' | 'success' | 'danger' | 'neutral'; labelKey: string }> = {
+      pending: { variant: 'warning', labelKey: 'orders.statusPending' },
+      preparing: { variant: 'info', labelKey: 'orders.statusPreparing' },
+      ready: { variant: 'success', labelKey: 'orders.statusReady' },
+      served: { variant: 'info', labelKey: 'orders.statusServed' },
+      paid: { variant: 'success', labelKey: 'orders.paid' },
+      cancelled: { variant: 'danger', labelKey: 'orders.statusCancelled' },
     };
-    const info = map[st] || { style: 'bg-gray-800 text-gray-300 border-gray-700', labelKey: st };
+    const info = map[st] || { variant: 'neutral', labelKey: st };
     return (
-      <span className={`px-2.5 py-1 text-xs font-bold rounded-full border capitalize ${info.style}`}>
+      <Badge variant={info.variant} dot={true}>
         {t(info.labelKey, { defaultValue: st })}
-      </span>
+      </Badge>
     );
   };
 
@@ -129,26 +131,30 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
   const canCancel = canCancelPending || canCancelPreparing;
 
   return (
-    <div className="glass-card p-6 rounded-3xl border border-gray-800 flex flex-col justify-between shadow-xl relative overflow-hidden transition-all hover:border-gray-700">
+    <Card padding="md" className="flex flex-col justify-between shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.06)] transition-all">
       <div>
-        {/* Header: Order ID, Type, Status */}
-        <div className="flex items-start justify-between gap-3 pb-4 border-b border-gray-800/80">
+        {/* Header: Order ID, Type, Status, Total */}
+        <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-base font-extrabold text-white">{t('orders.orderId')}{order.id}</span>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-mono text-base font-extrabold text-slate-800">
+                {t('orders.orderId')}{order.id}
+              </span>
               {getStatusBadge(order.status)}
             </div>
-            <div className="flex items-center gap-3 text-xs text-gray-400 mt-1.5">
-              <span className="capitalize font-semibold text-indigo-400">
-                {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, { defaultValue: order.order_type.replace('_', ' ') })}
+            <div className="flex items-center gap-3 text-xs text-slate-500 mt-1.5 flex-wrap">
+              <span className="capitalize font-bold text-red-500">
+                {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, {
+                  defaultValue: order.order_type.replace('_', ' '),
+                })}
               </span>
               {order.table_number && (
-                <span className="flex items-center gap-1 text-amber-400 font-bold">
+                <span className="flex items-center gap-1 text-amber-600 font-bold">
                   <MapPin className="w-3 h-3" />
                   {t('dashboard.table')} {order.table_number}
                 </span>
               )}
-              <span className="flex items-center gap-1 text-gray-500">
+              <span className="flex items-center gap-1 text-slate-400 font-medium">
                 <Clock className="w-3 h-3" />
                 {new Date(order.created_at).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -158,9 +164,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
             </div>
           </div>
 
-          <div className="text-right">
-            <span className="text-[10px] text-gray-500 block uppercase font-semibold">{t('common.total')}</span>
-            <span className="font-mono font-extrabold text-emerald-400 text-lg">
+          <div className="text-right shrink-0">
+            <span className="text-[10px] text-slate-400 block uppercase font-bold">{t('common.total')}</span>
+            <span className="font-mono font-extrabold text-emerald-600 text-lg">
               ${Number(order.total_price).toFixed(2)}
             </span>
           </div>
@@ -168,15 +174,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
 
         {/* Card Error Banner */}
         {cardError && (
-          <div className="mt-4 p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-start gap-2">
-            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+          <div className="mt-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 font-medium">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
             <span>{cardError}</span>
           </div>
         )}
 
         {/* Order Items List */}
         <div className="py-4 space-y-3">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
             {t('dashboard.items')} ({order.items.length})
           </p>
 
@@ -188,39 +194,40 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               return (
                 <div
                   key={item.id}
-                  className="p-3 rounded-xl glass-panel border border-gray-800/80 space-y-1.5"
+                  className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5">
+                      {/* Small circular thumbnail */}
                       {item.menu_item_avatar ? (
                         <img
                           src={item.menu_item_avatar}
                           alt={item.menu_item_name || ''}
-                          className="w-7 h-7 rounded-lg object-cover border border-gray-700/60 shrink-0"
+                          className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0 bg-white"
                         />
                       ) : (
-                        <div className="w-7 h-7 rounded-lg bg-gray-800/80 border border-gray-700/60 flex items-center justify-center text-gray-500 shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
                           <UtensilsCrossed className="w-3.5 h-3.5" />
                         </div>
                       )}
-                      <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs flex items-center justify-center border border-indigo-500/30 shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-red-50 text-red-600 font-extrabold text-xs flex items-center justify-center border border-red-100 shrink-0">
                         {item.quantity}×
                       </span>
-                      <span className="font-semibold text-white text-xs">
+                      <span className="font-bold text-slate-800 text-xs">
                         {item.menu_item_name || `Dish #${item.menu_item}`}
                       </span>
                     </div>
 
-                    <span className="font-mono text-xs font-bold text-emerald-400">
+                    <span className="font-mono text-xs font-bold text-emerald-600">
                       ${itemTotal.toFixed(2)}
                     </span>
                   </div>
 
                   {item.note && (
-                    <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2 font-medium">
-                      <FileText className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
+                    <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs flex items-start gap-1.5 font-medium">
+                      <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
                       <span>
-                        {t('common.notes')}: <strong className="text-amber-100">{item.note}</strong>
+                        {t('common.notes')}: <strong className="text-amber-900">{item.note}</strong>
                       </span>
                     </div>
                   )}
@@ -232,86 +239,76 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
       </div>
 
       {/* Card Footer */}
-      <div className="pt-4 border-t border-gray-800/80 space-y-3">
-        <div className="flex items-center justify-between text-xs text-gray-400">
+      <div className="pt-4 border-t border-slate-100 space-y-3">
+        <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
           <span className="flex items-center gap-1">
-            <User className="w-3.5 h-3.5 text-gray-500" />
+            <User className="w-3.5 h-3.5 text-slate-400" />
             <span>{t('staff.role')}: {order.staff_name || `#${order.staff}`}</span>
           </span>
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {canStartPreparing && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth={true}
+              isLoading={isUpdating}
+              icon={<Flame className="w-4 h-4" />}
               onClick={() => handleTransition('preparing')}
-              disabled={isUpdating}
-              className="flex-1 py-2.5 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-indigo-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              {isUpdating ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : (
-                <>
-                  <Flame className="w-4 h-4 text-amber-300" />
-                  <span>{t('orders.startPreparing')}</span>
-                </>
-              )}
-            </button>
+              {t('orders.startPreparing')}
+            </Button>
           )}
 
           {canMarkReady && (
-            <button
+            <Button
+              variant="success"
+              size="sm"
+              fullWidth={true}
+              isLoading={isUpdating}
+              icon={<CheckCircle2 className="w-4 h-4" />}
               onClick={() => handleTransition('ready')}
-              disabled={isUpdating}
-              className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              {isUpdating ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : (
-                <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                  <span>{t('orders.markReady')}</span>
-                </>
-              )}
-            </button>
+              {t('orders.markReady')}
+            </Button>
           )}
 
           {canMarkServed && (
-            <button
+            <Button
+              variant="primary"
+              size="sm"
+              fullWidth={true}
+              isLoading={isUpdating}
+              icon={<Utensils className="w-4 h-4" />}
               onClick={() => handleTransition('served')}
-              disabled={isUpdating}
-              className="flex-1 py-2.5 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              {isUpdating ? (
-                <Loader2 className="w-4 h-4 animate-spin text-white" />
-              ) : (
-                <>
-                  <Utensils className="w-4 h-4 text-blue-200" />
-                  <span>{t('orders.markServed')}</span>
-                </>
-              )}
-            </button>
+              {t('orders.markServed')}
+            </Button>
           )}
 
           {canMarkPaid && !showPaymentSelector && (
-            <button
+            <Button
+              variant="success"
+              size="sm"
+              fullWidth={true}
+              isLoading={isUpdating}
+              icon={<CreditCard className="w-4 h-4" />}
               onClick={() => {
                 setCardError(null);
                 setShowPaymentSelector(true);
               }}
-              disabled={isUpdating}
-              className="flex-1 py-2.5 px-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-semibold shadow-lg shadow-purple-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
             >
-              <CreditCard className="w-4 h-4 text-purple-200" />
-              <span>{t('orders.markPaidBtn', { amount: Number(order.total_price).toFixed(2) })}</span>
-            </button>
+              {t('orders.markPaidBtn', { amount: Number(order.total_price).toFixed(2) })}
+            </Button>
           )}
 
           {canMarkPaid && showPaymentSelector && (
-            <div className="flex-1 glass-panel p-3 rounded-2xl border border-purple-500/40 bg-purple-950/20 space-y-2.5">
+            <div className="w-full bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-purple-200 flex items-center gap-1">
-                  <CreditCard className="w-3.5 h-3.5 text-purple-400" />
+                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                  <CreditCard className="w-3.5 h-3.5 text-red-500" />
                   {t('orders.paymentMethod')}:
                 </span>
                 <button
@@ -320,9 +317,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     setShowPaymentSelector(false);
                     setCardError(null);
                   }}
-                  className="text-gray-400 hover:text-white p-0.5 rounded transition-colors"
+                  className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition-colors"
                 >
-                  <XCircle className="w-4 h-4 text-gray-400 hover:text-rose-400" />
+                  <XCircle className="w-4 h-4 text-slate-400 hover:text-rose-500" />
                 </button>
               </div>
 
@@ -332,10 +329,10 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     key={method}
                     type="button"
                     onClick={() => setSelectedMethod(method)}
-                    className={`py-1.5 px-2 text-[11px] font-bold rounded-lg capitalize border transition-all ${
+                    className={`py-1.5 px-2 text-[11px] font-bold rounded-xl capitalize border transition-all ${
                       selectedMethod === method
-                        ? 'bg-purple-600 text-white border-purple-400 shadow-md shadow-purple-600/30'
-                        : 'bg-gray-800/80 text-gray-400 border-gray-700/80 hover:text-white hover:border-gray-600'
+                        ? 'bg-red-500 text-white border-red-500 shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     {t(`orders.${method === 'mobile' ? 'digital' : method}`, { defaultValue: method })}
@@ -343,40 +340,36 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                 ))}
               </div>
 
-              <button
-                type="button"
+              <Button
+                variant="success"
+                size="sm"
+                fullWidth={true}
+                isLoading={isUpdating}
+                icon={<CheckCircle2 className="w-4 h-4" />}
                 onClick={handleConfirmPayment}
-                disabled={isUpdating}
-                className="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-lg shadow-emerald-600/20 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
               >
-                {isUpdating ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                ) : (
-                  <>
-                    <CheckCircle2 className="w-4 h-4 text-emerald-200" />
-                    <span>{t('orders.confirmPaymentBtn', { amount: Number(order.total_price).toFixed(2) })}</span>
-                  </>
-                )}
-              </button>
+                {t('orders.confirmPaymentBtn', { amount: Number(order.total_price).toFixed(2) })}
+              </Button>
             </div>
           )}
 
           {canCancel && (
-            <button
+            <Button
+              variant="danger"
+              size="sm"
+              isLoading={isUpdating}
+              icon={<XCircle className="w-4 h-4" />}
               onClick={() => {
                 if (window.confirm(t('orders.cancelConfirm', { id: order.id }))) {
                   handleTransition('cancelled');
                 }
               }}
-              disabled={isUpdating}
-              className="py-2.5 px-3 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1 disabled:opacity-50"
             >
-              <XCircle className="w-4 h-4 text-rose-400" />
-              <span>{t('common.cancel')}</span>
-            </button>
+              {t('common.cancel')}
+            </Button>
           )}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };

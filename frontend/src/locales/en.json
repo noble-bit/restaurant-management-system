@@ -366,5 +366,15 @@
     "oneTimePasscode": "One-Time Passcode",
     "shareTempPasswordMsg": "Share this temporary password with {{name}}. For security reasons, this password will not be shown again.",
     "cannotDeleteSelf": "You cannot delete your own account."
+  },
+  "profile": {
+    "title": "My Profile",
+    "selectPhoto": "Select profile photo",
+    "savePhoto": "Save Photo",
+    "uploading": "Uploading...",
+    "photoSuccess": "Profile photo updated successfully!",
+    "uploadError": "Failed to upload profile photo. Please try again.",
+    "invalidFileType": "Invalid file type. Please select an image file (JPEG, PNG, WEBP, GIF).",
+    "fileTooLarge": "Image size exceeds 5MB limit. Please choose a smaller image."
   }
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
 
@@ -17,13 +17,25 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
   onProfileClick,
   children,
 }) => {
+  const [isOpenMobileSidebar, setIsOpenMobileSidebar] = useState(false);
+
   return (
-    <div className="flex min-h-screen bg-[#0b0f19] text-gray-100 antialiased selection:bg-indigo-500 selection:text-white">
-      <Sidebar currentTab={currentTab} setCurrentTab={setCurrentTab} />
+    <div className="flex min-h-screen bg-[#f3f7f6] text-slate-800 font-sans antialiased selection:bg-red-500 selection:text-white">
+      <Sidebar
+        currentTab={currentTab}
+        setCurrentTab={setCurrentTab}
+        isOpenMobile={isOpenMobileSidebar}
+        onCloseMobile={() => setIsOpenMobileSidebar(false)}
+      />
 
       <div className="flex-1 flex flex-col min-w-0">
-        <Navbar onChangePasswordClick={onChangePasswordClick} onProfileClick={onProfileClick} />
-        <main className="flex-1 p-8 overflow-y-auto">{children}</main>
+        <Navbar
+          onChangePasswordClick={onChangePasswordClick}
+          onProfileClick={onProfileClick}
+          onNavigateTab={setCurrentTab}
+          onOpenMobileSidebar={() => setIsOpenMobileSidebar(true)}
+        />
+        <main className="flex-1 p-4 md:p-8 overflow-y-auto">{children}</main>
       </div>
     </div>
   );

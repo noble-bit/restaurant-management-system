@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
 import { Key, Copy, Check, AlertTriangle } from 'lucide-react';
 
 interface TempPasswordModalProps {
@@ -28,49 +29,43 @@ export const TempPasswordModal: React.FC<TempPasswordModalProps> = ({
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={t('staff.tempPasswordTitle')} maxWidth="md">
       <div className="space-y-6 py-2">
-        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
-          <AlertTriangle className="w-6 h-6 text-amber-400 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-200 leading-relaxed font-medium">
+        <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-xs text-amber-900 leading-relaxed font-semibold">
             {t('staff.shareTempPasswordMsg', { name: staffName })}
           </p>
         </div>
 
-        <div className="p-5 glass-card rounded-2xl border border-indigo-500/30 flex flex-col items-center justify-center gap-3 relative">
-          <div className="flex items-center gap-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-            <Key className="w-4 h-4 text-indigo-400" />
+        <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col items-center justify-center gap-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-wider">
+            <Key className="w-4 h-4 text-red-500" />
             <span>{t('staff.oneTimePasscode')}</span>
           </div>
 
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-2xl font-bold tracking-widest text-emerald-400 select-all bg-gray-900/80 px-4 py-2 rounded-xl border border-gray-800">
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <span className="font-mono text-2xl font-extrabold tracking-widest text-emerald-600 select-all bg-white px-5 py-2.5 rounded-2xl border border-slate-200 shadow-xs">
               {tempPassword}
             </span>
-            <button
+            <Button
+              type="button"
+              variant={copied ? 'success' : 'primary'}
+              icon={copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               onClick={handleCopy}
-              className="p-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-lg transition-all flex items-center gap-2 text-sm font-semibold"
             >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-300" />
-                  <span>{t('staff.copied')}</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>{t('staff.copyPassword')}</span>
-                </>
-              )}
-            </button>
+              {copied ? t('staff.copied') : t('staff.copyPassword')}
+            </Button>
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <button
+        <div className="flex justify-end pt-2">
+          <Button
+            type="button"
+            variant="primary"
+            fullWidth={true}
             onClick={onClose}
-            className="w-full py-3 px-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-semibold rounded-xl hover:from-indigo-500 hover:to-violet-500 transition-all shadow-lg shadow-indigo-600/30"
           >
             {t('staff.securedPasswordBtn')}
-          </button>
+          </Button>
         </div>
       </div>
     </Modal>

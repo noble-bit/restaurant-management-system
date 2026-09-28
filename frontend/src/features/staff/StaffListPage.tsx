@@ -5,6 +5,14 @@ import { getStaffListApi, deleteStaffApi } from '../../api/staff';
 import { CreateStaffModal } from './CreateStaffModal';
 import { TempPasswordModal } from './TempPasswordModal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { PageHeader } from '../../components/common/PageHeader';
+import { Button } from '../../components/common/Button';
+import { Badge } from '../../components/common/Badge';
+import { Input } from '../../components/common/Input';
+import { Select } from '../../components/common/Select';
+import { Avatar } from '../../components/common/Avatar';
+import { EmptyState } from '../../components/common/EmptyState';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import {
@@ -15,10 +23,8 @@ import {
   Phone,
   Calendar,
   Trash2,
-  Loader2,
   AlertTriangle,
   X,
-  XCircle,
 } from 'lucide-react';
 
 export const StaffListPage: React.FC = () => {
@@ -32,7 +38,10 @@ export const StaffListPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<string>('all');
   const [showInactive, setShowInactive] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  // Deactivate modal state
+  const [deactivatingStaff, setDeactivatingStaff] = useState<StaffMember | null>(null);
+  const [isDeactivating, setIsDeactivating] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -68,23 +77,22 @@ export const StaffListPage: React.FC = () => {
     }
   };
 
-  const handleDeleteStaff = async (staff: StaffMember) => {
+  const handleConfirmDeactivate = async () => {
+    if (!deactivatingStaff) return;
     setDeleteError(null);
-    const staffName = staff.first_name
-      ? `${staff.first_name} ${staff.last_name}`.trim()
-      : staff.username;
+    setIsDeactivating(true);
 
-    if (!window.confirm(t('staff.deactivateStaffConfirm', { name: staffName }))) {
-      return;
-    }
+    const staffName = deactivatingStaff.first_name
+      ? `${deactivatingStaff.first_name} ${deactivatingStaff.last_name}`.trim()
+      : deactivatingStaff.username;
 
-    setDeletingId(staff.id);
     try {
-      await deleteStaffApi(staff.id);
+      await deleteStaffApi(deactivatingStaff.id);
       showToast(t('staff.deactivatedToast', { name: staffName }), 'info');
       setStaffList((prev) =>
-        prev.map((s) => (s.id === staff.id ? { ...s, is_active: false } : s))
+        prev.map((s) => (s.id === deactivatingStaff.id ? { ...s, is_active: false } : s))
       );
+      setDeactivatingStaff(null);
     } catch (err: unknown) {
       console.error('Failed to deactivate staff member:', err);
       if (err && typeof err === 'object' && 'response' in err) {
@@ -105,7 +113,7 @@ export const StaffListPage: React.FC = () => {
         showToast(msg, 'error');
       }
     } finally {
-      setDeletingId(null);
+      setIsDeactivating(false);
     }
   };
 
@@ -120,63 +128,50 @@ export const StaffListPage: React.FC = () => {
   });
 
   const getRoleBadge = (role: UserRole) => {
-    const map: Record<UserRole, string> = {
-      owner: 'bg-purple-500/20 text-purple-300 border-purple-500/30',
-      manager: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
-      chef: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
-      waiter: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
-      cashier: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    const map: Record<UserRole, 'primary' | 'success' | 'warning' | 'info' | 'neutral'> = {
+      owner: 'primary',
+      manager: 'info',
+      chef: 'warning',
+      waiter: 'success',
+      cashier: 'neutral',
     };
     return (
-      <span
-        className={`px-3 py-1 text-xs font-semibold rounded-full border capitalize ${
-          map[role] || 'bg-gray-800 text-gray-300 border-gray-700'
-        }`}
-      >
+      <Badge variant={map[role] || 'neutral'}>
         {t(`roles.${role}`, { defaultValue: role })}
-      </span>
+      </Badge>
     );
   };
 
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 rounded-2xl border border-gray-800">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-500/20 text-indigo-400 rounded-xl">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">{t('staff.title')}</h1>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {t('staff.subtitle')}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {isOwnerOrManager && (
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all text-sm shrink-0"
-          >
-            <UserPlus className="w-5 h-5" />
-            <span>{t('staff.addNewStaff')}</span>
-          </button>
-        )}
-      </div>
+      <PageHeader
+        title={t('staff.title')}
+        subtitle={t('staff.subtitle')}
+        icon={<Users className="w-6 h-6" />}
+        actions={
+          isOwnerOrManager && (
+            <Button
+              variant="primary"
+              icon={<UserPlus className="w-5 h-5" />}
+              onClick={() => setIsCreateModalOpen(true)}
+            >
+              {t('staff.addNewStaff')}
+            </Button>
+          )
+        }
+      />
 
       {/* Inline Error Alert Banner */}
       {deleteError && (
-        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between gap-3">
+        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between gap-3 font-medium">
           <div className="flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-500 shrink-0" />
             <span>{deleteError}</span>
           </div>
           <button
             onClick={() => setDeleteError(null)}
-            className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-rose-500/20 transition-colors"
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-rose-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -185,43 +180,39 @@ export const StaffListPage: React.FC = () => {
 
       {/* Filter and Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
+        <div className="w-full sm:w-80">
+          <Input
+            placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={t('common.search')}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl glass-input text-xs"
+            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-4 w-full sm:w-auto">
           {/* Show Inactive Staff Toggle */}
-          <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold text-gray-300 hover:text-white select-none">
+          <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 select-none">
             <input
               type="checkbox"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
-              className="w-4 h-4 rounded bg-gray-900 border-gray-700 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-gray-900 accent-indigo-600 cursor-pointer"
+              className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-400 cursor-pointer"
             />
             <span>{t('staff.showInactive')}</span>
           </label>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t('staff.role')}:</span>
-            <select
+          <div className="w-full sm:w-44">
+            <Select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value)}
-              className="px-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900 capitalize"
             >
-              <option value="all" className="bg-gray-900">{t('common.all')}</option>
-              <option value="owner" className="bg-gray-900">{t('roles.owner')}</option>
-              <option value="manager" className="bg-gray-900">{t('roles.manager')}</option>
-              <option value="chef" className="bg-gray-900">{t('roles.chef')}</option>
-              <option value="waiter" className="bg-gray-900">{t('roles.waiter')}</option>
-              <option value="cashier" className="bg-gray-900">{t('roles.cashier')}</option>
-            </select>
+              <option value="all">{t('common.all')}</option>
+              <option value="owner">{t('roles.owner')}</option>
+              <option value="manager">{t('roles.manager')}</option>
+              <option value="chef">{t('roles.chef')}</option>
+              <option value="waiter">{t('roles.waiter')}</option>
+              <option value="cashier">{t('roles.cashier')}</option>
+            </Select>
           </div>
         </div>
       </div>
@@ -230,15 +221,17 @@ export const StaffListPage: React.FC = () => {
       {isLoading ? (
         <LoadingSpinner text={t('common.loading')} />
       ) : filteredStaff.length === 0 ? (
-        <div className="glass-card p-12 rounded-2xl border border-gray-800 text-center flex flex-col items-center justify-center">
-          <Users className="w-12 h-12 text-gray-600 mb-3" />
-          <h3 className="text-base font-bold text-gray-300">{t('staff.noStaff')}</h3>
-        </div>
+        <EmptyState
+          icon={<Users className="w-8 h-8 text-slate-400" />}
+          title={t('staff.noStaff')}
+          actionText={isOwnerOrManager ? t('staff.addNewStaff') : undefined}
+          onAction={isOwnerOrManager ? () => setIsCreateModalOpen(true) : undefined}
+        />
       ) : (
-        <div className="glass-panel rounded-2xl border border-gray-800 overflow-hidden shadow-xl">
+        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-gray-900/80 text-gray-400 uppercase font-semibold border-b border-gray-800 tracking-wider">
+              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('common.name')}</th>
                   <th className="py-4 px-6">{t('staff.role')}</th>
@@ -248,56 +241,54 @@ export const StaffListPage: React.FC = () => {
                   {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-800/60 text-gray-300">
+              <tbody className="divide-y divide-slate-100 text-slate-700">
                 {filteredStaff.map((staff) => {
                   const isInactive = staff.is_active === false;
                   const isSelf = user?.id === staff.id || (user?.email && user.email === staff.email);
+                  const fullName = staff.first_name
+                    ? `${staff.first_name} ${staff.last_name}`.trim()
+                    : staff.username;
+
                   return (
                     <tr
                       key={staff.id}
                       className={`transition-colors ${
-                        isInactive ? 'bg-gray-900/40 opacity-60' : 'hover:bg-gray-800/40'
+                        isInactive ? 'bg-slate-50/50 opacity-60' : 'hover:bg-slate-50/60'
                       }`}
                     >
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-xs ${
-                              isInactive
-                                ? 'bg-gray-800 text-gray-400 border border-gray-700'
-                                : 'bg-gradient-to-tr from-indigo-600 to-purple-600 text-white'
-                            }`}
-                          >
-                            {(staff.first_name?.[0] || staff.username[0]).toUpperCase()}
-                          </div>
+                          <Avatar
+                            name={fullName}
+                            size="sm"
+                            showOnlineStatus={!isInactive}
+                          />
                           <div>
                             <p
-                              className={`font-semibold text-sm ${
-                                isInactive ? 'text-gray-400 line-through' : 'text-white'
+                              className={`font-bold text-sm ${
+                                isInactive ? 'text-slate-400 line-through' : 'text-slate-800'
                               }`}
                             >
-                              {staff.first_name
-                                ? `${staff.first_name} ${staff.last_name}`
-                                : staff.username}
+                              {fullName}
                             </p>
-                            <p className="text-xs text-gray-400">@{staff.username}</p>
+                            <p className="text-xs text-slate-400 font-medium">@{staff.username}</p>
                           </div>
                         </div>
                       </td>
                       <td className="py-4 px-6">{getRoleBadge(staff.role)}</td>
-                      <td className="py-4 px-6 space-y-1">
-                        <p className="text-gray-300 font-mono text-[11px]">{staff.email}</p>
+                      <td className="py-4 px-6 space-y-0.5">
+                        <p className="text-slate-700 font-mono text-[11px] font-medium">{staff.email}</p>
                         {staff.phone_number && (
-                          <p className="text-gray-500 text-[11px] flex items-center gap-1">
-                            <Phone className="w-3 h-3 text-gray-400" />
+                          <p className="text-slate-400 text-[11px] flex items-center gap-1 font-medium">
+                            <Phone className="w-3 h-3 text-slate-400" />
                             <span>{staff.phone_number}</span>
                           </p>
                         )}
                       </td>
-                      <td className="py-4 px-6 text-gray-400">
+                      <td className="py-4 px-6 text-slate-500 font-medium">
                         {staff.hire_date ? (
                           <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-gray-500" />
+                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
                             <span>{staff.hire_date}</span>
                           </div>
                         ) : (
@@ -306,38 +297,32 @@ export const StaffListPage: React.FC = () => {
                       </td>
                       <td className="py-4 px-6">
                         {isInactive ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-gray-800/80 text-gray-400 border border-gray-700">
-                            <XCircle className="w-3.5 h-3.5 text-gray-500" />
+                          <Badge variant="neutral" dot={true}>
                             {t('staff.statusInactive')}
-                          </span>
+                          </Badge>
                         ) : staff.must_change_password ? (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                          <Badge variant="warning">
                             <ShieldAlert className="w-3.5 h-3.5" />
-                            {t('staff.pendingPasswordChange')}
-                          </span>
+                            <span>{t('staff.pendingPasswordChange')}</span>
+                          </Badge>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold rounded-md bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          <Badge variant="success" dot={true}>
                             {t('staff.activeAndVerified')}
-                          </span>
+                          </Badge>
                         )}
                       </td>
                       {isOwnerOrManager && (
                         <td className="py-4 px-6 text-right">
                           {isSelf ? null : !isInactive ? (
                             <button
-                              onClick={() => handleDeleteStaff(staff)}
-                              disabled={deletingId === staff.id}
-                              className="p-1.5 text-gray-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors border border-transparent hover:border-rose-500/20 disabled:opacity-50"
+                              onClick={() => setDeactivatingStaff(staff)}
+                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
                               title={t('common.delete')}
                             >
-                              {deletingId === staff.id ? (
-                                <Loader2 className="w-4 h-4 animate-spin text-rose-400" />
-                              ) : (
-                                <Trash2 className="w-4 h-4" />
-                              )}
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           ) : (
-                            <span className="text-[11px] text-gray-500 italic pr-2">
+                            <span className="text-[11px] text-slate-400 italic pr-2 font-medium">
                               {t('staff.statusInactive')}
                             </span>
                           )}
@@ -352,19 +337,38 @@ export const StaffListPage: React.FC = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* Create Staff Modal */}
       <CreateStaffModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSuccess={handleStaffCreated}
       />
 
+      {/* Temp Password Modal */}
       {createdStaffTempPass && (
         <TempPasswordModal
           isOpen={true}
           onClose={() => setCreatedStaffTempPass(null)}
           staffName={createdStaffTempPass.name}
           tempPassword={createdStaffTempPass.pass}
+        />
+      )}
+
+      {/* Confirm Deactivate Dialog */}
+      {deactivatingStaff && (
+        <ConfirmDialog
+          isOpen={Boolean(deactivatingStaff)}
+          onClose={() => setDeactivatingStaff(null)}
+          onConfirm={handleConfirmDeactivate}
+          title={t('common.delete')}
+          message={t('staff.deactivateStaffConfirm', {
+            name: deactivatingStaff.first_name
+              ? `${deactivatingStaff.first_name} ${deactivatingStaff.last_name}`
+              : deactivatingStaff.username,
+          })}
+          confirmText={t('common.delete')}
+          variant="danger"
+          isLoading={isDeactivating}
         />
       )}
     </div>

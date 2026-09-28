@@ -43,14 +43,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
     // Client-side validation: image only
     if (!file.type.startsWith('image/')) {
-      setErrorMsg('Invalid file type. Please select an image file (JPEG, PNG, WEBP, GIF).');
+      setErrorMsg(t('profile.invalidFileType'));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
 
     // Client-side validation: size limit (5MB)
     if (file.size > MAX_FILE_SIZE) {
-      setErrorMsg('Image size exceeds 5MB limit. Please choose a smaller image.');
+      setErrorMsg(t('profile.fileTooLarge'));
       if (fileInputRef.current) fileInputRef.current.value = '';
       return;
     }
@@ -69,12 +69,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
       const updatedUser = await updateProfileAvatarApi(selectedFile);
       updateUser(updatedUser);
       await refreshUser();
-      showToast('Profile photo updated successfully!', 'success');
+      showToast(t('profile.photoSuccess'), 'success');
       setSelectedFile(null);
       setPreviewUrl(null);
     } catch (err: unknown) {
       console.error('Failed to upload profile photo:', err);
-      setErrorMsg('Failed to upload profile photo. Please try again.');
+      setErrorMsg(t('profile.uploadError'));
     } finally {
       setIsUploading(false);
     }
@@ -97,20 +97,20 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
   const avatarSrc = previewUrl || user?.avatar;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="My Profile" maxWidth="md">
+    <Modal isOpen={isOpen} onClose={onClose} title={t('profile.title')} maxWidth="md">
       <div className="space-y-6">
         {/* Inline Error Alert */}
         {errorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Profile Avatar & Upload Section */}
-        <div className="flex flex-col items-center justify-center p-6 rounded-2xl glass-card border border-gray-800 space-y-4 text-center">
+        <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4 text-center">
           <div className="relative group">
-            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-indigo-500/30 shadow-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white text-3xl font-bold">
+            <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-red-500/20 shadow-md bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center text-white text-3xl font-bold">
               {avatarSrc ? (
                 <img
                   src={avatarSrc}
@@ -126,8 +126,8 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="absolute bottom-0 right-0 p-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full shadow-lg border-2 border-gray-900 transition-all disabled:opacity-50"
-              title="Select profile photo"
+              className="absolute bottom-0 right-0 p-2.5 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full shadow-md border-2 border-white transition-all disabled:opacity-50 cursor-pointer"
+              title={t('profile.selectPhoto')}
             >
               <Camera className="w-4 h-4" />
             </button>
@@ -142,10 +142,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           />
 
           <div>
-            <h3 className="text-lg font-bold text-white">
+            <h3 className="text-lg font-bold text-slate-900">
               {user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username}
             </h3>
-            <p className="text-xs text-gray-400 mt-0.5">@{user?.username}</p>
+            <p className="text-xs text-slate-500 mt-0.5 font-medium">@{user?.username}</p>
           </div>
 
           {selectedFile && (
@@ -154,17 +154,17 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 type="button"
                 onClick={handleUpload}
                 disabled={isUploading}
-                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl shadow-md shadow-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
               >
                 {isUploading ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Uploading...</span>
+                    <span>{t('profile.uploading')}</span>
                   </>
                 ) : (
                   <>
                     <Upload className="w-4 h-4" />
-                    <span>Save Photo</span>
+                    <span>{t('profile.savePhoto')}</span>
                   </>
                 )}
               </button>
@@ -173,66 +173,66 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 type="button"
                 onClick={handleClearSelection}
                 disabled={isUploading}
-                className="px-3 py-2 text-xs font-semibold text-gray-400 hover:text-white rounded-xl border border-gray-700 hover:bg-gray-800 transition-colors disabled:opacity-50"
+                className="px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl border border-slate-300 hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
               >
-                Cancel
+                {t('common.cancel')}
               </button>
             </div>
           )}
         </div>
 
         {/* User Details Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-3.5 rounded-xl glass-panel border border-gray-800 flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
+            <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
               <Mail className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-gray-400 font-medium">{t('auth.emailLabel')}</p>
-              <p className="text-white font-semibold font-mono">{user?.email}</p>
+              <p className="text-slate-500 font-medium">{t('auth.emailLabel')}</p>
+              <p className="text-slate-900 font-semibold font-mono text-xs">{user?.email}</p>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl glass-panel border border-gray-800 flex items-center gap-3">
-            <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
+            <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
               <Shield className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-gray-400 font-medium">{t('nav.currentRole')}</p>
-              <p className="text-white font-semibold capitalize">{translatedRole}</p>
+              <p className="text-slate-500 font-medium">{t('nav.currentRole')}</p>
+              <p className="text-slate-900 font-semibold capitalize">{translatedRole}</p>
             </div>
           </div>
 
           {user?.phone_number && (
-            <div className="p-3.5 rounded-xl glass-panel border border-gray-800 flex items-center gap-3">
-              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
+              <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
                 <Phone className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-gray-400 font-medium">{t('staff.phone')}</p>
-                <p className="text-white font-semibold">{user.phone_number}</p>
+                <p className="text-slate-500 font-medium">{t('staff.phone')}</p>
+                <p className="text-slate-900 font-semibold">{user.phone_number}</p>
               </div>
             </div>
           )}
 
           {user?.hire_date && (
-            <div className="p-3.5 rounded-xl glass-panel border border-gray-800 flex items-center gap-3">
-              <div className="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
+              <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
                 <Calendar className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-gray-400 font-medium">{t('staff.hireDate')}</p>
-                <p className="text-white font-semibold">{user.hire_date}</p>
+                <p className="text-slate-500 font-medium">{t('staff.hireDate')}</p>
+                <p className="text-slate-900 font-semibold">{user.hire_date}</p>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-gray-800">
+        <div className="flex justify-end pt-4 border-t border-slate-100">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
+            className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
           >
             {t('common.close')}
           </button>

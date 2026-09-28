@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../components/common/Modal';
+import { Button } from '../../components/common/Button';
+import { Input } from '../../components/common/Input';
+import { Select } from '../../components/common/Select';
 import type {
   CreateMenuItemPayload,
   Ingredient,
@@ -209,144 +212,107 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={t('menu.addMenuItem')} maxWidth="xl">
       <form onSubmit={handleSubmit} className="space-y-6">
         {(fieldErrors.detail || fieldErrors.non_field_errors) && (
-          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{fieldErrors.detail || fieldErrors.non_field_errors}</span>
           </div>
         )}
 
         {/* Section 1: Item Basic Details */}
         <div className="space-y-4">
-          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider border-b border-gray-800 pb-2">
+          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
             {t('menu.menuItemCol')}
           </h4>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-              {t('common.name')} *
-            </label>
-            <div className="relative">
-              <Tag className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                name="name"
-                required
-                value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
-                }}
-                placeholder="e.g. Margherita Pizza"
-                className={`w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs ${
-                  fieldErrors.name ? 'border-rose-500/60 focus:border-rose-500' : ''
-                }`}
-              />
-            </div>
-            {fieldErrors.name && (
-              <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 shrink-0" />
-                <span>{fieldErrors.name}</span>
-              </p>
-            )}
+            <Input
+              label={`${t('common.name')} *`}
+              name="name"
+              required
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+                if (fieldErrors.name) setFieldErrors((prev) => ({ ...prev, name: '' }));
+              }}
+              placeholder="e.g. Margherita Pizza"
+              leftIcon={<Tag className="w-4 h-4" />}
+              error={fieldErrors.name}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                {t('menu.categoryCol')} *
-              </label>
-              <div className="relative">
-                <FolderTree className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <select
-                  name="category_id"
-                  required
-                  value={categoryId}
-                  onChange={(e) => {
-                    setCategoryId(Number(e.target.value));
-                    if (fieldErrors.category_id) setFieldErrors((prev) => ({ ...prev, category_id: '' }));
-                  }}
-                  disabled={isLoadingOptions}
-                  className={`w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs bg-gray-900 ${
-                    fieldErrors.category_id ? 'border-rose-500/60' : ''
-                  }`}
-                >
-                  {categories.length === 0 ? (
-                    <option value={0}>No categories available</option>
-                  ) : (
-                    categories.map((c) => (
-                      <option key={c.id} value={c.id} className="bg-gray-900">
-                        {c.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-              {fieldErrors.category_id && (
-                <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3 shrink-0" />
-                  <span>{fieldErrors.category_id}</span>
-                </p>
-              )}
+              <Select
+                label={`${t('menu.categoryCol')} *`}
+                name="category_id"
+                required
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(Number(e.target.value));
+                  if (fieldErrors.category_id) setFieldErrors((prev) => ({ ...prev, category_id: '' }));
+                }}
+                disabled={isLoadingOptions}
+                leftIcon={<FolderTree className="w-4 h-4 text-slate-400" />}
+                error={fieldErrors.category_id}
+              >
+                {categories.length === 0 ? (
+                  <option value={0}>No categories available</option>
+                ) : (
+                  categories.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))
+                )}
+              </Select>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
-                {t('menu.priceCol')} ($) *
-              </label>
-              <div className="relative">
-                <DollarSign className="w-4 h-4 text-gray-500 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="number"
-                  name="price"
-                  step="0.01"
-                  min="0"
-                  required
-                  value={price}
-                  onChange={(e) => {
-                    setPrice(e.target.value);
-                    if (fieldErrors.price) setFieldErrors((prev) => ({ ...prev, price: '' }));
-                  }}
-                  className={`w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs ${
-                    fieldErrors.price ? 'border-rose-500/60 focus:border-rose-500' : ''
-                  }`}
-                />
-              </div>
-              {fieldErrors.price && (
-                <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
-                  <AlertCircle className="w-3 h-3 shrink-0" />
-                  <span>{fieldErrors.price}</span>
-                </p>
-              )}
+              <Input
+                label={`${t('menu.priceCol')} ($) *`}
+                type="number"
+                name="price"
+                step="0.01"
+                min="0"
+                required
+                value={price}
+                onChange={(e) => {
+                  setPrice(e.target.value);
+                  if (fieldErrors.price) setFieldErrors((prev) => ({ ...prev, price: '' }));
+                }}
+                leftIcon={<DollarSign className="w-4 h-4" />}
+                error={fieldErrors.price}
+              />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               {t('common.description')}
             </label>
             <div className="relative">
-              <FileText className="w-4 h-4 text-gray-500 absolute left-3 top-3" />
+              <FileText className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <textarea
                 name="description"
                 rows={2}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl glass-input text-xs"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:border-red-400 focus:ring-3 focus:ring-red-50"
               />
             </div>
           </div>
 
           {/* Menu Item Photo */}
           <div>
-            <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Item Photo (Optional)
             </label>
-            <div className="flex items-center gap-4 p-3.5 rounded-xl glass-panel border border-gray-800">
-              <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-900 border border-gray-700 flex items-center justify-center text-gray-500 shrink-0">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-xs">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <UtensilsCrossed className="w-6 h-6 text-gray-600" />
+                  <UtensilsCrossed className="w-7 h-7 text-slate-400" />
                 )}
               </div>
 
@@ -359,65 +325,64 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                     onChange={handleAvatarChange}
                     className="hidden"
                   />
-                  <button
+                  <Button
                     type="button"
+                    variant="outline"
+                    size="sm"
+                    icon={<Upload className="w-3.5 h-3.5" />}
                     onClick={() => avatarInputRef.current?.click()}
-                    className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1.5"
                   >
-                    <Upload className="w-3.5 h-3.5" />
-                    <span>{avatarFile ? 'Change Photo' : 'Select Photo'}</span>
-                  </button>
+                    {avatarFile ? 'Change Photo' : 'Select Photo'}
+                  </Button>
 
                   {avatarFile && (
-                    <button
+                    <Button
                       type="button"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => {
                         setAvatarFile(null);
                         if (avatarPreview) URL.revokeObjectURL(avatarPreview);
                         setAvatarPreview(null);
                         if (avatarInputRef.current) avatarInputRef.current.value = '';
                       }}
-                      className="px-2.5 py-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
                     >
                       Remove
-                    </button>
+                    </Button>
                   )}
                 </div>
-                <p className="text-[11px] text-gray-500">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
+                <p className="text-[11px] text-slate-400">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
               </div>
             </div>
             {fieldErrors.avatar && (
-              <p className="text-[11px] text-rose-400 font-medium mt-1 flex items-center gap-1">
-                <AlertCircle className="w-3 h-3 shrink-0" />
-                <span>{fieldErrors.avatar}</span>
-              </p>
+              <p className="text-xs text-rose-500 font-semibold mt-1 leading-tight">{fieldErrors.avatar}</p>
             )}
           </div>
         </div>
 
         {/* Section 2: Recipe Ingredients */}
         <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between border-b border-gray-800 pb-2">
-            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-              <Scale className="w-4 h-4 text-indigo-400" />
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <Scale className="w-4 h-4 text-red-500" />
               <span>{t('menu.recipeCol')} *</span>
             </h4>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
+              icon={<Plus className="w-3.5 h-3.5" />}
               onClick={handleAddIngredientRow}
               disabled={allIngredients.length === 0}
-              className="flex items-center gap-1 px-3 py-1.5 bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 text-xs font-semibold rounded-lg transition-all disabled:opacity-50"
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>{t('menu.addIngredientToRecipe')}</span>
-            </button>
+              {t('menu.addIngredientToRecipe')}
+            </Button>
           </div>
 
           {fieldErrors.ingredients && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs font-medium flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{fieldErrors.ingredients}</span>
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+              {fieldErrors.ingredients}
             </div>
           )}
 
@@ -429,36 +394,31 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-3 rounded-xl glass-card border border-gray-800"
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100"
                 >
                   <div className="flex-1">
-                    <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      {t('inventory.ingredientCol')} #{idx + 1}
-                    </label>
-                    <select
+                    <Select
+                      label={`${t('inventory.ingredientCol')} #${idx + 1}`}
                       value={row.ingredient_id}
                       onChange={(e) =>
                         handleIngredientRowChange(idx, 'ingredient_id', e.target.value)
                       }
-                      className="w-full px-3 py-2 rounded-lg glass-input text-xs bg-gray-900"
                     >
                       {allIngredients.length === 0 ? (
                         <option value={0}>No ingredients available</option>
                       ) : (
                         allIngredients.map((ing) => (
-                          <option key={ing.id} value={ing.id} className="bg-gray-900">
+                          <option key={ing.id} value={ing.id}>
                             {ing.name} ({ing.unit_of_measure})
                           </option>
                         ))
                       )}
-                    </select>
+                    </Select>
                   </div>
 
                   <div className="w-36">
-                    <label className="block text-[10px] text-gray-400 uppercase font-semibold mb-1">
-                      {t('common.quantity')} ({unit || 'unit'})
-                    </label>
-                    <input
+                    <Input
+                      label={`${t('common.quantity')} (${unit || 'unit'})`}
                       type="number"
                       step="0.01"
                       min="0.01"
@@ -467,7 +427,6 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                       onChange={(e) =>
                         handleIngredientRowChange(idx, 'quantity_required', e.target.value)
                       }
-                      className="w-full px-3 py-2 rounded-lg glass-input text-xs"
                     />
                   </div>
 
@@ -475,7 +434,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                     type="button"
                     onClick={() => handleRemoveIngredientRow(idx)}
                     disabled={ingredientRows.length <= 1}
-                    className="p-2 text-gray-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors mt-4 disabled:opacity-30 disabled:hover:bg-transparent disabled:hover:text-gray-500"
+                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors mt-5 disabled:opacity-30"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -485,22 +444,19 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-800">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2.5 rounded-xl border border-gray-700 text-xs font-semibold text-gray-300 hover:bg-gray-800 transition-colors"
-          >
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+          <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
-          </button>
-          <button
+          </Button>
+          <Button
             type="submit"
-            disabled={isSubmitting || categories.length === 0}
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
+            variant="primary"
+            isLoading={isSubmitting}
+            disabled={categories.length === 0}
+            icon={<UtensilsCrossed className="w-4 h-4" />}
           >
-            <UtensilsCrossed className="w-4 h-4" />
-            <span>{isSubmitting ? t('common.saving') : t('menu.addMenuItem')}</span>
-          </button>
+            {isSubmitting ? t('common.saving') : t('menu.addMenuItem')}
+          </Button>
         </div>
       </form>
     </Modal>

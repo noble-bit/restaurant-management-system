@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
+import { CartProvider } from './context/CartContext';
 import { LoginPage } from './features/auth/LoginPage';
 import { ForceChangePasswordPage } from './features/auth/ForceChangePasswordPage';
 import { MainLayout } from './components/layout/MainLayout';
@@ -27,7 +28,7 @@ const AppContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0b0f19] flex items-center justify-center">
+      <div className="min-h-screen bg-[#f3f7f6] flex items-center justify-center">
         <LoadingSpinner size="lg" text="Authenticating session..." />
       </div>
     );
@@ -99,7 +100,9 @@ export function App() {
   return (
     <ToastProvider>
       <AuthProvider>
-        <AppContent />
+        <CartProvider>
+          <AppContent />
+        </CartProvider>
       </AuthProvider>
     </ToastProvider>
   );

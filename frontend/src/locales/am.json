@@ -366,5 +366,15 @@
     "oneTimePasscode": "የአንድ ጊዜ የይለፍ ቃል",
     "shareTempPasswordMsg": "ይህንን ጊዜያዊ የይለፍ ቃል ለ{{name}} ይስጡት። ለደህንነት ሲባል ይህ የይለፍ ቃል እንደገና አይታይም።",
     "cannotDeleteSelf": "የራስዎን መለያ ማጥፋት አይችሉም።"
+  },
+  "profile": {
+    "title": "የእኔ መገለጫ",
+    "selectPhoto": "የመገለጫ ፎቶ ይምረጡ",
+    "savePhoto": "ፎቶ ያስቀምጡ",
+    "uploading": "በመጫን ላይ...",
+    "photoSuccess": "የመገለጫ ፎቶ በተሳካ ሁኔታ ተዘምኗል!",
+    "uploadError": "የመገለጫ ፎቶ መጫን አልተሳካም። እባክዎ እንደገና ይሞክሩ።",
+    "invalidFileType": "የተሳሳተ የፋይል አይነት። እባክዎ የምስል ፋይል ይምረጡ (JPEG, PNG, WEBP, GIF)።",
+    "fileTooLarge": "የምስል መጠን ከ5ሜጋባይት ይበልጣል። እባክዎ አነስ ያለ ምስል ይምረጡ።"
   }
 }

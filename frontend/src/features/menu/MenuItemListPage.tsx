@@ -150,7 +150,7 @@ export const MenuItemListPage: React.FC = () => {
             placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
+            leftIcon={<Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
           />
         </div>
 
@@ -160,7 +160,7 @@ export const MenuItemListPage: React.FC = () => {
             <Select
               value={selectedCategoryFilter}
               onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              leftIcon={<Filter className="w-4 h-4 text-slate-400" />}
+              leftIcon={<Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
             >
               <option value="all">{t('menu.allCategories')}</option>
               {categories.map((c) => (
@@ -197,7 +197,7 @@ export const MenuItemListPage: React.FC = () => {
         <LoadingSpinner text={t('menu.loadingCatalog')} />
       ) : filteredItems.length === 0 ? (
         <EmptyState
-          icon={<UtensilsCrossed className="w-8 h-8 text-slate-400" />}
+          icon={<UtensilsCrossed className="w-8 h-8 text-slate-400 dark:text-slate-500" />}
           title={t('menu.noItemsTitle')}
           description={
             searchQuery || selectedCategoryFilter !== 'all' || availabilityFilter !== 'all'
@@ -208,10 +208,10 @@ export const MenuItemListPage: React.FC = () => {
           onAction={isOwnerOrManager ? () => setIsAddModalOpen(true) : undefined}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
+              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('menu.menuItemCol')}</th>
                   <th className="py-4 px-6">{t('menu.categoryCol')}</th>
@@ -221,7 +221,7 @@ export const MenuItemListPage: React.FC = () => {
                   <th className="py-4 px-6 text-right">{t('common.actions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
                 {filteredItems.map((item) => {
                   const categoryName =
                     typeof item.category === 'object' && item.category !== null
@@ -229,20 +229,20 @@ export const MenuItemListPage: React.FC = () => {
                       : t('menu.generalMenu');
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
+                    <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200/60 flex items-center justify-center text-slate-400 shrink-0">
+                          <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
                             {item.avatar ? (
                               <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
                             ) : (
-                              <UtensilsCrossed className="w-5 h-5 text-slate-400" />
+                              <UtensilsCrossed className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                             )}
                           </div>
                           <div>
-                            <span className="font-bold text-slate-800 text-sm block">{item.name}</span>
+                            <span className="font-bold text-slate-800 dark:text-slate-100 text-sm block">{item.name}</span>
                             {item.description && (
-                              <span className="text-xs text-slate-400 line-clamp-1 mt-0.5">
+                              <span className="text-xs text-slate-400 dark:text-slate-400 line-clamp-1 mt-0.5">
                                 {item.description}
                               </span>
                             )}
@@ -252,9 +252,9 @@ export const MenuItemListPage: React.FC = () => {
                       <td className="py-4 px-6">
                         <Badge variant="primary">{categoryName}</Badge>
                       </td>
-                      <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-600">
+                      <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
                         <div className="flex items-center gap-0.5">
-                          <DollarSign className="w-3.5 h-3.5 text-slate-400" />
+                          <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                           <span>{Number(item.price).toFixed(2)}</span>
                         </div>
                       </td>
@@ -264,19 +264,19 @@ export const MenuItemListPage: React.FC = () => {
                             {item.ingredients.map((ri, idx) => (
                               <span
                                 key={idx}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 text-slate-600 border border-slate-200/60"
+                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-600"
                               >
-                                <Scale className="w-2.5 h-2.5 text-slate-400" />
+                                <Scale className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
                                 <span>
                                   {ri.ingredient?.name || `${t('inventory.ingredientCol')} #${ri.ingredient_id}`}:{' '}
-                                  <strong className="text-slate-800">{ri.quantity_required}</strong>
+                                  <strong className="text-slate-800 dark:text-slate-100">{ri.quantity_required}</strong>
                                   {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
                                 </span>
                               </span>
                             ))}
                           </div>
                         ) : (
-                          <span className="text-slate-400 italic text-[11px]">{t('menu.noRecipe')}</span>
+                          <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">{t('menu.noRecipe')}</span>
                         )}
                       </td>
                       <td className="py-4 px-6">
@@ -295,7 +295,7 @@ export const MenuItemListPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500" /> : <Eye className="w-3.5 h-3.5 text-slate-400" />}
+                            icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />}
                             onClick={() => setEditingItem(item)}
                           >
                             {isOwnerOrManager ? t('common.edit') : t('common.viewDetails')}
@@ -304,7 +304,7 @@ export const MenuItemListPage: React.FC = () => {
                           {isOwnerOrManager && (
                             <button
                               onClick={() => setDeletingItem(item)}
-                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                              className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
                               title={t('common.delete')}
                             >
                               <Trash2 className="w-4 h-4" />

@@ -99,7 +99,7 @@ export const CategoryListPage: React.FC = () => {
             placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
+            leftIcon={<Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
           />
         </div>
 
@@ -116,7 +116,7 @@ export const CategoryListPage: React.FC = () => {
         <LoadingSpinner text={t('common.loading')} />
       ) : filteredCategories.length === 0 ? (
         <EmptyState
-          icon={<FolderTree className="w-8 h-8 text-slate-400" />}
+          icon={<FolderTree className="w-8 h-8 text-slate-400 dark:text-slate-500" />}
           title={t('menu.noCategories')}
           description={
             searchQuery ? t('menu.noItemsMatching') : t('menu.categoriesTitle')
@@ -132,10 +132,10 @@ export const CategoryListPage: React.FC = () => {
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
+              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">ID</th>
                   <th className="py-4 px-6">{t('menu.categoryName')}</th>
@@ -143,11 +143,11 @@ export const CategoryListPage: React.FC = () => {
                   {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
                 {filteredCategories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-slate-50/60 transition-colors">
-                    <td className="py-4 px-6 font-mono text-slate-400 text-xs">#{cat.id}</td>
-                    <td className="py-4 px-6 font-bold text-slate-800 text-sm">{cat.name}</td>
+                  <tr key={cat.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
+                    <td className="py-4 px-6 font-mono text-slate-400 dark:text-slate-500 text-xs">#{cat.id}</td>
+                    <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-sm">{cat.name}</td>
                     <td className="py-4 px-6">
                       {cat.is_active ? (
                         <Badge variant="success" dot={true}>
@@ -165,7 +165,7 @@ export const CategoryListPage: React.FC = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            icon={<Edit2 className="w-3.5 h-3.5 text-red-500" />}
+                            icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
                             onClick={() => {
                               setEditingCategory(cat);
                               setIsModalOpen(true);
@@ -175,7 +175,7 @@ export const CategoryListPage: React.FC = () => {
                           </Button>
                           <button
                             onClick={() => setDeletingCategory(cat)}
-                            className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
                             title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />

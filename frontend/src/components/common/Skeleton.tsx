@@ -25,7 +25,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
       {skeletons.map((_, i) => (
         <div
           key={i}
-          className={`animate-pulse bg-slate-200/70 ${variantClasses[variant]} ${className}`}
+          className={`animate-pulse bg-slate-200/70 dark:bg-slate-700/60 ${variantClasses[variant]} ${className}`}
         />
       ))}
     </>

@@ -37,22 +37,22 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       {/* Floating Toast Portal */}
       <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3 max-w-sm w-full px-4">
         {toasts.map((toast) => {
-          let styleClass = 'bg-white text-slate-800 border-slate-200 shadow-[0_8px_30px_rgb(0,0,0,0.12)]';
+          let styleClass = 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border-slate-200 dark:border-slate-700 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]';
           let Icon = Info;
-          let iconColor = 'text-sky-500';
+          let iconColor = 'text-sky-500 dark:text-sky-400';
 
           if (toast.type === 'success') {
-            styleClass = 'bg-emerald-50 text-emerald-900 border-emerald-200 shadow-[0_8px_30px_rgba(16,185,129,0.15)]';
+            styleClass = 'bg-emerald-50 dark:bg-emerald-950/90 text-emerald-900 dark:text-emerald-200 border-emerald-200 dark:border-emerald-800/80 shadow-[0_8px_30px_rgba(16,185,129,0.15)]';
             Icon = CheckCircle2;
-            iconColor = 'text-emerald-600';
+            iconColor = 'text-emerald-600 dark:text-emerald-400';
           } else if (toast.type === 'error') {
-            styleClass = 'bg-rose-50 text-rose-900 border-rose-200 shadow-[0_8px_30px_rgba(239,68,68,0.15)]';
+            styleClass = 'bg-rose-50 dark:bg-rose-950/90 text-rose-900 dark:text-rose-200 border-rose-200 dark:border-rose-800/80 shadow-[0_8px_30px_rgba(239,68,68,0.15)]';
             Icon = AlertCircle;
-            iconColor = 'text-rose-600';
+            iconColor = 'text-rose-600 dark:text-rose-400';
           } else if (toast.type === 'warning') {
-            styleClass = 'bg-amber-50 text-amber-900 border-amber-200 shadow-[0_8px_30px_rgba(245,158,11,0.15)]';
+            styleClass = 'bg-amber-50 dark:bg-amber-950/90 text-amber-900 dark:text-amber-200 border-amber-200 dark:border-amber-800/80 shadow-[0_8px_30px_rgba(245,158,11,0.15)]';
             Icon = AlertTriangle;
-            iconColor = 'text-amber-600';
+            iconColor = 'text-amber-600 dark:text-amber-400';
           }
 
           return (
@@ -66,7 +66,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               </div>
               <button
                 onClick={() => removeToast(toast.id)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg transition-colors ml-2"
+                className="text-slate-400 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 rounded-lg transition-colors ml-2"
               >
                 <X className="w-4 h-4" />
               </button>

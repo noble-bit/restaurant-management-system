@@ -227,11 +227,11 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Availability Readiness Pill */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
+        <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700">
           <div className="flex items-center gap-3">
-            <UtensilsCrossed className="w-5 h-5 text-red-500" />
+            <UtensilsCrossed className="w-5 h-5 text-red-500 dark:text-red-400" />
             <div>
-              <p className="text-xs font-semibold text-slate-500">{t('menu.stockAvailabilityCol')}</p>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">{t('menu.stockAvailabilityCol')}</p>
             </div>
           </div>
           {menuItem.is_available ? (
@@ -246,15 +246,15 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
         </div>
 
         {(fieldErrors.detail || fieldErrors.non_field_errors) && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
             <span>{fieldErrors.detail || fieldErrors.non_field_errors}</span>
           </div>
         )}
 
         {/* Section 1: Item Basic Details */}
         <div className="space-y-4">
-          <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider border-b border-slate-100 pb-2">
+          <h4 className="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider border-b border-slate-100 dark:border-slate-700 pb-2">
             {t('menu.menuItemCol')}
           </h4>
 
@@ -286,7 +286,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                   setCategoryId(Number(e.target.value));
                   if (fieldErrors.category_id) setFieldErrors((prev) => ({ ...prev, category_id: '' }));
                 }}
-                leftIcon={<FolderTree className="w-4 h-4 text-slate-400" />}
+                leftIcon={<FolderTree className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
                 error={fieldErrors.category_id}
               >
                 {categories.map((c) => (
@@ -318,33 +318,33 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               {t('common.description')}
             </label>
             <div className="relative">
-              <FileText className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+              <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-3" />
               <textarea
                 name="description"
                 rows={2}
                 disabled={!isOwnerOrManager}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 focus:outline-none focus:border-red-400 focus:ring-3 focus:ring-red-50 disabled:opacity-60"
+                className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-sm text-slate-800 dark:text-slate-100 focus:outline-none focus:border-red-400 focus:ring-3 focus:ring-red-50 dark:focus:ring-red-950/40 disabled:opacity-60"
               />
             </div>
           </div>
 
           {/* Menu Item Photo */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               Item Photo (Optional)
             </label>
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 border border-slate-100">
-              <div className="w-16 h-16 rounded-full overflow-hidden bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0 shadow-xs">
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700">
+              <div className="w-16 h-16 rounded-full overflow-hidden bg-white dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0 shadow-xs">
                 {avatarPreview ? (
                   <img src={avatarPreview} alt="Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <UtensilsCrossed className="w-7 h-7 text-slate-400" />
+                  <UtensilsCrossed className="w-7 h-7 text-slate-400 dark:text-slate-500" />
                 )}
               </div>
 
@@ -384,20 +384,20 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                     )}
                   </div>
                 )}
-                <p className="text-[11px] text-slate-400">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-400">Supported formats: JPG, PNG, WEBP (Max 5MB)</p>
               </div>
             </div>
             {fieldErrors.avatar && (
-              <p className="text-xs text-rose-500 font-semibold mt-1 leading-tight">{fieldErrors.avatar}</p>
+              <p className="text-xs text-rose-500 dark:text-rose-400 font-semibold mt-1 leading-tight">{fieldErrors.avatar}</p>
             )}
           </div>
         </div>
 
         {/* Section 2: Recipe Ingredients */}
         <div className="space-y-3 pt-2">
-          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <Scale className="w-4 h-4 text-red-500" />
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700 pb-2">
+            <h4 className="text-xs font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <Scale className="w-4 h-4 text-red-500 dark:text-red-400" />
               <span>{t('menu.recipeCol')} *</span>
             </h4>
 
@@ -416,7 +416,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           </div>
 
           {fieldErrors.ingredients && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+            <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold">
               {fieldErrors.ingredients}
             </div>
           )}
@@ -429,7 +429,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100"
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700"
                 >
                   <div className="flex-1">
                     <Select
@@ -468,7 +468,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
                       type="button"
                       onClick={() => handleRemoveIngredientRow(idx)}
                       disabled={ingredientRows.length <= 1}
-                      className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors mt-5 disabled:opacity-30"
+                      className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors mt-5 disabled:opacity-30 cursor-pointer"
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -479,7 +479,7 @@ export const EditMenuItemModal: React.FC<EditMenuItemModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             {isOwnerOrManager ? t('common.cancel') : t('common.close')}
           </Button>

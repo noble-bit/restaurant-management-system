@@ -182,7 +182,7 @@ export const OrderHistoryPage: React.FC = () => {
           value={`$${totalRevenue.toFixed(2)}`}
           subtitle={t('orders.sumPaidTx')}
           icon={DollarSign}
-          iconColor="text-emerald-500"
+          iconColor="text-emerald-500 dark:text-emerald-400"
         />
 
         <StatCard
@@ -190,7 +190,7 @@ export const OrderHistoryPage: React.FC = () => {
           value={isLoading ? '...' : totalCount}
           subtitle={t('orders.completedRecords')}
           icon={Receipt}
-          iconColor="text-red-500"
+          iconColor="text-red-500 dark:text-red-400"
         />
 
         <StatCard
@@ -198,7 +198,7 @@ export const OrderHistoryPage: React.FC = () => {
           value={`$${avgOrderValue.toFixed(2)}`}
           subtitle={t('orders.revPerPaidOrder')}
           icon={TrendingUp}
-          iconColor="text-sky-500"
+          iconColor="text-sky-500 dark:text-sky-400"
         />
       </div>
 
@@ -210,7 +210,7 @@ export const OrderHistoryPage: React.FC = () => {
             placeholder={t('common.search')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            leftIcon={<Search className="w-4 h-4 text-slate-400" />}
+            leftIcon={<Search className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
           />
         </div>
 
@@ -220,7 +220,7 @@ export const OrderHistoryPage: React.FC = () => {
             <Select
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value as DateFilterOption)}
-              leftIcon={<Calendar className="w-4 h-4 text-slate-400" />}
+              leftIcon={<Calendar className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
             >
               <option value="all">{t('orders.allTime')}</option>
               <option value="today">{t('orders.todayOnly')}</option>
@@ -248,17 +248,17 @@ export const OrderHistoryPage: React.FC = () => {
         <LoadingSpinner text={t('orders.loadingHistory')} />
       ) : filteredOrders.length === 0 ? (
         <EmptyState
-          icon={<History className="w-8 h-8 text-slate-400" />}
+          icon={<History className="w-8 h-8 text-slate-400 dark:text-slate-500" />}
           title={t('orders.noPaidOrdersMatch')}
           description={
             orders.length === 0 ? t('orders.noOrdersMarkedPaid') : t('orders.adjustSearch')
           }
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
+              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('orders.orderRefAndType')}</th>
                   <th className="py-4 px-6">{t('orders.datePlaced')}</th>
@@ -269,7 +269,7 @@ export const OrderHistoryPage: React.FC = () => {
                   <th className="py-4 px-6">{t('common.status')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
                 {filteredOrders.map((order) => {
                   const isExpanded = Boolean(expandedOrders[order.id]);
                   const itemsCount = order.items.length;
@@ -277,9 +277,9 @@ export const OrderHistoryPage: React.FC = () => {
 
                   return (
                     <React.Fragment key={order.id}>
-                      <tr className="hover:bg-slate-50/60 transition-colors">
+                      <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
                         {/* Order ID & Type */}
-                        <td className="py-4 px-6 font-bold text-slate-800">
+                        <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100">
                           <div className="flex items-center gap-2">
                             <span className="font-mono text-sm font-extrabold">{t('orders.orderId')}{order.id}</span>
                             <Badge variant="primary">
@@ -289,7 +289,7 @@ export const OrderHistoryPage: React.FC = () => {
                             </Badge>
                           </div>
                           {order.table_number && (
-                            <p className="text-xs text-amber-600 font-bold flex items-center gap-1 mt-1">
+                            <p className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 mt-1">
                               <MapPin className="w-3 h-3" />
                               {t('dashboard.table')} {order.table_number}
                             </p>
@@ -297,9 +297,9 @@ export const OrderHistoryPage: React.FC = () => {
                         </td>
 
                         {/* Date & Time */}
-                        <td className="py-4 px-6 text-slate-500 font-mono text-xs">
+                        <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-mono text-xs">
                           <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-slate-400" />
+                            <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                             <span>
                               {new Date(order.created_at).toLocaleDateString()}{' '}
                               {new Date(order.created_at).toLocaleTimeString([], {
@@ -317,7 +317,7 @@ export const OrderHistoryPage: React.FC = () => {
                               {order.items.slice(0, 3).map((item, idx) => (
                                 <span
                                   key={idx}
-                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200/60 text-[11px] font-medium"
+                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-600 text-[11px] font-medium"
                                 >
                                   {item.menu_item_avatar ? (
                                     <img
@@ -326,9 +326,9 @@ export const OrderHistoryPage: React.FC = () => {
                                       className="w-4 h-4 rounded-full object-cover shrink-0"
                                     />
                                   ) : (
-                                    <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                    <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
                                   )}
-                                  <strong className="text-red-500 font-extrabold">{item.quantity}×</strong>
+                                  <strong className="text-red-500 dark:text-red-400 font-extrabold">{item.quantity}×</strong>
                                   <span>{item.menu_item_name || `Dish #${item.menu_item}`}</span>
                                 </span>
                               ))}
@@ -336,7 +336,7 @@ export const OrderHistoryPage: React.FC = () => {
                               {itemsCount > 3 && (
                                 <button
                                   onClick={() => toggleExpand(order.id)}
-                                  className="text-[11px] text-red-500 hover:text-red-600 font-bold flex items-center gap-0.5 ml-1"
+                                  className="text-[11px] text-red-500 dark:text-red-400 hover:text-red-600 font-bold flex items-center gap-0.5 ml-1 cursor-pointer"
                                 >
                                   <span>{isExpanded ? 'Less' : `+${itemsCount - 3} more`}</span>
                                   {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
@@ -345,8 +345,8 @@ export const OrderHistoryPage: React.FC = () => {
                             </div>
 
                             {order.items.some((i) => i.note) && (
-                              <div className="flex items-center gap-1 text-[11px] text-amber-700 italic mt-1 font-medium">
-                                <FileText className="w-3 h-3 text-amber-500 shrink-0" />
+                              <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-300 italic mt-1 font-medium">
+                                <FileText className="w-3 h-3 text-amber-500 dark:text-amber-400 shrink-0" />
                                 <span className="truncate">
                                   {t('common.notes')}:{' '}
                                   {order.items
@@ -365,27 +365,27 @@ export const OrderHistoryPage: React.FC = () => {
                             <div>
                               {getPaymentMethodBadge(payment.method)}
                               {payment.processed_by && (
-                                <p className="text-[11px] text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                                  <UserCheck className="w-3 h-3 text-slate-400" />
+                                <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                                  <UserCheck className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                                   <span>By {payment.processed_by}</span>
                                 </p>
                               )}
                             </div>
                           ) : (
-                            <span className="text-slate-400 font-mono text-xs">—</span>
+                            <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">—</span>
                           )}
                         </td>
 
                         {/* Staff */}
-                        <td className="py-4 px-6 text-slate-600 font-medium">
+                        <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">
                           <div className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-slate-400" />
+                            <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                             <span>{order.staff_name || `#${order.staff}`}</span>
                           </div>
                         </td>
 
                         {/* Total Price */}
-                        <td className="py-4 px-6 font-mono text-sm font-extrabold text-emerald-600">
+                        <td className="py-4 px-6 font-mono text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
                           ${Number(order.total_price).toFixed(2)}
                         </td>
 
@@ -399,16 +399,16 @@ export const OrderHistoryPage: React.FC = () => {
 
                       {/* Expandable full items drawer */}
                       {isExpanded && (
-                        <tr className="bg-slate-50/50">
+                        <tr className="bg-slate-50/50 dark:bg-slate-900/40">
                           <td colSpan={7} className="py-3 px-8">
-                            <div className="p-4 rounded-2xl bg-white border border-slate-100 space-y-2.5 shadow-xs">
+                            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 space-y-2.5 shadow-xs">
                               <div className="flex items-center justify-between">
-                                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
                                   {t('orders.itemsSummary')}
                                 </p>
                                 {payment?.processed_by && (
-                                  <p className="text-[11px] text-slate-600 font-medium">
-                                    Processed By: <strong className="text-slate-800">{payment.processed_by}</strong> ({payment.method})
+                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+                                    Processed By: <strong className="text-slate-800 dark:text-slate-100">{payment.processed_by}</strong> ({payment.method})
                                   </p>
                                 )}
                               </div>
@@ -417,32 +417,32 @@ export const OrderHistoryPage: React.FC = () => {
                                 {order.items.map((item, i) => (
                                   <div
                                     key={i}
-                                    className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-xs flex justify-between items-center"
+                                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 text-xs flex justify-between items-center"
                                   >
                                     <div className="flex items-center gap-2">
                                       {item.menu_item_avatar ? (
                                         <img
                                           src={item.menu_item_avatar}
                                           alt={item.menu_item_name || ''}
-                                          className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200"
+                                          className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
                                         />
                                       ) : (
-                                        <div className="w-6 h-6 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                                        <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
                                           <UtensilsCrossed className="w-3.5 h-3.5" />
                                         </div>
                                       )}
                                       <div>
-                                        <span className="font-bold text-slate-800">
+                                        <span className="font-bold text-slate-800 dark:text-slate-100">
                                           {item.quantity}× {item.menu_item_name}
                                         </span>
                                         {item.note && (
-                                          <p className="text-[11px] text-amber-700 italic mt-0.5">
+                                          <p className="text-[11px] text-amber-700 dark:text-amber-300 italic mt-0.5">
                                             "{item.note}"
                                           </p>
                                         )}
                                       </div>
                                     </div>
-                                    <span className="font-mono text-emerald-600 font-bold ml-2">
+                                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold ml-2">
                                       ${(Number(item.price_at_order) * item.quantity).toFixed(2)}
                                     </span>
                                   </div>

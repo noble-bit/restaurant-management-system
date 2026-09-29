@@ -105,8 +105,8 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {(fieldErrors.detail || fieldErrors.non_field_errors) && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
             <span>{fieldErrors.detail || fieldErrors.non_field_errors}</span>
           </div>
         )}
@@ -131,14 +131,14 @@ export const AddEditCategoryModal: React.FC<AddEditCategoryModalProps> = ({
             name="is_active"
             checked={formData.is_active}
             onChange={handleChange}
-            className="w-4 h-4 rounded border-slate-300 text-red-500 focus:ring-red-400"
+            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-red-500 focus:ring-red-400 cursor-pointer"
           />
-          <label htmlFor="cat_is_active" className="text-xs font-bold text-slate-700 select-none">
+          <label htmlFor="cat_is_active" className="text-xs font-bold text-slate-700 dark:text-slate-300 select-none cursor-pointer">
             {t('staff.statusActive')}
           </label>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
           </Button>

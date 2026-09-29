@@ -81,7 +81,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={t('staff.registerTitle')} maxWidth="lg">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
             <span>{error}</span>
           </div>
@@ -181,7 +181,7 @@ export const CreateStaffModal: React.FC<CreateStaffModalProps> = ({
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
           </Button>

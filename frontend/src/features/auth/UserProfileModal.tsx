@@ -101,14 +101,14 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
       <div className="space-y-6">
         {/* Inline Error Alert */}
         {errorMsg && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2.5">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-medium flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
             <span>{errorMsg}</span>
           </div>
         )}
 
         {/* Profile Avatar & Upload Section */}
-        <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-4 text-center">
+        <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 space-y-4 text-center">
           <div className="relative group">
             <div className="w-28 h-28 rounded-full overflow-hidden border-4 border-red-500/20 shadow-md bg-gradient-to-tr from-red-500 to-rose-600 flex items-center justify-center text-white text-3xl font-bold">
               {avatarSrc ? (
@@ -126,7 +126,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isUploading}
-              className="absolute bottom-0 right-0 p-2.5 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full shadow-md border-2 border-white transition-all disabled:opacity-50 cursor-pointer"
+              className="absolute bottom-0 right-0 p-2.5 bg-red-500 hover:bg-red-600 active:bg-red-700 text-white rounded-full shadow-md border-2 border-white dark:border-slate-800 transition-all disabled:opacity-50 cursor-pointer"
               title={t('profile.selectPhoto')}
             >
               <Camera className="w-4 h-4" />
@@ -142,10 +142,10 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           />
 
           <div>
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
               {user?.first_name ? `${user.first_name} ${user.last_name}` : user?.username}
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5 font-medium">@{user?.username}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-medium">@{user?.username}</p>
           </div>
 
           {selectedFile && (
@@ -173,7 +173,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 type="button"
                 onClick={handleClearSelection}
                 disabled={isUploading}
-                className="px-3 py-2 text-xs font-semibold text-slate-600 hover:text-slate-900 rounded-xl border border-slate-300 hover:bg-slate-100 transition-colors disabled:opacity-50 cursor-pointer"
+                className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {t('common.cancel')}
               </button>
@@ -183,56 +183,56 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
         {/* User Details Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-            <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center gap-3">
+            <div className="p-2.5 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 rounded-xl shrink-0">
               <Mail className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-slate-500 font-medium">{t('auth.emailLabel')}</p>
-              <p className="text-slate-900 font-semibold font-mono text-xs">{user?.email}</p>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">{t('auth.emailLabel')}</p>
+              <p className="text-slate-900 dark:text-slate-100 font-semibold font-mono text-xs">{user?.email}</p>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-            <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center gap-3">
+            <div className="p-2.5 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 rounded-xl shrink-0">
               <Shield className="w-4 h-4" />
             </div>
             <div>
-              <p className="text-slate-500 font-medium">{t('nav.currentRole')}</p>
-              <p className="text-slate-900 font-semibold capitalize">{translatedRole}</p>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">{t('nav.currentRole')}</p>
+              <p className="text-slate-900 dark:text-slate-100 font-semibold capitalize">{translatedRole}</p>
             </div>
           </div>
 
           {user?.phone_number && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-              <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center gap-3">
+              <div className="p-2.5 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 rounded-xl shrink-0">
                 <Phone className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-slate-500 font-medium">{t('staff.phone')}</p>
-                <p className="text-slate-900 font-semibold">{user.phone_number}</p>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">{t('staff.phone')}</p>
+                <p className="text-slate-900 dark:text-slate-100 font-semibold">{user.phone_number}</p>
               </div>
             </div>
           )}
 
           {user?.hire_date && (
-            <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-              <div className="p-2.5 bg-red-50 text-red-500 rounded-xl shrink-0">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex items-center gap-3">
+              <div className="p-2.5 bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400 rounded-xl shrink-0">
                 <Calendar className="w-4 h-4" />
               </div>
               <div>
-                <p className="text-slate-500 font-medium">{t('staff.hireDate')}</p>
-                <p className="text-slate-900 font-semibold">{user.hire_date}</p>
+                <p className="text-slate-500 dark:text-slate-400 font-medium">{t('staff.hireDate')}</p>
+                <p className="text-slate-900 dark:text-slate-100 font-semibold">{user.hire_date}</p>
               </div>
             </div>
           )}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-slate-100">
+        <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
           >
             {t('common.close')}
           </button>

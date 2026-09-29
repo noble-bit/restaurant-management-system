@@ -78,7 +78,7 @@ export const StockMovementsPage: React.FC = () => {
           <Select
             value={selectedReason}
             onChange={(e) => setSelectedReason(e.target.value)}
-            leftIcon={<Filter className="w-4 h-4 text-slate-400" />}
+            leftIcon={<Filter className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
           >
             <option value="all">{t('inventory.allReasons')}</option>
             <option value="restock">{t('inventory.restock')}</option>
@@ -88,7 +88,7 @@ export const StockMovementsPage: React.FC = () => {
           </Select>
         </div>
 
-        <p className="text-xs text-slate-500 font-semibold">
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-semibold">
           {t('inventory.showingCount', { count: filteredMovements.length })}
         </p>
       </div>
@@ -98,15 +98,15 @@ export const StockMovementsPage: React.FC = () => {
         <LoadingSpinner text={t('inventory.loading')} />
       ) : filteredMovements.length === 0 ? (
         <EmptyState
-          icon={<History className="w-8 h-8 text-slate-400" />}
+          icon={<History className="w-8 h-8 text-slate-400 dark:text-slate-500" />}
           title={t('inventory.noMovementsTitle')}
           description={t('inventory.noMovementsDesc')}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
+        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
+              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
                 <tr>
                   <th className="py-4 px-6">{t('inventory.timestampCol')}</th>
                   <th className="py-4 px-6">{t('inventory.ingredientRefCol')}</th>
@@ -115,33 +115,33 @@ export const StockMovementsPage: React.FC = () => {
                   <th className="py-4 px-6">{t('inventory.recordedByCol')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
                 {filteredMovements.map((item) => {
                   const numDelta = Number(item.quantity_delta);
                   const isPositive = numDelta > 0;
 
                   return (
-                    <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                      <td className="py-4 px-6 text-slate-500 font-mono text-[11px]">
+                    <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
+                      <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
                         {new Date(item.created_at).toLocaleString()}
                       </td>
-                      <td className="py-4 px-6 font-bold text-slate-800">
+                      <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100">
                         {item.ingredient_name || t('inventory.ingredientId', { id: item.ingredient })}
                       </td>
                       <td className="py-4 px-6 font-mono text-sm font-bold">
                         <div className="flex items-center gap-1.5">
                           {isPositive ? (
-                            <TrendingUp className="w-4 h-4 text-emerald-500" />
+                            <TrendingUp className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                           ) : (
-                            <TrendingDown className="w-4 h-4 text-rose-500" />
+                            <TrendingDown className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                           )}
-                          <span className={isPositive ? 'text-emerald-600' : 'text-rose-600'}>
+                          <span className={isPositive ? 'text-emerald-600 dark:text-emerald-400' : 'text-rose-600 dark:text-rose-400'}>
                             {isPositive ? `+${numDelta}` : numDelta}
                           </span>
                         </div>
                       </td>
                       <td className="py-4 px-6">{getReasonBadge(item.reason)}</td>
-                      <td className="py-4 px-6 text-slate-500 font-medium">
+                      <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium">
                         {item.staff_name || (item.staff ? t('inventory.staffId', { id: item.staff }) : t('inventory.systemAutomated'))}
                       </td>
                     </tr>

@@ -104,8 +104,8 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
     >
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
+          <div className="p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 dark:text-rose-400" />
             <span>{error}</span>
           </div>
         )}
@@ -129,7 +129,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
               name="unit_of_measure"
               value={formData.unit_of_measure}
               onChange={handleChange}
-              leftIcon={<Scale className="w-4 h-4 text-slate-400" />}
+              leftIcon={<Scale className="w-4 h-4 text-slate-400 dark:text-slate-500" />}
             >
               <option value="g">Grams (g)</option>
               <option value="kg">Kilograms (kg)</option>
@@ -167,11 +167,11 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
           </div>
         </div>
 
-        <p className="text-[11px] text-slate-500 italic bg-slate-50 p-3 rounded-2xl border border-slate-100">
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 italic bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
           {t('inventory.auditNote')}
         </p>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
           <Button type="button" variant="outline" onClick={onClose}>
             {t('common.cancel')}
           </Button>

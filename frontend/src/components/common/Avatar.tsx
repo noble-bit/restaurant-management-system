@@ -48,7 +48,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   return (
     <div className="relative inline-block shrink-0" onClick={onClick}>
       <div
-        className={`${sizeClasses[size]} rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 overflow-hidden shadow-xs ${
+        className={`${sizeClasses[size]} rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-bold text-slate-700 dark:text-slate-200 overflow-hidden shadow-xs ${
           onClick ? 'cursor-pointer hover:ring-2 hover:ring-red-400 transition-all' : ''
         } ${className}`}
       >
@@ -57,13 +57,13 @@ export const Avatar: React.FC<AvatarProps> = ({
         ) : initials ? (
           <span>{initials}</span>
         ) : (
-          <UserIcon className="w-1/2 h-1/2 text-slate-400" />
+          <UserIcon className="w-1/2 h-1/2 text-slate-400 dark:text-slate-500" />
         )}
       </div>
 
       {showOnlineStatus && (
         <span
-          className={`absolute bottom-0 right-0 ${statusDotSizes[size]} bg-emerald-500 border-2 border-white rounded-full ring-1 ring-slate-900/5`}
+          className={`absolute bottom-0 right-0 ${statusDotSizes[size]} bg-emerald-500 border-2 border-white dark:border-slate-800 rounded-full ring-1 ring-slate-900/5`}
           title="Online"
         />
       )}

@@ -131,30 +131,30 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
   const canCancel = canCancelPending || canCancelPreparing;
 
   return (
-    <Card padding="md" className="flex flex-col justify-between shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.06)] transition-all">
+    <Card padding="md" className="flex flex-col justify-between shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)] hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.06)] dark:hover:shadow-[0_8px_20px_-4px_rgba(0,0,0,0.4)] transition-all">
       <div>
         {/* Header: Order ID, Type, Status, Total */}
-        <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
+        <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100 dark:border-slate-700">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="font-mono text-base font-extrabold text-slate-800">
+              <span className="font-mono text-base font-extrabold text-slate-800 dark:text-slate-100">
                 {t('orders.orderId')}{order.id}
               </span>
               {getStatusBadge(order.status)}
             </div>
-            <div className="flex items-center gap-3 text-xs text-slate-500 mt-1.5 flex-wrap">
-              <span className="capitalize font-bold text-red-500">
+            <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1.5 flex-wrap">
+              <span className="capitalize font-bold text-red-500 dark:text-red-400">
                 {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, {
                   defaultValue: order.order_type.replace('_', ' '),
                 })}
               </span>
               {order.table_number && (
-                <span className="flex items-center gap-1 text-amber-600 font-bold">
+                <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400 font-bold">
                   <MapPin className="w-3 h-3" />
                   {t('dashboard.table')} {order.table_number}
                 </span>
               )}
-              <span className="flex items-center gap-1 text-slate-400 font-medium">
+              <span className="flex items-center gap-1 text-slate-400 dark:text-slate-500 font-medium">
                 <Clock className="w-3 h-3" />
                 {new Date(order.created_at).toLocaleTimeString([], {
                   hour: '2-digit',
@@ -165,8 +165,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           </div>
 
           <div className="text-right shrink-0">
-            <span className="text-[10px] text-slate-400 block uppercase font-bold">{t('common.total')}</span>
-            <span className="font-mono font-extrabold text-emerald-600 text-lg">
+            <span className="text-[10px] text-slate-400 dark:text-slate-500 block uppercase font-bold">{t('common.total')}</span>
+            <span className="font-mono font-extrabold text-emerald-600 dark:text-emerald-400 text-lg">
               ${Number(order.total_price).toFixed(2)}
             </span>
           </div>
@@ -174,15 +174,15 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
 
         {/* Card Error Banner */}
         {cardError && (
-          <div className="mt-4 p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2 font-medium">
-            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500" />
+          <div className="mt-4 p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-xs flex items-start gap-2 font-medium">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-500 dark:text-rose-400" />
             <span>{cardError}</span>
           </div>
         )}
 
         {/* Order Items List */}
         <div className="py-4 space-y-3">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
             {t('dashboard.items')} ({order.items.length})
           </p>
 
@@ -194,7 +194,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
               return (
                 <div
                   key={item.id}
-                  className="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5"
+                  className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 space-y-1.5"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2.5">
@@ -203,31 +203,31 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                         <img
                           src={item.menu_item_avatar}
                           alt={item.menu_item_name || ''}
-                          className="w-7 h-7 rounded-full object-cover border border-slate-200 shrink-0 bg-white"
+                          className="w-7 h-7 rounded-full object-cover border border-slate-200 dark:border-slate-700 shrink-0 bg-white dark:bg-slate-800"
                         />
                       ) : (
-                        <div className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 shrink-0">
+                        <div className="w-7 h-7 rounded-full bg-white dark:bg-slate-700/60 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 dark:text-slate-500 shrink-0">
                           <UtensilsCrossed className="w-3.5 h-3.5" />
                         </div>
                       )}
-                      <span className="w-6 h-6 rounded-full bg-red-50 text-red-600 font-extrabold text-xs flex items-center justify-center border border-red-100 shrink-0">
+                      <span className="w-6 h-6 rounded-full bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400 font-extrabold text-xs flex items-center justify-center border border-red-100 dark:border-red-900/40 shrink-0">
                         {item.quantity}×
                       </span>
-                      <span className="font-bold text-slate-800 text-xs">
+                      <span className="font-bold text-slate-800 dark:text-slate-100 text-xs">
                         {item.menu_item_name || `Dish #${item.menu_item}`}
                       </span>
                     </div>
 
-                    <span className="font-mono text-xs font-bold text-emerald-600">
+                    <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
                       ${itemTotal.toFixed(2)}
                     </span>
                   </div>
 
                   {item.note && (
-                    <div className="p-2 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs flex items-start gap-1.5 font-medium">
-                      <FileText className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                    <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-1.5 font-medium">
+                      <FileText className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                       <span>
-                        {t('common.notes')}: <strong className="text-amber-900">{item.note}</strong>
+                        {t('common.notes')}: <strong className="text-amber-900 dark:text-amber-200">{item.note}</strong>
                       </span>
                     </div>
                   )}
@@ -239,10 +239,10 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
       </div>
 
       {/* Card Footer */}
-      <div className="pt-4 border-t border-slate-100 space-y-3">
-        <div className="flex items-center justify-between text-xs text-slate-500 font-medium">
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-700 space-y-3">
+        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-medium">
           <span className="flex items-center gap-1">
-            <User className="w-3.5 h-3.5 text-slate-400" />
+            <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
             <span>{t('staff.role')}: {order.staff_name || `#${order.staff}`}</span>
           </span>
         </div>
@@ -305,10 +305,10 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           )}
 
           {canMarkPaid && showPaymentSelector && (
-            <div className="w-full bg-slate-50 p-3 rounded-2xl border border-slate-200 space-y-2.5">
+            <div className="w-full bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
-                  <CreditCard className="w-3.5 h-3.5 text-red-500" />
+                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                  <CreditCard className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
                   {t('orders.paymentMethod')}:
                 </span>
                 <button
@@ -317,7 +317,7 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     setShowPaymentSelector(false);
                     setCardError(null);
                   }}
-                  className="text-slate-400 hover:text-slate-700 p-0.5 rounded transition-colors"
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5 rounded transition-colors cursor-pointer"
                 >
                   <XCircle className="w-4 h-4 text-slate-400 hover:text-rose-500" />
                 </button>
@@ -329,10 +329,10 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     key={method}
                     type="button"
                     onClick={() => setSelectedMethod(method)}
-                    className={`py-1.5 px-2 text-[11px] font-bold rounded-xl capitalize border transition-all ${
+                    className={`py-1.5 px-2 text-[11px] font-bold rounded-xl capitalize border transition-all cursor-pointer ${
                       selectedMethod === method
                         ? 'bg-red-500 text-white border-red-500 shadow-xs'
-                        : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
                     }`}
                   >
                     {t(`orders.${method === 'mobile' ? 'digital' : method}`, { defaultValue: method })}

@@ -35,7 +35,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
           onNavigateTab={setCurrentTab}
           onOpenMobileSidebar={() => setIsOpenMobileSidebar(true)}
         />
-        <main className="flex-1 p-4 md:p-8 overflow-y-auto min-h-0">{children}</main>
+        <main className="flex-1 p-3 sm:p-5 md:p-8 overflow-y-auto min-h-0">{children}</main>
       </div>
     </div>
   );

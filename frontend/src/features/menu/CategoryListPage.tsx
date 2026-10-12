@@ -132,63 +132,123 @@ export const CategoryListPage: React.FC = () => {
           }
         />
       ) : (
-        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
-                <tr>
-                  <th className="py-4 px-6">ID</th>
-                  <th className="py-4 px-6">{t('menu.categoryName')}</th>
-                  <th className="py-4 px-6">{t('common.status')}</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
-                {filteredCategories.map((cat) => (
-                  <tr key={cat.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
-                    <td className="py-4 px-6 font-mono text-slate-400 dark:text-slate-500 text-xs">#{cat.id}</td>
-                    <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-sm">{cat.name}</td>
-                    <td className="py-4 px-6">
-                      {cat.is_active ? (
-                        <Badge variant="success" dot={true}>
-                          {t('staff.statusActive')}
-                        </Badge>
-                      ) : (
-                        <Badge variant="neutral" dot={true}>
-                          {t('staff.statusInactive')}
-                        </Badge>
-                      )}
-                    </td>
-                    {isOwnerOrManager && (
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
-                            onClick={() => {
-                              setEditingCategory(cat);
-                              setIsModalOpen(true);
-                            }}
-                          >
-                            {t('common.edit')}
-                          </Button>
-                          <button
-                            onClick={() => setDeletingCategory(cat)}
-                            className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
-                            title={t('common.delete')}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+        <>
+          {/* Mobile Stacked Cards (< md) */}
+          <div className="md:hidden space-y-3">
+            {filteredCategories.map((cat) => (
+              <div
+                key={cat.id}
+                className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 p-4 shadow-xs space-y-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="font-mono text-xs text-slate-400 dark:text-slate-500">#{cat.id}</span>
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base mt-0.5">
+                      {cat.name}
+                    </h3>
+                  </div>
+
+                  <div>
+                    {cat.is_active ? (
+                      <Badge variant="success" dot={true}>
+                        {t('staff.statusActive')}
+                      </Badge>
+                    ) : (
+                      <Badge variant="neutral" dot={true}>
+                        {t('staff.statusInactive')}
+                      </Badge>
                     )}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                  </div>
+                </div>
+
+                {isOwnerOrManager && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 min-h-[44px] justify-center"
+                      icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
+                      onClick={() => {
+                        setEditingCategory(cat);
+                        setIsModalOpen(true);
+                      }}
+                    >
+                      {t('common.edit')}
+                    </Button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingCategory(cat)}
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                      title={t('common.delete')}
+                      aria-label={t('common.delete')}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
-        </div>
+
+          {/* Desktop Table (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
+                  <tr>
+                    <th className="py-4 px-6">ID</th>
+                    <th className="py-4 px-6">{t('menu.categoryName')}</th>
+                    <th className="py-4 px-6">{t('common.status')}</th>
+                    {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
+                  {filteredCategories.map((cat) => (
+                    <tr key={cat.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
+                      <td className="py-4 px-6 font-mono text-slate-400 dark:text-slate-500 text-xs">#{cat.id}</td>
+                      <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-sm">{cat.name}</td>
+                      <td className="py-4 px-6">
+                        {cat.is_active ? (
+                          <Badge variant="success" dot={true}>
+                            {t('staff.statusActive')}
+                          </Badge>
+                        ) : (
+                          <Badge variant="neutral" dot={true}>
+                            {t('staff.statusInactive')}
+                          </Badge>
+                        )}
+                      </td>
+                      {isOwnerOrManager && (
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
+                              onClick={() => {
+                                setEditingCategory(cat);
+                                setIsModalOpen(true);
+                              }}
+                            >
+                              {t('common.edit')}
+                            </Button>
+                            <button
+                              onClick={() => setDeletingCategory(cat)}
+                              className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                              title={t('common.delete')}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Add / Edit Category Modal */}

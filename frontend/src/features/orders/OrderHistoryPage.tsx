@@ -243,7 +243,7 @@ export const OrderHistoryPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Dense Scannable Table */}
+      {/* Dense Scannable Table (Desktop/Tablet) & Responsive Cards (Mobile) */}
       {isLoading ? (
         <LoadingSpinner text={t('orders.loadingHistory')} />
       ) : filteredOrders.length === 0 ? (
@@ -255,210 +255,372 @@ export const OrderHistoryPage: React.FC = () => {
           }
         />
       ) : (
-        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
-                <tr>
-                  <th className="py-4 px-6">{t('orders.orderRefAndType')}</th>
-                  <th className="py-4 px-6">{t('orders.datePlaced')}</th>
-                  <th className="py-4 px-6">{t('orders.itemsSummary')}</th>
-                  <th className="py-4 px-6">{t('orders.paymentMethod')}</th>
-                  <th className="py-4 px-6">{t('orders.staffCashier')}</th>
-                  <th className="py-4 px-6">{t('orders.totalSettled')}</th>
-                  <th className="py-4 px-6">{t('common.status')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
-                {filteredOrders.map((order) => {
-                  const isExpanded = Boolean(expandedOrders[order.id]);
-                  const itemsCount = order.items.length;
-                  const payment = paymentsMap[order.id];
+        <>
+          {/* Mobile Stacked Cards (< md) */}
+          <div className="md:hidden space-y-3">
+            {filteredOrders.map((order) => {
+              const isExpanded = Boolean(expandedOrders[order.id]);
+              const itemsCount = order.items.length;
+              const payment = paymentsMap[order.id];
 
-                  return (
-                    <React.Fragment key={order.id}>
-                      <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
-                        {/* Order ID & Type */}
-                        <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100">
-                          <div className="flex items-center gap-2">
-                            <span className="font-mono text-sm font-extrabold">{t('orders.orderId')}{order.id}</span>
-                            <Badge variant="primary">
-                              {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, {
-                                defaultValue: order.order_type.replace('_', ' '),
-                              })}
-                            </Badge>
-                          </div>
-                          {order.table_number && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 mt-1">
-                              <MapPin className="w-3 h-3" />
-                              {t('dashboard.table')} {order.table_number}
-                            </p>
-                          )}
-                        </td>
+              return (
+                <div
+                  key={order.id}
+                  className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 p-4 shadow-xs space-y-3"
+                >
+                  {/* Top Bar: Order ID, Type & Price */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-base font-extrabold text-slate-900 dark:text-white">
+                          #{order.id}
+                        </span>
+                        <Badge variant="primary">
+                          {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, {
+                            defaultValue: order.order_type.replace('_', ' '),
+                          })}
+                        </Badge>
+                      </div>
+                      {order.table_number && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 mt-1">
+                          <MapPin className="w-3.5 h-3.5 shrink-0" />
+                          <span>{t('dashboard.table')} {order.table_number}</span>
+                        </p>
+                      )}
+                    </div>
 
-                        {/* Date & Time */}
-                        <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-mono text-xs">
-                          <div className="flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                            <span>
-                              {new Date(order.created_at).toLocaleDateString()}{' '}
-                              {new Date(order.created_at).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                          </div>
-                        </td>
+                    <div className="text-right">
+                      <span className="font-mono text-base font-extrabold text-emerald-600 dark:text-emerald-400 block">
+                        ${Number(order.total_price).toFixed(2)}
+                      </span>
+                      <Badge variant="success" dot={true}>
+                        {t('orders.paid')}
+                      </Badge>
+                    </div>
+                  </div>
 
-                        {/* Items Breakdown */}
-                        <td className="py-4 px-6">
-                          <div className="space-y-1 max-w-xs">
-                            <div className="flex items-center gap-1.5 flex-wrap">
-                              {order.items.slice(0, 3).map((item, idx) => (
-                                <span
-                                  key={idx}
-                                  className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-600 text-[11px] font-medium"
-                                >
-                                  {item.menu_item_avatar ? (
-                                    <img
-                                      src={item.menu_item_avatar}
-                                      alt={item.menu_item_name || ''}
-                                      className="w-4 h-4 rounded-full object-cover shrink-0"
-                                    />
-                                  ) : (
-                                    <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
-                                  )}
-                                  <strong className="text-red-500 dark:text-red-400 font-extrabold">{item.quantity}×</strong>
-                                  <span>{item.menu_item_name || `Dish #${item.menu_item}`}</span>
-                                </span>
-                              ))}
+                  {/* Meta: Time, Staff, Payment */}
+                  <div className="grid grid-cols-2 gap-2 text-xs text-slate-500 dark:text-slate-400 py-2 border-y border-slate-100 dark:border-slate-700/60">
+                    <div className="flex items-center gap-1.5 font-mono text-[11px]">
+                      <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span>
+                        {new Date(order.created_at).toLocaleDateString()}{' '}
+                        {new Date(order.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
 
-                              {itemsCount > 3 && (
-                                <button
-                                  onClick={() => toggleExpand(order.id)}
-                                  className="text-[11px] text-red-500 dark:text-red-400 hover:text-red-600 font-bold flex items-center gap-0.5 ml-1 cursor-pointer"
-                                >
-                                  <span>{isExpanded ? 'Less' : `+${itemsCount - 3} more`}</span>
-                                  {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                                </button>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <User className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                      <span className="truncate">{order.staff_name || `#${order.staff}`}</span>
+                    </div>
+
+                    {payment && (
+                      <div className="col-span-2 flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-1.5">
+                          {getPaymentMethodBadge(payment.method)}
+                        </div>
+                        {payment.processed_by && (
+                          <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                            <UserCheck className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span>By {payment.processed_by}</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Items Summary */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                        {t('orders.itemsSummary')} ({itemsCount})
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => toggleExpand(order.id)}
+                        className="text-xs text-red-500 dark:text-red-400 font-bold flex items-center gap-1 min-h-[36px] px-2 py-1 cursor-pointer"
+                      >
+                        <span>{isExpanded ? 'Collapse' : 'Details'}</span>
+                        {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+
+                    {/* Compact Item pills */}
+                    {!isExpanded ? (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {order.items.slice(0, 3).map((item, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-600 text-xs font-medium"
+                          >
+                            <strong className="text-red-500 dark:text-red-400 font-extrabold">{item.quantity}×</strong>
+                            <span className="truncate max-w-[120px]">{item.menu_item_name || `Dish #${item.menu_item}`}</span>
+                          </span>
+                        ))}
+                        {itemsCount > 3 && (
+                          <span className="text-xs text-slate-400 font-medium self-center">
+                            +{itemsCount - 3} more
+                          </span>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-1.5 pt-1">
+                        {order.items.map((item, i) => (
+                          <div
+                            key={i}
+                            className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 text-xs flex justify-between items-center"
+                          >
+                            <div className="flex items-center gap-2 min-w-0">
+                              {item.menu_item_avatar ? (
+                                <img
+                                  src={item.menu_item_avatar}
+                                  alt={item.menu_item_name || ''}
+                                  className="w-6 h-6 rounded-full object-cover shrink-0"
+                                />
+                              ) : (
+                                <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-700 flex items-center justify-center text-slate-400 shrink-0">
+                                  <UtensilsCrossed className="w-3 h-3" />
+                                </div>
                               )}
-                            </div>
-
-                            {order.items.some((i) => i.note) && (
-                              <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-300 italic mt-1 font-medium">
-                                <FileText className="w-3 h-3 text-amber-500 dark:text-amber-400 shrink-0" />
-                                <span className="truncate">
-                                  {t('common.notes')}:{' '}
-                                  {order.items
-                                    .filter((i) => i.note)
-                                    .map((i) => `"${i.note}"`)
-                                    .join(', ')}
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-
-                        {/* Payment Method Badge */}
-                        <td className="py-4 px-6">
-                          {payment ? (
-                            <div>
-                              {getPaymentMethodBadge(payment.method)}
-                              {payment.processed_by && (
-                                <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
-                                  <UserCheck className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                                  <span>By {payment.processed_by}</span>
+                              <div className="min-w-0">
+                                <p className="font-bold text-slate-800 dark:text-slate-100 truncate">
+                                  {item.quantity}× {item.menu_item_name}
                                 </p>
-                              )}
-                            </div>
-                          ) : (
-                            <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">—</span>
-                          )}
-                        </td>
-
-                        {/* Staff */}
-                        <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">
-                          <div className="flex items-center gap-1.5">
-                            <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                            <span>{order.staff_name || `#${order.staff}`}</span>
-                          </div>
-                        </td>
-
-                        {/* Total Price */}
-                        <td className="py-4 px-6 font-mono text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
-                          ${Number(order.total_price).toFixed(2)}
-                        </td>
-
-                        {/* Status Badge */}
-                        <td className="py-4 px-6">
-                          <Badge variant="success" dot={true}>
-                            {t('orders.paid')}
-                          </Badge>
-                        </td>
-                      </tr>
-
-                      {/* Expandable full items drawer */}
-                      {isExpanded && (
-                        <tr className="bg-slate-50/50 dark:bg-slate-900/40">
-                          <td colSpan={7} className="py-3 px-8">
-                            <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 space-y-2.5 shadow-xs">
-                              <div className="flex items-center justify-between">
-                                <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
-                                  {t('orders.itemsSummary')}
-                                </p>
-                                {payment?.processed_by && (
-                                  <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
-                                    Processed By: <strong className="text-slate-800 dark:text-slate-100">{payment.processed_by}</strong> ({payment.method})
+                                {item.note && (
+                                  <p className="text-[11px] text-amber-700 dark:text-amber-300 italic truncate">
+                                    "{item.note}"
                                   </p>
                                 )}
                               </div>
+                            </div>
+                            <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold ml-2 shrink-0">
+                              ${(Number(item.price_at_order) * item.quantity).toFixed(2)}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
 
-                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                                {order.items.map((item, i) => (
-                                  <div
-                                    key={i}
-                                    className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 text-xs flex justify-between items-center"
-                                  >
-                                    <div className="flex items-center gap-2">
-                                      {item.menu_item_avatar ? (
-                                        <img
-                                          src={item.menu_item_avatar}
-                                          alt={item.menu_item_name || ''}
-                                          className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
-                                        />
-                                      ) : (
-                                        <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
-                                          <UtensilsCrossed className="w-3.5 h-3.5" />
-                                        </div>
-                                      )}
-                                      <div>
-                                        <span className="font-bold text-slate-800 dark:text-slate-100">
-                                          {item.quantity}× {item.menu_item_name}
-                                        </span>
-                                        {item.note && (
-                                          <p className="text-[11px] text-amber-700 dark:text-amber-300 italic mt-0.5">
-                                            "{item.note}"
-                                          </p>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold ml-2">
-                                      ${(Number(item.price_at_order) * item.quantity).toFixed(2)}
-                                    </span>
-                                  </div>
-                                ))}
-                              </div>
+                    {order.items.some((i) => i.note) && !isExpanded && (
+                      <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-300 italic font-medium">
+                        <FileText className="w-3 h-3 text-amber-500 shrink-0" />
+                        <span className="truncate">
+                          {t('common.notes')}: {order.items.filter((i) => i.note).map((i) => `"${i.note}"`).join(', ')}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
+                  <tr>
+                    <th className="py-4 px-6">{t('orders.orderRefAndType')}</th>
+                    <th className="py-4 px-6">{t('orders.datePlaced')}</th>
+                    <th className="py-4 px-6">{t('orders.itemsSummary')}</th>
+                    <th className="py-4 px-6">{t('orders.paymentMethod')}</th>
+                    <th className="py-4 px-6">{t('orders.staffCashier')}</th>
+                    <th className="py-4 px-6">{t('orders.totalSettled')}</th>
+                    <th className="py-4 px-6">{t('common.status')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
+                  {filteredOrders.map((order) => {
+                    const isExpanded = Boolean(expandedOrders[order.id]);
+                    const itemsCount = order.items.length;
+                    const payment = paymentsMap[order.id];
+
+                    return (
+                      <React.Fragment key={order.id}>
+                        <tr className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
+                          {/* Order ID & Type */}
+                          <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono text-sm font-extrabold">{t('orders.orderId')}{order.id}</span>
+                              <Badge variant="primary">
+                                {t(`orders.${order.order_type === 'dine_in' ? 'dineIn' : order.order_type}`, {
+                                  defaultValue: order.order_type.replace('_', ' '),
+                                })}
+                              </Badge>
+                            </div>
+                            {order.table_number && (
+                              <p className="text-xs text-amber-600 dark:text-amber-400 font-bold flex items-center gap-1 mt-1">
+                                <MapPin className="w-3 h-3" />
+                                {t('dashboard.table')} {order.table_number}
+                              </p>
+                            )}
+                          </td>
+
+                          {/* Date & Time */}
+                          <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-mono text-xs">
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                              <span>
+                                {new Date(order.created_at).toLocaleDateString()}{' '}
+                                {new Date(order.created_at).toLocaleTimeString([], {
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </span>
                             </div>
                           </td>
+
+                          {/* Items Breakdown */}
+                          <td className="py-4 px-6">
+                            <div className="space-y-1 max-w-xs">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {order.items.slice(0, 3).map((item, idx) => (
+                                  <span
+                                    key={idx}
+                                    className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-600 text-[11px] font-medium"
+                                  >
+                                    {item.menu_item_avatar ? (
+                                      <img
+                                        src={item.menu_item_avatar}
+                                        alt={item.menu_item_name || ''}
+                                        className="w-4 h-4 rounded-full object-cover shrink-0"
+                                      />
+                                    ) : (
+                                      <UtensilsCrossed className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 shrink-0" />
+                                    )}
+                                    <strong className="text-red-500 dark:text-red-400 font-extrabold">{item.quantity}×</strong>
+                                    <span>{item.menu_item_name || `Dish #${item.menu_item}`}</span>
+                                  </span>
+                                ))}
+
+                                {itemsCount > 3 && (
+                                  <button
+                                    onClick={() => toggleExpand(order.id)}
+                                    className="text-[11px] text-red-500 dark:text-red-400 hover:text-red-600 font-bold flex items-center gap-0.5 ml-1 cursor-pointer"
+                                  >
+                                    <span>{isExpanded ? 'Less' : `+${itemsCount - 3} more`}</span>
+                                    {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                                  </button>
+                                )}
+                              </div>
+
+                              {order.items.some((i) => i.note) && (
+                                <div className="flex items-center gap-1 text-[11px] text-amber-700 dark:text-amber-300 italic mt-1 font-medium">
+                                  <FileText className="w-3 h-3 text-amber-500 dark:text-amber-400 shrink-0" />
+                                  <span className="truncate">
+                                    {t('common.notes')}:{' '}
+                                    {order.items
+                                      .filter((i) => i.note)
+                                      .map((i) => `"${i.note}"`)
+                                      .join(', ')}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* Payment Method Badge */}
+                          <td className="py-4 px-6">
+                            {payment ? (
+                              <div>
+                                {getPaymentMethodBadge(payment.method)}
+                                {payment.processed_by && (
+                                  <p className="text-[11px] text-slate-400 dark:text-slate-400 mt-1 flex items-center gap-1 font-medium">
+                                    <UserCheck className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                                    <span>By {payment.processed_by}</span>
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 dark:text-slate-500 font-mono text-xs">—</span>
+                            )}
+                          </td>
+
+                          {/* Staff */}
+                          <td className="py-4 px-6 text-slate-600 dark:text-slate-300 font-medium">
+                            <div className="flex items-center gap-1.5">
+                              <User className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                              <span>{order.staff_name || `#${order.staff}`}</span>
+                            </div>
+                          </td>
+
+                          {/* Total Price */}
+                          <td className="py-4 px-6 font-mono text-sm font-extrabold text-emerald-600 dark:text-emerald-400">
+                            ${Number(order.total_price).toFixed(2)}
+                          </td>
+
+                          {/* Status Badge */}
+                          <td className="py-4 px-6">
+                            <Badge variant="success" dot={true}>
+                              {t('orders.paid')}
+                            </Badge>
+                          </td>
                         </tr>
-                      )}
-                    </React.Fragment>
-                  );
-                })}
-              </tbody>
-            </table>
+
+                        {/* Expandable full items drawer */}
+                        {isExpanded && (
+                          <tr className="bg-slate-50/50 dark:bg-slate-900/40">
+                            <td colSpan={7} className="py-3 px-8">
+                              <div className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 space-y-2.5 shadow-xs">
+                                <div className="flex items-center justify-between">
+                                  <p className="text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+                                    {t('orders.itemsSummary')}
+                                  </p>
+                                  {payment?.processed_by && (
+                                    <p className="text-[11px] text-slate-600 dark:text-slate-300 font-medium">
+                                      Processed By: <strong className="text-slate-800 dark:text-slate-100">{payment.processed_by}</strong> ({payment.method})
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                  {order.items.map((item, i) => (
+                                    <div
+                                      key={i}
+                                      className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 text-xs flex justify-between items-center"
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        {item.menu_item_avatar ? (
+                                          <img
+                                            src={item.menu_item_avatar}
+                                            alt={item.menu_item_name || ''}
+                                            className="w-6 h-6 rounded-full object-cover shrink-0 border border-slate-200 dark:border-slate-700"
+                                          />
+                                        ) : (
+                                          <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
+                                            <UtensilsCrossed className="w-3.5 h-3.5" />
+                                          </div>
+                                        )}
+                                        <div>
+                                          <span className="font-bold text-slate-800 dark:text-slate-100">
+                                            {item.quantity}× {item.menu_item_name}
+                                          </span>
+                                          {item.note && (
+                                            <p className="text-[11px] text-amber-700 dark:text-amber-300 italic mt-0.5">
+                                              "{item.note}"
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <span className="font-mono text-emerald-600 dark:text-emerald-400 font-bold ml-2">
+                                        ${(Number(item.price_at_order) * item.quantity).toFixed(2)}
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
     </div>
   );

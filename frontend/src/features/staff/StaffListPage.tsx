@@ -217,124 +217,245 @@ export const StaffListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Staff Table */}
+      {/* Staff Table (Desktop) & Cards (Mobile) */}
       {isLoading ? (
         <LoadingSpinner text={t('common.loading')} />
       ) : filteredStaff.length === 0 ? (
         <EmptyState
-          icon={<Users className="w-8 h-8 text-slate-400" />}
+          icon={<Users className="w-8 h-8 text-slate-400 dark:text-slate-500" />}
           title={t('staff.noStaff')}
           actionText={isOwnerOrManager ? t('staff.addNewStaff') : undefined}
           onAction={isOwnerOrManager ? () => setIsCreateModalOpen(true) : undefined}
         />
       ) : (
-        <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 text-slate-500 uppercase font-bold border-b border-slate-100 tracking-wider">
-                <tr>
-                  <th className="py-4 px-6">{t('common.name')}</th>
-                  <th className="py-4 px-6">{t('staff.role')}</th>
-                  <th className="py-4 px-6">{t('staff.contactInfo')}</th>
-                  <th className="py-4 px-6">{t('staff.hireDate')}</th>
-                  <th className="py-4 px-6">{t('staff.securityStatus')}</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 text-slate-700">
-                {filteredStaff.map((staff) => {
-                  const isInactive = staff.is_active === false;
-                  const isSelf = user?.id === staff.id || (user?.email && user.email === staff.email);
-                  const fullName = staff.first_name
-                    ? `${staff.first_name} ${staff.last_name}`.trim()
-                    : staff.username;
+        <>
+          {/* Mobile Stacked Cards (< md) */}
+          <div className="md:hidden space-y-3">
+            {filteredStaff.map((staff) => {
+              const isInactive = staff.is_active === false;
+              const isSelf = user?.id === staff.id || (user?.email && user.email === staff.email);
+              const fullName = staff.first_name
+                ? `${staff.first_name} ${staff.last_name}`.trim()
+                : staff.username;
 
-                  return (
-                    <tr
-                      key={staff.id}
-                      className={`transition-colors ${
-                        isInactive ? 'bg-slate-50/50 opacity-60' : 'hover:bg-slate-50/60'
-                      }`}
-                    >
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <Avatar
-                            name={fullName}
-                            size="sm"
-                            showOnlineStatus={!isInactive}
-                          />
-                          <div>
-                            <p
-                              className={`font-bold text-sm ${
-                                isInactive ? 'text-slate-400 line-through' : 'text-slate-800'
-                              }`}
-                            >
-                              {fullName}
+              return (
+                <div
+                  key={staff.id}
+                  className={`bg-white dark:bg-slate-800/90 rounded-2xl border p-4 shadow-xs space-y-3 ${
+                    isInactive
+                      ? 'border-slate-200 dark:border-slate-700/40 opacity-70 bg-slate-50/50 dark:bg-slate-900/40'
+                      : 'border-slate-100 dark:border-slate-700/60'
+                  }`}
+                >
+                  {/* Top: Avatar, Name & Status */}
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <Avatar
+                        name={fullName}
+                        size="md"
+                        showOnlineStatus={!isInactive}
+                      />
+                      <div className="min-w-0">
+                        <p
+                          className={`font-bold text-sm truncate ${
+                            isInactive ? 'text-slate-400 line-through' : 'text-slate-900 dark:text-white'
+                          }`}
+                        >
+                          {fullName}
+                        </p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 font-medium truncate">
+                          @{staff.username}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0">
+                      {isInactive ? (
+                        <Badge variant="neutral" dot={true}>
+                          {t('staff.statusInactive')}
+                        </Badge>
+                      ) : staff.must_change_password ? (
+                        <Badge variant="warning">
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                          <span>{t('staff.pendingPasswordChange')}</span>
+                        </Badge>
+                      ) : (
+                        <Badge variant="success" dot={true}>
+                          {t('staff.activeAndVerified')}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Role & Info grid */}
+                  <div className="grid grid-cols-2 gap-2 text-xs py-2 border-y border-slate-100 dark:border-slate-700/60">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        {t('staff.role')}
+                      </p>
+                      {getRoleBadge(staff.role)}
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                        {t('staff.hireDate')}
+                      </p>
+                      <p className="text-slate-600 dark:text-slate-300 font-medium">
+                        {staff.hire_date || '—'}
+                      </p>
+                    </div>
+
+                    <div className="col-span-2 pt-1">
+                      <p className="text-slate-700 dark:text-slate-300 font-mono text-[11px] truncate">
+                        {staff.email}
+                      </p>
+                      {staff.phone_number && (
+                        <p className="text-slate-400 dark:text-slate-500 text-[11px] flex items-center gap-1 font-medium mt-0.5">
+                          <Phone className="w-3 h-3 text-slate-400 shrink-0" />
+                          <span>{staff.phone_number}</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Actions on Mobile */}
+                  {isOwnerOrManager && (
+                    <div className="flex justify-end pt-1">
+                      {isSelf ? (
+                        <span className="text-[11px] text-slate-400 italic">Current User</span>
+                      ) : !isInactive ? (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="w-full min-h-[44px] justify-center"
+                          icon={<Trash2 className="w-4 h-4" />}
+                          onClick={() => setDeactivatingStaff(staff)}
+                        >
+                          {t('common.delete')}
+                        </Button>
+                      ) : (
+                        <span className="text-[11px] text-slate-400 italic">
+                          {t('staff.statusInactive')}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
+                  <tr>
+                    <th className="py-4 px-6">{t('common.name')}</th>
+                    <th className="py-4 px-6">{t('staff.role')}</th>
+                    <th className="py-4 px-6">{t('staff.contactInfo')}</th>
+                    <th className="py-4 px-6">{t('staff.hireDate')}</th>
+                    <th className="py-4 px-6">{t('staff.securityStatus')}</th>
+                    {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
+                  {filteredStaff.map((staff) => {
+                    const isInactive = staff.is_active === false;
+                    const isSelf = user?.id === staff.id || (user?.email && user.email === staff.email);
+                    const fullName = staff.first_name
+                      ? `${staff.first_name} ${staff.last_name}`.trim()
+                      : staff.username;
+
+                    return (
+                      <tr
+                        key={staff.id}
+                        className={`transition-colors ${
+                          isInactive
+                            ? 'bg-slate-50/50 dark:bg-slate-900/30 opacity-60'
+                            : 'hover:bg-slate-50/60 dark:hover:bg-slate-700/50'
+                        }`}
+                      >
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <Avatar
+                              name={fullName}
+                              size="sm"
+                              showOnlineStatus={!isInactive}
+                            />
+                            <div>
+                              <p
+                                className={`font-bold text-sm ${
+                                  isInactive ? 'text-slate-400 line-through' : 'text-slate-800 dark:text-slate-100'
+                                }`}
+                              >
+                                {fullName}
+                              </p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">@{staff.username}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">{getRoleBadge(staff.role)}</td>
+                        <td className="py-4 px-6 space-y-0.5">
+                          <p className="text-slate-700 dark:text-slate-300 font-mono text-[11px] font-medium">{staff.email}</p>
+                          {staff.phone_number && (
+                            <p className="text-slate-400 dark:text-slate-500 text-[11px] flex items-center gap-1 font-medium">
+                              <Phone className="w-3 h-3 text-slate-400 dark:text-slate-500" />
+                              <span>{staff.phone_number}</span>
                             </p>
-                            <p className="text-xs text-slate-400 font-medium">@{staff.username}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">{getRoleBadge(staff.role)}</td>
-                      <td className="py-4 px-6 space-y-0.5">
-                        <p className="text-slate-700 font-mono text-[11px] font-medium">{staff.email}</p>
-                        {staff.phone_number && (
-                          <p className="text-slate-400 text-[11px] flex items-center gap-1 font-medium">
-                            <Phone className="w-3 h-3 text-slate-400" />
-                            <span>{staff.phone_number}</span>
-                          </p>
-                        )}
-                      </td>
-                      <td className="py-4 px-6 text-slate-500 font-medium">
-                        {staff.hire_date ? (
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{staff.hire_date}</span>
-                          </div>
-                        ) : (
-                          '—'
-                        )}
-                      </td>
-                      <td className="py-4 px-6">
-                        {isInactive ? (
-                          <Badge variant="neutral" dot={true}>
-                            {t('staff.statusInactive')}
-                          </Badge>
-                        ) : staff.must_change_password ? (
-                          <Badge variant="warning">
-                            <ShieldAlert className="w-3.5 h-3.5" />
-                            <span>{t('staff.pendingPasswordChange')}</span>
-                          </Badge>
-                        ) : (
-                          <Badge variant="success" dot={true}>
-                            {t('staff.activeAndVerified')}
-                          </Badge>
-                        )}
-                      </td>
-                      {isOwnerOrManager && (
-                        <td className="py-4 px-6 text-right">
-                          {isSelf ? null : !isInactive ? (
-                            <button
-                              onClick={() => setDeactivatingStaff(staff)}
-                              className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
-                              title={t('common.delete')}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          ) : (
-                            <span className="text-[11px] text-slate-400 italic pr-2 font-medium">
-                              {t('staff.statusInactive')}
-                            </span>
                           )}
                         </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium">
+                          {staff.hire_date ? (
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                              <span>{staff.hire_date}</span>
+                            </div>
+                          ) : (
+                            '—'
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {isInactive ? (
+                            <Badge variant="neutral" dot={true}>
+                              {t('staff.statusInactive')}
+                            </Badge>
+                          ) : staff.must_change_password ? (
+                            <Badge variant="warning">
+                              <ShieldAlert className="w-3.5 h-3.5" />
+                              <span>{t('staff.pendingPasswordChange')}</span>
+                            </Badge>
+                          ) : (
+                            <Badge variant="success" dot={true}>
+                              {t('staff.activeAndVerified')}
+                            </Badge>
+                          )}
+                        </td>
+                        {isOwnerOrManager && (
+                          <td className="py-4 px-6 text-right">
+                            {isSelf ? null : !isInactive ? (
+                              <button
+                                onClick={() => setDeactivatingStaff(staff)}
+                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                                title={t('common.delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <span className="text-[11px] text-slate-400 italic pr-2 font-medium">
+                                {t('staff.statusInactive')}
+                              </span>
+                            )}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Create Staff Modal */}

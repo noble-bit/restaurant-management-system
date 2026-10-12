@@ -394,9 +394,9 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
               return (
                 <div
                   key={idx}
-                  className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700"
+                  className="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-3 p-3.5 sm:p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700"
                 >
-                  <div className="flex-1">
+                  <div className="flex-1 w-full">
                     <Select
                       label={`${t('inventory.ingredientCol')} #${idx + 1}`}
                       value={row.ingredient_id}
@@ -416,36 +416,39 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
                     </Select>
                   </div>
 
-                  <div className="w-36">
-                    <Input
-                      label={`${t('common.quantity')} (${unit || 'unit'})`}
-                      type="number"
-                      step="0.01"
-                      min="0.01"
-                      required
-                      value={row.quantity_required}
-                      onChange={(e) =>
-                        handleIngredientRowChange(idx, 'quantity_required', e.target.value)
-                      }
-                    />
-                  </div>
+                  <div className="flex items-end gap-2 w-full sm:w-auto">
+                    <div className="flex-1 sm:w-36">
+                      <Input
+                        label={`${t('common.quantity')} (${unit || 'unit'})`}
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        required
+                        value={row.quantity_required}
+                        onChange={(e) =>
+                          handleIngredientRowChange(idx, 'quantity_required', e.target.value)
+                        }
+                      />
+                    </div>
 
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveIngredientRow(idx)}
-                    disabled={ingredientRows.length <= 1}
-                    className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors mt-5 disabled:opacity-30 cursor-pointer"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveIngredientRow(idx)}
+                      disabled={ingredientRows.length <= 1}
+                      className="min-h-[44px] min-w-[44px] p-2.5 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors flex items-center justify-center disabled:opacity-30 cursor-pointer shrink-0"
+                      aria-label="Remove ingredient"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+          <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
             {t('common.cancel')}
           </Button>
           <Button
@@ -454,6 +457,7 @@ export const AddMenuItemModal: React.FC<AddMenuItemModalProps> = ({
             isLoading={isSubmitting}
             disabled={categories.length === 0}
             icon={<UtensilsCrossed className="w-4 h-4" />}
+            className="w-full sm:w-auto"
           >
             {isSubmitting ? t('common.saving') : t('menu.addMenuItem')}
           </Button>

@@ -171,8 +171,8 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
           {t('inventory.auditNote')}
         </p>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+          <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
             {t('common.cancel')}
           </Button>
           <Button
@@ -180,6 +180,7 @@ export const AddEditIngredientModal: React.FC<AddEditIngredientModalProps> = ({
             variant="primary"
             isLoading={isSubmitting}
             icon={<PackagePlus className="w-4 h-4" />}
+            className="w-full sm:w-auto"
           >
             {isSubmitting ? t('common.saving') : isEditing ? t('inventory.saveChanges') : t('inventory.createIngredient')}
           </Button>

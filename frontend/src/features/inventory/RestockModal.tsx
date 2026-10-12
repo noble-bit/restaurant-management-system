@@ -6,7 +6,7 @@ import { Input } from '../../components/common/Input';
 import type { Ingredient } from '../../types';
 import { restockIngredientApi } from '../../api/inventory';
 import { useToast } from '../../context/ToastContext';
-import { RefreshCw, PlusCircle, AlertOctagon } from 'lucide-react';
+import { RefreshCw, AlertOctagon, Plus, Minus } from 'lucide-react';
 
 interface RestockModalProps {
   isOpen: boolean;
@@ -107,21 +107,57 @@ export const RestockModal: React.FC<RestockModalProps> = ({
         )}
 
         <div>
-          <Input
-            label={`${t('inventory.quantityAdded')} (${ingredient.unit_of_measure}) *`}
-            type="number"
-            step="0.01"
-            min="0.01"
-            required
-            value={quantity}
-            onChange={(e) => setQuantity(Number(e.target.value))}
-            placeholder="e.g. 50"
-            leftIcon={<PlusCircle className="w-5 h-5 text-slate-400 dark:text-slate-500" />}
-          />
+          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+            {`${t('inventory.quantityAdded')} (${ingredient.unit_of_measure}) *`}
+          </label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => Math.max(0.1, Math.round((prev - 1) * 100) / 100))}
+              className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center font-bold text-base transition-colors shrink-0 cursor-pointer active:scale-95"
+              aria-label="Decrease quantity"
+            >
+              <Minus className="w-4 h-4" />
+            </button>
+            <div className="flex-1">
+              <Input
+                type="number"
+                step="0.01"
+                min="0.01"
+                required
+                value={quantity}
+                onChange={(e) => setQuantity(Math.max(0, Number(e.target.value)))}
+                placeholder="e.g. 50"
+                className="text-center font-bold text-base"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setQuantity((prev) => Math.round((prev + 1) * 100) / 100)}
+              className="min-h-[44px] min-w-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center font-bold text-base transition-colors shrink-0 cursor-pointer active:scale-95"
+              aria-label="Increase quantity"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
+          </div>
+          {/* Quick preset increments */}
+          <div className="flex items-center gap-2 mt-2.5 flex-wrap">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium mr-1">Quick add:</span>
+            {[1, 5, 10, 25, 50].map((step) => (
+              <button
+                key={step}
+                type="button"
+                onClick={() => setQuantity((prev) => Math.round((prev + step) * 100) / 100)}
+                className="min-h-[36px] px-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/80 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold font-mono transition-colors active:scale-95 cursor-pointer"
+              >
+                +{step}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-          <Button type="button" variant="outline" onClick={onClose}>
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2.5 sm:gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+          <Button type="button" variant="outline" onClick={onClose} className="w-full sm:w-auto">
             {t('common.cancel')}
           </Button>
           <Button
@@ -129,6 +165,7 @@ export const RestockModal: React.FC<RestockModalProps> = ({
             variant="success"
             isLoading={isSubmitting}
             icon={<RefreshCw className="w-4 h-4" />}
+            className="w-full sm:w-auto"
           >
             {isSubmitting ? t('common.loading') : t('common.confirm')}
           </Button>

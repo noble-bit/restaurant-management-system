@@ -192,7 +192,7 @@ export const MenuItemListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Menu Items Table */}
+      {/* Menu Items Table (Desktop) & Cards (Mobile) */}
       {isLoading ? (
         <LoadingSpinner text={t('menu.loadingCatalog')} />
       ) : filteredItems.length === 0 ? (
@@ -208,78 +208,44 @@ export const MenuItemListPage: React.FC = () => {
           onAction={isOwnerOrManager ? () => setIsAddModalOpen(true) : undefined}
         />
       ) : (
-        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
-                <tr>
-                  <th className="py-4 px-6">{t('menu.menuItemCol')}</th>
-                  <th className="py-4 px-6">{t('menu.categoryCol')}</th>
-                  <th className="py-4 px-6">{t('menu.priceCol')}</th>
-                  <th className="py-4 px-6">{t('menu.recipeCol')}</th>
-                  <th className="py-4 px-6">{t('menu.stockAvailabilityCol')}</th>
-                  <th className="py-4 px-6 text-right">{t('common.actions')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
-                {filteredItems.map((item) => {
-                  const categoryName =
-                    typeof item.category === 'object' && item.category !== null
-                      ? item.category.name
-                      : t('menu.generalMenu');
+        <>
+          {/* Mobile Stacked Cards (< md) */}
+          <div className="md:hidden space-y-3">
+            {filteredItems.map((item) => {
+              const categoryName =
+                typeof item.category === 'object' && item.category !== null
+                  ? item.category.name
+                  : t('menu.generalMenu');
 
-                  return (
-                    <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
-                            {item.avatar ? (
-                              <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <UtensilsCrossed className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                            )}
-                          </div>
-                          <div>
-                            <span className="font-bold text-slate-800 dark:text-slate-100 text-sm block">{item.name}</span>
-                            {item.description && (
-                              <span className="text-xs text-slate-400 dark:text-slate-400 line-clamp-1 mt-0.5">
-                                {item.description}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        <Badge variant="primary">{categoryName}</Badge>
-                      </td>
-                      <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
-                        <div className="flex items-center gap-0.5">
-                          <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <span>{Number(item.price).toFixed(2)}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        {item.ingredients && item.ingredients.length > 0 ? (
-                          <div className="flex flex-wrap gap-1 max-w-xs">
-                            {item.ingredients.map((ri, idx) => (
-                              <span
-                                key={idx}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-600"
-                              >
-                                <Scale className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
-                                <span>
-                                  {ri.ingredient?.name || `${t('inventory.ingredientCol')} #${ri.ingredient_id}`}:{' '}
-                                  <strong className="text-slate-800 dark:text-slate-100">{ri.quantity_required}</strong>
-                                  {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
-                                </span>
-                              </span>
-                            ))}
-                          </div>
+              return (
+                <div
+                  key={item.id}
+                  className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 p-4 shadow-xs space-y-3"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-12 h-12 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
+                        {item.avatar ? (
+                          <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">{t('menu.noRecipe')}</span>
+                          <UtensilsCrossed className="w-6 h-6 text-slate-400 dark:text-slate-500" />
                         )}
-                      </td>
-                      <td className="py-4 px-6">
+                      </div>
+                      <div className="min-w-0">
+                        <h3 className="font-bold text-slate-900 dark:text-white text-base truncate">
+                          {item.name}
+                        </h3>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Badge variant="primary">{categoryName}</Badge>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-right shrink-0">
+                      <span className="font-mono font-extrabold text-base text-emerald-600 dark:text-emerald-400 block">
+                        ${Number(item.price).toFixed(2)}
+                      </span>
+                      <div className="mt-1">
                         {item.is_available ? (
                           <Badge variant="success" dot={true}>
                             {t('menu.available')}
@@ -289,36 +255,182 @@ export const MenuItemListPage: React.FC = () => {
                             {t('menu.unavailable')}
                           </Badge>
                         )}
-                      </td>
-                      <td className="py-4 px-6 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />}
-                            onClick={() => setEditingItem(item)}
-                          >
-                            {isOwnerOrManager ? t('common.edit') : t('common.viewDetails')}
-                          </Button>
+                      </div>
+                    </div>
+                  </div>
 
-                          {isOwnerOrManager && (
-                            <button
-                              onClick={() => setDeletingItem(item)}
-                              className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
-                              title={t('common.delete')}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  {item.description && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">
+                      {item.description}
+                    </p>
+                  )}
+
+                  {/* Recipe section if any */}
+                  {item.ingredients && item.ingredients.length > 0 && (
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                        {t('menu.recipeCol')}
+                      </p>
+                      <div className="flex flex-wrap gap-1">
+                        {item.ingredients.map((ri, idx) => (
+                          <span
+                            key={idx}
+                            className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-600"
+                          >
+                            <Scale className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
+                            <span>
+                              {ri.ingredient?.name || `#${ri.ingredient_id}`}:{' '}
+                              <strong className="text-slate-800 dark:text-slate-100">{ri.quantity_required}</strong>
+                              {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
+                            </span>
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Actions */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex-1 min-h-[44px] justify-center"
+                      icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />}
+                      onClick={() => setEditingItem(item)}
+                    >
+                      {isOwnerOrManager ? t('common.edit') : t('common.viewDetails')}
+                    </Button>
+
+                    {isOwnerOrManager && (
+                      <button
+                        type="button"
+                        onClick={() => setDeletingItem(item)}
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                        title={t('common.delete')}
+                        aria-label={t('common.delete')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
+
+          {/* Desktop Table (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
+                  <tr>
+                    <th className="py-4 px-6">{t('menu.menuItemCol')}</th>
+                    <th className="py-4 px-6">{t('menu.categoryCol')}</th>
+                    <th className="py-4 px-6">{t('menu.priceCol')}</th>
+                    <th className="py-4 px-6">{t('menu.recipeCol')}</th>
+                    <th className="py-4 px-6">{t('menu.stockAvailabilityCol')}</th>
+                    <th className="py-4 px-6 text-right">{t('common.actions')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
+                  {filteredItems.map((item) => {
+                    const categoryName =
+                      typeof item.category === 'object' && item.category !== null
+                        ? item.category.name
+                        : t('menu.generalMenu');
+
+                    return (
+                      <tr key={item.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-700/50 transition-colors">
+                        <td className="py-4 px-6">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 dark:bg-slate-700/60 border border-slate-200/60 dark:border-slate-600 flex items-center justify-center text-slate-400 shrink-0">
+                              {item.avatar ? (
+                                <img src={item.avatar} alt={item.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <UtensilsCrossed className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                              )}
+                            </div>
+                            <div>
+                              <span className="font-bold text-slate-800 dark:text-slate-100 text-sm block">{item.name}</span>
+                              {item.description && (
+                                <span className="text-xs text-slate-400 dark:text-slate-400 line-clamp-1 mt-0.5">
+                                  {item.description}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          <Badge variant="primary">{categoryName}</Badge>
+                        </td>
+                        <td className="py-4 px-6 font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">
+                          <div className="flex items-center gap-0.5">
+                            <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                            <span>{Number(item.price).toFixed(2)}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {item.ingredients && item.ingredients.length > 0 ? (
+                            <div className="flex flex-wrap gap-1 max-w-xs">
+                              {item.ingredients.map((ri, idx) => (
+                                <span
+                                  key={idx}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-slate-100 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-600"
+                                >
+                                  <Scale className="w-2.5 h-2.5 text-slate-400 dark:text-slate-500" />
+                                  <span>
+                                    {ri.ingredient?.name || `${t('inventory.ingredientCol')} #${ri.ingredient_id}`}:{' '}
+                                    <strong className="text-slate-800 dark:text-slate-100">{ri.quantity_required}</strong>
+                                    {ri.ingredient?.unit_of_measure ? ri.ingredient.unit_of_measure : ''}
+                                  </span>
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-slate-400 dark:text-slate-500 italic text-[11px]">{t('menu.noRecipe')}</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-6">
+                          {item.is_available ? (
+                            <Badge variant="success" dot={true}>
+                              {t('menu.available')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="danger" dot={true}>
+                              {t('menu.unavailable')}
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="py-4 px-6 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              icon={isOwnerOrManager ? <Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" /> : <Eye className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />}
+                              onClick={() => setEditingItem(item)}
+                            >
+                              {isOwnerOrManager ? t('common.edit') : t('common.viewDetails')}
+                            </Button>
+
+                            {isOwnerOrManager && (
+                              <button
+                                onClick={() => setDeletingItem(item)}
+                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                                title={t('common.delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
       )}
 
       {/* Add Item Modal */}

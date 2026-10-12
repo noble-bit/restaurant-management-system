@@ -58,14 +58,15 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </div>
       </div>
 
-      <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
-        <Button variant="outline" onClick={onClose} disabled={isLoading}>
+      <div className="mt-6 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 sm:gap-3 pt-4 border-t border-slate-100 dark:border-slate-700">
+        <Button variant="outline" onClick={onClose} disabled={isLoading} className="w-full sm:w-auto">
           {cancelText || t('common.cancel')}
         </Button>
         <Button
           variant={buttonVariantMap[variant]}
           onClick={onConfirm}
           isLoading={isLoading}
+          className="w-full sm:w-auto"
         >
           {confirmText || t('common.confirm')}
         </Button>

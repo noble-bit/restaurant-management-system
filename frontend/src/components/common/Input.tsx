@@ -42,7 +42,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           <input
             id={inputId}
             ref={ref}
-            className={`w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border rounded-xl text-sm transition-all focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 ${
+            className={`w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border rounded-xl text-sm transition-all focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 min-h-[44px] ${
               leftIcon ? 'pl-10' : 'pl-3.5'
             } ${rightIcon ? 'pr-10' : 'pr-3.5'} py-2.5 ${
               error

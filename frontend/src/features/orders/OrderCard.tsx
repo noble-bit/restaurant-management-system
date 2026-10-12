@@ -224,10 +224,10 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                   </div>
 
                   {item.note && (
-                    <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-1.5 font-medium">
+                    <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-900/50 text-amber-800 dark:text-amber-300 text-xs flex items-start gap-1.5 font-medium">
                       <FileText className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                      <span>
-                        {t('common.notes')}: <strong className="text-amber-900 dark:text-amber-200">{item.note}</strong>
+                      <span className="break-words">
+                        {t('common.notes')}: <strong className="text-amber-900 dark:text-amber-200 break-words">{item.note}</strong>
                       </span>
                     </div>
                   )}
@@ -248,13 +248,13 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col gap-2 w-full">
           {canStartPreparing && (
             <Button
               variant="primary"
-              size="sm"
               fullWidth={true}
               isLoading={isUpdating}
+              className="min-h-[44px] text-sm font-semibold"
               icon={<Flame className="w-4 h-4" />}
               onClick={() => handleTransition('preparing')}
             >
@@ -265,9 +265,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           {canMarkReady && (
             <Button
               variant="success"
-              size="sm"
               fullWidth={true}
               isLoading={isUpdating}
+              className="min-h-[44px] text-sm font-semibold"
               icon={<CheckCircle2 className="w-4 h-4" />}
               onClick={() => handleTransition('ready')}
             >
@@ -278,9 +278,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           {canMarkServed && (
             <Button
               variant="primary"
-              size="sm"
               fullWidth={true}
               isLoading={isUpdating}
+              className="min-h-[44px] text-sm font-semibold"
               icon={<Utensils className="w-4 h-4" />}
               onClick={() => handleTransition('served')}
             >
@@ -291,9 +291,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           {canMarkPaid && !showPaymentSelector && (
             <Button
               variant="success"
-              size="sm"
               fullWidth={true}
               isLoading={isUpdating}
+              className="min-h-[44px] text-sm font-semibold"
               icon={<CreditCard className="w-4 h-4" />}
               onClick={() => {
                 setCardError(null);
@@ -307,8 +307,8 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           {canMarkPaid && showPaymentSelector && (
             <div className="w-full bg-slate-50 dark:bg-slate-800/80 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-2.5">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                  <CreditCard className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                  <CreditCard className="w-4 h-4 text-red-500 dark:text-red-400" />
                   {t('orders.paymentMethod')}:
                 </span>
                 <button
@@ -317,19 +317,20 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
                     setShowPaymentSelector(false);
                     setCardError(null);
                   }}
-                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-0.5 rounded transition-colors cursor-pointer"
+                  className="p-1 min-w-[36px] min-h-[36px] flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 rounded-lg transition-colors cursor-pointer"
+                  aria-label="Close payment options"
                 >
                   <XCircle className="w-4 h-4 text-slate-400 hover:text-rose-500" />
                 </button>
               </div>
 
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 gap-2">
                 {(['cash', 'card', 'mobile'] as PaymentMethod[]).map((method) => (
                   <button
                     key={method}
                     type="button"
                     onClick={() => setSelectedMethod(method)}
-                    className={`py-1.5 px-2 text-[11px] font-bold rounded-xl capitalize border transition-all cursor-pointer ${
+                    className={`min-h-[44px] py-2 px-2 text-xs font-bold rounded-xl capitalize border transition-all cursor-pointer flex items-center justify-center ${
                       selectedMethod === method
                         ? 'bg-red-500 text-white border-red-500 shadow-xs'
                         : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700'
@@ -342,9 +343,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
 
               <Button
                 variant="success"
-                size="sm"
                 fullWidth={true}
                 isLoading={isUpdating}
+                className="min-h-[44px] text-sm font-semibold"
                 icon={<CheckCircle2 className="w-4 h-4" />}
                 onClick={handleConfirmPayment}
               >
@@ -356,8 +357,9 @@ export const OrderCard: React.FC<OrderCardProps> = ({ order, onStatusUpdated }) 
           {canCancel && (
             <Button
               variant="danger"
-              size="sm"
+              fullWidth={true}
               isLoading={isUpdating}
+              className="min-h-[44px] text-sm font-semibold"
               icon={<XCircle className="w-4 h-4" />}
               onClick={() => {
                 if (window.confirm(t('orders.cancelConfirm', { id: order.id }))) {

@@ -49,7 +49,7 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           <select
             id={selectId}
             ref={ref}
-            className={`w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border rounded-xl text-sm transition-all focus:outline-none appearance-none ${
+            className={`w-full bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-100 border rounded-xl text-sm transition-all focus:outline-none appearance-none min-h-[44px] ${
               leftIcon ? 'pl-10' : 'pl-3.5'
             } pr-8 py-2.5 ${
               error

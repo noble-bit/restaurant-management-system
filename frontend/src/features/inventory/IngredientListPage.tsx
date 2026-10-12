@@ -150,7 +150,7 @@ export const IngredientListPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Ingredients Table */}
+      {/* Ingredients Table (Desktop) & Cards (Mobile) */}
       {isLoading ? (
         <LoadingSpinner text={t('inventory.loading')} />
       ) : filteredIngredients.length === 0 ? (
@@ -173,115 +173,228 @@ export const IngredientListPage: React.FC = () => {
           }
         />
       ) : (
-        <div className="bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
-                <tr>
-                  <th className="py-4 px-6">{t('inventory.ingredientCol')}</th>
-                  <th className="py-4 px-6">{t('inventory.quantityOnHandCol')}</th>
-                  <th className="py-4 px-6">{t('inventory.reorderThresholdCol')}</th>
-                  <th className="py-4 px-6">{t('inventory.costPerUnitCol')}</th>
-                  <th className="py-4 px-6">{t('inventory.statusBadgeCol')}</th>
-                  {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
-                {filteredIngredients.map((item) => {
-                  const isLow = item.is_low_stock;
+        <>
+          {/* Mobile Stacked Cards (< md) */}
+          <div className="md:hidden space-y-3">
+            {filteredIngredients.map((item) => {
+              const isLow = item.is_low_stock;
 
-                  return (
-                    <tr
-                      key={item.id}
-                      className={`transition-colors ${
-                        isLow
-                          ? 'bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/30'
-                          : 'hover:bg-slate-50/60 dark:hover:bg-slate-700/50'
-                      }`}
-                    >
-                      <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-sm">
-                        <span>{item.name}</span>
-                      </td>
-                      <td className="py-4 px-6 font-mono text-sm font-bold">
-                        <span className={isLow ? 'text-rose-600 dark:text-rose-400 font-extrabold' : 'text-emerald-600 dark:text-emerald-400 font-bold'}>
-                          {item.quantity_on_hand}
-                        </span>{' '}
-                        <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+              return (
+                <div
+                  key={item.id}
+                  className={`bg-white dark:bg-slate-800/90 rounded-2xl border p-4 shadow-xs space-y-3 ${
+                    isLow
+                      ? 'border-rose-200 dark:border-rose-900/40 bg-rose-50/20 dark:bg-rose-950/10'
+                      : 'border-slate-100 dark:border-slate-700/60'
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="font-bold text-slate-900 dark:text-white text-base">
+                      {item.name}
+                    </h3>
+                    {isLow ? (
+                      <Badge variant="danger" dot={true}>
+                        {t('inventory.lowStockAlert')}
+                      </Badge>
+                    ) : (
+                      <Badge variant="success" dot={true}>
+                        {t('inventory.optimalLevel')}
+                      </Badge>
+                    )}
+                  </div>
+
+                  {/* Metrics grid */}
+                  <div className="grid grid-cols-3 gap-2 py-2 border-y border-slate-100 dark:border-slate-700/60 text-xs">
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                        {t('inventory.quantityOnHandCol')}
+                      </p>
+                      <p className={`font-mono text-sm font-extrabold mt-0.5 ${isLow ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                        {item.quantity_on_hand}{' '}
+                        <span className="text-[10px] font-semibold text-slate-400 font-sans">
                           {item.unit_of_measure}
                         </span>
-                      </td>
-                      <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium">
-                        <div className="flex items-center gap-1.5">
-                          <Scale className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <span>
-                            {item.reorder_threshold} {item.unit_of_measure}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                        {t('inventory.reorderThresholdCol')}
+                      </p>
+                      <p className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">
+                        {item.reorder_threshold}{' '}
+                        <span className="text-[10px] text-slate-400 font-sans">
+                          {item.unit_of_measure}
+                        </span>
+                      </p>
+                    </div>
+
+                    <div>
+                      <p className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-500">
+                        {t('inventory.costPerUnitCol')}
+                      </p>
+                      <p className="font-mono text-xs font-semibold text-slate-700 dark:text-slate-300 mt-1">
+                        ${Number(item.cost_per_unit).toFixed(2)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Actions on Mobile */}
+                  {isOwnerOrManager && (
+                    <div className="flex items-center gap-2 pt-1">
+                      <Button
+                        variant="success"
+                        size="sm"
+                        className="flex-1 min-h-[44px]"
+                        icon={<RefreshCw className="w-3.5 h-3.5" />}
+                        onClick={() => {
+                          setRestockingIngredient(item);
+                          setIsRestockModalOpen(true);
+                        }}
+                      >
+                        {t('inventory.restock')}
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 min-h-[44px]"
+                        icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
+                        onClick={() => {
+                          setEditingIngredient(item);
+                          setIsAddEditModalOpen(true);
+                        }}
+                      >
+                        {t('common.edit')}
+                      </Button>
+
+                      <button
+                        type="button"
+                        onClick={() => setDeactivatingIngredient(item)}
+                        className="min-h-[44px] min-w-[44px] flex items-center justify-center p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+                        title={t('common.delete')}
+                        aria-label={t('common.delete')}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Desktop Table (hidden md:block) */}
+          <div className="hidden md:block bg-white dark:bg-slate-800/90 rounded-2xl border border-slate-100 dark:border-slate-700/60 overflow-hidden shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_2px_12px_-2px_rgba(0,0,0,0.3)]">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-slate-50/80 dark:bg-slate-800/90 text-slate-500 dark:text-slate-400 uppercase font-bold border-b border-slate-100 dark:border-slate-700 tracking-wider">
+                  <tr>
+                    <th className="py-4 px-6">{t('inventory.ingredientCol')}</th>
+                    <th className="py-4 px-6">{t('inventory.quantityOnHandCol')}</th>
+                    <th className="py-4 px-6">{t('inventory.reorderThresholdCol')}</th>
+                    <th className="py-4 px-6">{t('inventory.costPerUnitCol')}</th>
+                    <th className="py-4 px-6">{t('inventory.statusBadgeCol')}</th>
+                    {isOwnerOrManager && <th className="py-4 px-6 text-right">{t('common.actions')}</th>}
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-700/60 text-slate-700 dark:text-slate-200">
+                  {filteredIngredients.map((item) => {
+                    const isLow = item.is_low_stock;
+
+                    return (
+                      <tr
+                        key={item.id}
+                        className={`transition-colors ${
+                          isLow
+                            ? 'bg-rose-50/50 dark:bg-rose-950/20 hover:bg-rose-50 dark:hover:bg-rose-950/30'
+                            : 'hover:bg-slate-50/60 dark:hover:bg-slate-700/50'
+                        }`}
+                      >
+                        <td className="py-4 px-6 font-bold text-slate-800 dark:text-slate-100 text-sm">
+                          <span>{item.name}</span>
+                        </td>
+                        <td className="py-4 px-6 font-mono text-sm font-bold">
+                          <span className={isLow ? 'text-rose-600 dark:text-rose-400 font-extrabold' : 'text-emerald-600 dark:text-emerald-400 font-bold'}>
+                            {item.quantity_on_hand}
+                          </span>{' '}
+                          <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">
+                            {item.unit_of_measure}
                           </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6 text-slate-700 dark:text-slate-300 font-mono">
-                        <div className="flex items-center gap-1">
-                          <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                          <span>{Number(item.cost_per_unit).toFixed(2)}</span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-6">
-                        {isLow ? (
-                          <Badge variant="danger" dot={true}>
-                            {t('inventory.lowStockAlert')}
-                          </Badge>
-                        ) : (
-                          <Badge variant="success" dot={true}>
-                            {t('inventory.optimalLevel')}
-                          </Badge>
-                        )}
-                      </td>
-                      {isOwnerOrManager && (
-                        <td className="py-4 px-6 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            {/* Restock Button */}
-                            <Button
-                              variant="success"
-                              size="sm"
-                              icon={<RefreshCw className="w-3.5 h-3.5" />}
-                              onClick={() => {
-                                setRestockingIngredient(item);
-                                setIsRestockModalOpen(true);
-                              }}
-                            >
-                              {t('inventory.restock')}
-                            </Button>
-
-                            {/* Edit Button */}
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
-                              onClick={() => {
-                                setEditingIngredient(item);
-                                setIsAddEditModalOpen(true);
-                              }}
-                            >
-                              {t('common.edit')}
-                            </Button>
-
-                            {/* Delete/Deactivate Button */}
-                            <button
-                              onClick={() => setDeactivatingIngredient(item)}
-                              className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
-                              title={t('common.delete')}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                        </td>
+                        <td className="py-4 px-6 text-slate-500 dark:text-slate-400 font-medium">
+                          <div className="flex items-center gap-1.5">
+                            <Scale className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                            <span>
+                              {item.reorder_threshold} {item.unit_of_measure}
+                            </span>
                           </div>
                         </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                        <td className="py-4 px-6 text-slate-700 dark:text-slate-300 font-mono">
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+                            <span>{Number(item.cost_per_unit).toFixed(2)}</span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-6">
+                          {isLow ? (
+                            <Badge variant="danger" dot={true}>
+                              {t('inventory.lowStockAlert')}
+                            </Badge>
+                          ) : (
+                            <Badge variant="success" dot={true}>
+                              {t('inventory.optimalLevel')}
+                            </Badge>
+                          )}
+                        </td>
+                        {isOwnerOrManager && (
+                          <td className="py-4 px-6 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* Restock Button */}
+                              <Button
+                                variant="success"
+                                size="sm"
+                                icon={<RefreshCw className="w-3.5 h-3.5" />}
+                                onClick={() => {
+                                  setRestockingIngredient(item);
+                                  setIsRestockModalOpen(true);
+                                }}
+                              >
+                                {t('inventory.restock')}
+                              </Button>
+
+                              {/* Edit Button */}
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                icon={<Edit2 className="w-3.5 h-3.5 text-red-500 dark:text-red-400" />}
+                                onClick={() => {
+                                  setEditingIngredient(item);
+                                  setIsAddEditModalOpen(true);
+                                }}
+                              >
+                                {t('common.edit')}
+                              </Button>
+
+                              {/* Delete/Deactivate Button */}
+                              <button
+                                onClick={() => setDeactivatingIngredient(item)}
+                                className="p-2 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors cursor-pointer"
+                                title={t('common.delete')}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Add / Edit Modal */}

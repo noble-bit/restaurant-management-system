@@ -149,12 +149,12 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           </div>
 
           {selectedFile && (
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2 w-full justify-center">
               <button
                 type="button"
                 onClick={handleUpload}
                 disabled={isUploading}
-                className="flex items-center gap-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl shadow-md shadow-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
+                className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-red-500 hover:bg-red-600 text-white text-xs font-semibold rounded-xl shadow-md shadow-red-500/20 transition-all disabled:opacity-50 cursor-pointer flex-1 max-w-[140px]"
               >
                 {isUploading ? (
                   <>
@@ -173,7 +173,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 type="button"
                 onClick={handleClearSelection}
                 disabled={isUploading}
-                className="px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
+                className="px-3 py-2 min-h-[44px] text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-xl border border-slate-300 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50 cursor-pointer"
               >
                 {t('common.cancel')}
               </button>
@@ -232,7 +232,7 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl border border-slate-300 dark:border-slate-600 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+            className="w-full sm:w-auto px-5 py-2.5 min-h-[44px] rounded-xl border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer flex items-center justify-center"
           >
             {t('common.close')}
           </button>
